@@ -16,5 +16,5 @@ public record Course(
         int numOpenSeats,
         int totalSeats
 ) {
-
+// adding a change by Hudson
 }
