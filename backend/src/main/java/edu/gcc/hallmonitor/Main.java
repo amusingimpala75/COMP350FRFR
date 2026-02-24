@@ -24,7 +24,6 @@ public class Main {
             });
         }).start(port);
 
-
         SearchController.registerRoutes(app);
     }
 
