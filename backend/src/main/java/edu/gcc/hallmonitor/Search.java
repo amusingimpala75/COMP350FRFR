@@ -16,7 +16,7 @@ public class Search {
     private ArrayList<Filter> filterList;
     private ArrayList<Course> searchResults;
     private ArrayList<Course> matchResults;
-    private static List<Course> allCourses; //intialized on the first search, shared across all searches. or constructor could call an init method
+    private static List<Course> allCourses;
 
     public void applyFilter(Filter filter) {
 
@@ -60,7 +60,7 @@ public class Search {
     }
 
     public Search(String searchQuery, ArrayList<Filter> filterList) {
-        //if this is the first search, initialize the allCourses list
+        //initialize the allCourses list if it's the first search
         if(allCourses == null){
             try {
                 allCourses = loadData("courses.json");
