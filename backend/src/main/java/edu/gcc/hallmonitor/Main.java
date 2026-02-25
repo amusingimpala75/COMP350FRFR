@@ -1,5 +1,6 @@
 package edu.gcc.hallmonitor;
 
+import io.javalin.http.staticfiles.Location;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 
@@ -10,6 +11,7 @@ public class Main {
     }
 
     public static void run(int port) {
+<<<<<<< Updated upstream
 
         //old code that didn't connect with the index.html file
 //        Javalin app = Javalin.create(cfg -> { cfg.staticFiles.add("public"); })
@@ -24,6 +26,11 @@ public class Main {
             });
         }).start(port);
 
+=======
+       Javalin app = Javalin.create(cfg -> {
+           cfg.staticFiles.add("/dist", Location.CLASSPATH);
+       }).start(port);
+>>>>>>> Stashed changes
         SearchController.registerRoutes(app);
     }
 

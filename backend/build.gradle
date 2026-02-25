@@ -36,13 +36,21 @@ jar {
     }
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDirs += '../frontend'
-        }
-    }
+def npmCommand = System.getProperty("os.name").toLowerCase().contains("windows") ? "npm.cmd" : "npm"
+
+tasks.register('buildFrontend', Exec) {
+    workingDir '../frontend'
+    commandLine npmCommand, 'install'
+    commandLine npmCommand, 'run', 'build'
 }
+
+tasks.register('copyFrontendBuild', Copy) {
+    dependsOn buildFrontend
+    from('../frontend/dist')
+    into("$buildDir/resources/main/dist")
+}
+
+processResources.dependsOn copyFrontendBuild
 
 test {
     useJUnitPlatform()
