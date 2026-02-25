@@ -1,13 +1,8 @@
 package edu.gcc.hallmonitor;
 
 import io.javalin.Javalin;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
+import io.javalin.http.staticfiles.Location;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,30 +10,21 @@ public class Main {
     }
 
     public static void run(int port) {
-        try {
-            List<Course> courses = loadData("courses.json");
-        } catch (FileNotFoundException fnfe) {
-            System.err.println("File not found: " + fnfe.getMessage());
-        } catch (IOException ioe) {
-            System.err.println("IO Exception occurred: " + ioe.getMessage());
-        }
 
-        Javalin.create(cfg -> { cfg.staticFiles.add("public"); })
-                .get("/", ctx -> ctx.result("Hello, world"))
-                .start(port);
+        //old code that didn't connect with the index.html file
+//        Javalin app = Javalin.create(cfg -> { cfg.staticFiles.add("public"); })
+//                .get("/", ctx -> ctx.result("Hello, World"))
+//                .start(port);
+
+        Javalin app = Javalin.create(config -> {
+            config.staticFiles.add(staticFiles -> {
+                staticFiles.hostedPath = "/";
+                staticFiles.directory = "../frontend/public";
+                staticFiles.location = Location.EXTERNAL;
+            });
+        }).start(port);
+
+        SearchController.registerRoutes(app);
     }
 
-    public static List<Course> loadData(String coursesFilename) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-
-        URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
-        if (jsonURL == null) {
-            throw new FileNotFoundException(String.format("Could not find '%s' in resources directory", coursesFilename));
-        }
-
-        JsonNode root = mapper.readTree(jsonURL);
-        JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
-
-        return mapper.readerForListOf(Course.class).readValue(classesNode);
-    }
 }
