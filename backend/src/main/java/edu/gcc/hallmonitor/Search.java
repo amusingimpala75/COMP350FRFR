@@ -2,19 +2,24 @@ package edu.gcc.hallmonitor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kotlin.Pair;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Search {
 
     private String searchQuery;
     private ArrayList<Filter> filterList;
-    private ArrayList<Course> searchResults;
+    private List<Course> searchResults;
     private ArrayList<Course> matchResults;
     private static List<Course> allCourses;
 
@@ -29,6 +34,10 @@ public class Search {
     public ArrayList<Course> getMatchResults() {
         //TODO: make a /results route and use this method to convert into json
         return matchResults;
+    }
+
+    public static void main(String[] args) {
+        Search s = new Search("COMP");
     }
 
     //The constructors will search the db for the appropriate courses
@@ -46,15 +55,15 @@ public class Search {
         }
 
 
-        //TODO: parse query, get terms
+        List<Map.Entry<Integer, Course>> sortList = new ArrayList<>();
+        for(Course course : allCourses){
+            //System.out.println(course.department() + ": " + FuzzySearch.tokenSetPartialRatio(course.department(),searchQuery));
+            sortList.add(new AbstractMap.SimpleEntry<>(FuzzySearch.tokenSetPartialRatio(course.department(),searchQuery),course)); //TODO: change department to be a string of all the necessary parameters
+        }
+        sortList.sort((a,b)->Integer.compare(b.getKey(),a.getKey()));
+        searchResults = sortList.stream().map(Map.Entry::getValue).collect(Collectors.toList());
 
-        //TODO: order (add to) searchResults based on what most closely matches the terms
-
-        //TODO: matchResults = searchResults since there are no filters
-        //matchResults = searchResults;
-
-        //for now:
-        matchResults = new ArrayList<>(allCourses);
+        matchResults = new ArrayList<>(searchResults);
 
 
     }
