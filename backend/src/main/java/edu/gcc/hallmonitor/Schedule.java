@@ -1,22 +1,21 @@
 package edu.gcc.hallmonitor;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public class Schedule {
 
-    private ArrayList<Course> courses;
+    private List<Course> courses;
 
-    public Schedule(ArrayList<Course> courses) {
+    public Schedule(List<Course> courses) {
 
     }
     public Schedule() {
 
     }
 
-    public static Schedule loadSchedule(File f) {
-        return null;
+    public static Schedule loadSchedule(String scheduleFilename) throws IOException {
+        return new Schedule(Search.loadData(scheduleFilename));
     }
 
     public void saveSchedule() {
@@ -31,7 +30,7 @@ public class Schedule {
         return null;
     }
 
-    public ArrayList<Course> getCourses() {
+    public List<Course> getCourses() {
         return null;
     }
 
