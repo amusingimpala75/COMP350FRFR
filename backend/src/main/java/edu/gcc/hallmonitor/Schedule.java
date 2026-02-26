@@ -1,5 +1,8 @@
 package edu.gcc.hallmonitor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -18,8 +21,9 @@ public class Schedule {
         return new Schedule(Search.loadData(scheduleFilename));
     }
 
-    public void saveSchedule() {
-
+    public void saveSchedule(String scheduleName) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(new File(scheduleName), courses);
     }
 
     public void addCourse(Course course) {
