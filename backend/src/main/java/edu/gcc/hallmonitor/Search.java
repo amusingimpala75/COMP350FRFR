@@ -54,15 +54,16 @@ public class Search {
             }
         }
 
-
         List<Map.Entry<Integer, Course>> sortList = new ArrayList<>();
         for(Course course : allCourses){
-            //System.out.println(course.department() + ": " + FuzzySearch.tokenSetPartialRatio(course.department(),searchQuery));
-            sortList.add(new AbstractMap.SimpleEntry<>(FuzzySearch.tokenSetPartialRatio(course.department(),searchQuery),course)); //TODO: change department to be a string of all the necessary parameters
+            //compare the string of all the relevant attributes of the course to the query string
+            sortList.add(new AbstractMap.SimpleEntry<>(FuzzySearch.tokenSetPartialRatio((course.department() + " " + course.name() + " " + course.professor() + " " + course.code()),searchQuery),course)); //TODO: change department to be a string of all the necessary parameters
         }
+        //sort the list based on score
         sortList.sort((a,b)->Integer.compare(b.getKey(),a.getKey()));
         searchResults = sortList.stream().map(Map.Entry::getValue).collect(Collectors.toList());
 
+        //applying filters will just need to take the searchresults returned by this code ^^ and only add the matching courses to the matchResults list
         matchResults = new ArrayList<>(searchResults);
 
 
