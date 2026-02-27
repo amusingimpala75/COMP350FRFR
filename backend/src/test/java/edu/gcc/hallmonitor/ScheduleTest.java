@@ -108,23 +108,16 @@ class ScheduleTest {
                 )
         ));
         try {
-            expectedSchedule.saveSchedule("src/main/saved_schedules/schedule-test-result.json");
+            expectedSchedule.saveSchedule();
         } catch (IOException ioe) {
-            fail("Failed to save schedule to `src/main/saved_schedules/schedule-test-result.json`");
-        }
-
-        Scanner fileScanner = null;
-        try {
-            fileScanner = new Scanner(new File("src/main/saved_schedules/schedule-test-result.json"));
-        } catch (IOException ioe) {
-            fail("Unable to read schedule-test-result.json");
+            fail("Failed to save schedule");
         }
 
         Schedule actualSchedule = null;
         try {
-            actualSchedule = Schedule.loadSchedule("src/main/saved_schedules/schedule-test-result.json");
+            actualSchedule = Schedule.loadSchedule();
         } catch (IOException ioe) {
-            fail("Unable to load schedule from schedule-test-result.json");
+            fail("Unable to load schedule.json");
         }
 
         assertSchedulesEqual(expectedSchedule, actualSchedule);
