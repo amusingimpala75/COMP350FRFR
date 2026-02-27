@@ -19,6 +19,13 @@ public class SearchController {
                 ctx.json(search.getMatchResults())      //returns a json of all the courses in the search's match results
         );
 
+        app.get("/courses", ctx -> {
+            // create a Search object with empty query to get all courses
+            // pls keep this so my frontend works -Luca
+            Search allCoursesSearch = new Search("");
+            ctx.json(allCoursesSearch.getMatchResults());
+        });
+
         //have one for adding/removing a filter?
     }
 }
