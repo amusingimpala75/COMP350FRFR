@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Schedule {
 
     private List<Course> courses;
+    private static final String SAVED_SCHEDULE = "src/main/java/saved_schedules/saved-schedule.json";
 
     public Schedule(List<Course> courses) {
         this.courses = courses;
@@ -20,15 +19,15 @@ public class Schedule {
 
     }
 
-    public static Schedule loadSchedule(String scheduleFilename) throws IOException {
-        return new Schedule(Search.loadData(scheduleFilename));
+    public static Schedule loadSchedule() throws IOException {
+        return new Schedule(Search.loadData(SAVED_SCHEDULE));
     }
 
-    public void saveSchedule(String path) throws IOException {
+    public void saveSchedule() throws IOException {
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, List<Course>> jsonObject = Map.of("classes", courses);
-        objectMapper.writeValue(new File(path), jsonObject);
+        objectMapper.writeValue(new File(SAVED_SCHEDULE), jsonObject);
     }
 
     public void addCourse(Course course) {
