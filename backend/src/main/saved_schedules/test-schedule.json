@@ -1,0 +1,65 @@
+{
+  "classes": [
+    {
+      "credits": 3,
+      "faculty": [
+        "Wolfe, Britton D."
+      ],
+      "is_lab": false,
+      "is_open": false,
+      "location": "Science Technology Engineering",
+      "name": "COMP PROGRAMMING I",
+      "number": 141,
+      "open_seats": 0,
+      "section": "A",
+      "semester": "2023_Fall",
+      "subject": "COMP",
+      "times": [
+        {
+          "day": "M",
+          "end_time": "12:50:00",
+          "start_time": "12:00:00"
+        },
+        {
+          "day": "W",
+          "end_time": "12:50:00",
+          "start_time": "12:00:00"
+        },
+        {
+          "day": "F",
+          "end_time": "12:50:00",
+          "start_time": "12:00:00"
+        }
+      ],
+      "total_seats": 32
+    },
+    {
+      "credits": 3,
+      "faculty": [
+        "Dickinson, Brian C"
+      ],
+      "is_lab": false,
+      "is_open": false,
+      "location": "STEM 326",
+      "name": "INTRO TO COMPUTER SCIENCE",
+      "number": 155,
+      "open_seats": 0,
+      "section": "A",
+      "semester": "2023_Fall",
+      "subject": "COMP",
+      "times": [
+        {
+          "day": "T",
+          "end_time": "12:15:00",
+          "start_time": "11:00:00"
+        },
+        {
+          "day": "R",
+          "end_time": "12:15:00",
+          "start_time": "11:00:00"
+        }
+      ],
+      "total_seats": 32
+    }
+  ]
+}
