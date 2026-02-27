@@ -4,14 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Schedule {
 
     private List<Course> courses;
 
     public Schedule(List<Course> courses) {
-
+        this.courses = courses;
     }
     public Schedule() {
 
@@ -21,9 +24,11 @@ public class Schedule {
         return new Schedule(Search.loadData(scheduleFilename));
     }
 
-    public void saveSchedule(String scheduleName) throws IOException {
+    public void saveSchedule(String path) throws IOException {
+
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.writeValue(new File(scheduleName), courses);
+        Map<String, List<Course>> jsonObject = Map.of("classes", courses);
+        objectMapper.writeValue(new File(path), jsonObject);
     }
 
     public void addCourse(Course course) {
@@ -35,7 +40,8 @@ public class Schedule {
     }
 
     public List<Course> getCourses() {
-        return null;
+        // TODO: Turn into deep-copy of courses so that mutable object parameters can't be changed
+        return courses;
     }
 
 
