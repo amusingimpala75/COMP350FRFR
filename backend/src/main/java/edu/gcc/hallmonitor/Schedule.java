@@ -12,7 +12,7 @@ import java.util.Map;
 public class Schedule {
 
     private List<Course> courses;
-    private static final String SAVED_SCHEDULE = "src/main/java/saved_schedules/saved-schedule.json";
+    private static final String SAVED_SCHEDULE = "src/main/saved_schedules/saved-schedule.json";
 
     public Schedule(List<Course> courses) {
         this.courses = courses;
