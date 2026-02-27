@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,8 +41,39 @@ public class Schedule {
     }
 
     public List<Course> getCourses() {
-        // TODO: Turn into deep-copy of courses so that mutable object parameters can't be changed
-        return courses;
+        List<Course> copyCourses = new ArrayList<>();
+        for (Course c : courses) {
+            List<Map<String, String>> timesCopy = new ArrayList<>();
+
+
+            for (Map<String, String> time : c.times()) {
+                Map<String, String> mapTimeCopy = new HashMap<>();
+                for (String key : time.keySet()) {
+                    mapTimeCopy.put(key, time.get(key));
+                }
+                timesCopy.add(mapTimeCopy);
+            }
+
+            Course copyCourse = new Course(
+                    c.name(),
+                    new ArrayList<>(c.professor()),
+                    c.department(),
+                    c.code(),
+                    c.section(),
+                    c.location(),
+                    c.credits(),
+                    c.semester(),
+                    timesCopy,
+                    c.isLab(),
+                    c.isOpen(),
+                    c.numOpenSeats(),
+                    c.totalSeats()
+            );
+
+            copyCourses.add(copyCourse);
+        }
+
+        return copyCourses;
     }
 
 
