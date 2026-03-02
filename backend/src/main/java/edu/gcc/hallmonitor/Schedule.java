@@ -1,9 +1,12 @@
 package edu.gcc.hallmonitor;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +25,12 @@ public class Schedule {
     }
 
     public static Schedule loadSchedule() throws IOException {
-        return new Schedule(Search.loadData(SAVED_SCHEDULE));
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonNode root = mapper.readTree(new File(SAVED_SCHEDULE));
+        JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
+
+        return new Schedule(mapper.readerForListOf(Course.class).readValue(classesNode));
     }
 
     public void saveSchedule() throws IOException {
