@@ -15,7 +15,7 @@ public class ScheduleController {
         );
         app.get("/schedule", ctx -> {
                     schedule = Schedule.loadSchedule();
-                    ctx.json(schedule); // Return the loaded schedule
+                    ctx.json(schedule); // Return the loaded schedule as a json
                 }
 
         );
