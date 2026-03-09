@@ -28,7 +28,8 @@ public class Main {
            cfg.staticFiles.add("/dist", Location.CLASSPATH);
        }).start(port);
 
-        SearchController.registerRoutes(app);
+       SearchController.registerRoutes(app);
+       ScheduleController.registerRoutes(app);
     }
 
 }
