@@ -2,11 +2,9 @@ package edu.gcc.hallmonitor;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
