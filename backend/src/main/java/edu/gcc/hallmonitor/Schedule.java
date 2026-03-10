@@ -8,9 +8,12 @@ public class Schedule {
 
     private ArrayList<Course> courses;
 
+
+
     public Schedule(ArrayList<Course> courses) {
 
     }
+
     public Schedule() {
 
     }

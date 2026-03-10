@@ -5,6 +5,8 @@ import io.javalin.Javalin;
 public class Main {
     public static void main(String[] args) {
         run(7070);
+        SearchController.initSchedule();
+        Search.loadCourses();
     }
 
     public static void run(int port) {
@@ -13,4 +15,5 @@ public class Main {
 
         SearchController.registerRoutes(app);
     }
+
 }
