@@ -91,6 +91,9 @@ public class Search {
 
     public static List<Course> loadData(String coursesFilename) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
+        // We may want to do this once and keep a global object
+        // if this cost is too large
+        mapper.findAndRegisterModules();
 
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
         if (jsonURL == null) {
