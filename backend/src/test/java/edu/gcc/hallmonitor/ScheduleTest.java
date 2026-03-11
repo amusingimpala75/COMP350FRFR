@@ -105,14 +105,14 @@ class ScheduleTest {
                 )
         ));
         try {
-            expectedSchedule.saveSchedule();
+            expectedSchedule.saveSchedule("test.json");
         } catch (IOException ioe) {
             fail("Failed to save schedule");
         }
 
         Schedule actualSchedule = null;
         try {
-            actualSchedule = Schedule.loadSchedule();
+            actualSchedule = Schedule.loadSchedule("test.json");
         } catch (IOException ioe) {
             fail("Unable to load schedule.json");
         }
