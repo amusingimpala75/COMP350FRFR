@@ -1,6 +1,7 @@
 package edu.gcc.hallmonitor;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -23,6 +24,7 @@ public class Schedule {
 
     public static Schedule loadSchedule() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
 
         JsonNode root = mapper.readTree(new File(SAVED_SCHEDULE));
         JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
@@ -32,9 +34,10 @@ public class Schedule {
 
     public void saveSchedule() throws IOException {
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
         Map<String, List<Course>> jsonObject = Map.of("classes", courses);
-        objectMapper.writeValue(new File(SAVED_SCHEDULE), jsonObject);
+        mapper.writeValue(new File(SAVED_SCHEDULE), jsonObject);
     }
 
     public void addCourse(Course course) {
