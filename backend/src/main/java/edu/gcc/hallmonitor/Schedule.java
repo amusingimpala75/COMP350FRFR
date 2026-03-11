@@ -3,6 +3,7 @@ package edu.gcc.hallmonitor;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.io.File;
+import java.util.Currency;
 
 public class Schedule {
 
@@ -11,11 +12,15 @@ public class Schedule {
 
 
     public Schedule(ArrayList<Course> courses) {
-
+        //TODO fill out
     }
 
     public Schedule() {
+        courses = new ArrayList<>();
+    }
 
+    public boolean inSchedule(Course course){
+        return courses.contains(course);
     }
 
     public static Schedule loadSchedule(File f) {
@@ -27,15 +32,15 @@ public class Schedule {
     }
 
     public void addCourse(Course course) {
-
+        courses.add(course);
     }
 
-    public Course removeCourse(Course course) {
-        return null;
+    public boolean removeCourse(Course course) {
+        return courses.remove(course);
     }
 
     public ArrayList<Course> getCourses() {
-        return null;
+        return courses;
     }
 
 

@@ -37,6 +37,7 @@ public class Search {
             System.err.println("IO Exception occurred: " + ioe.getMessage());
         }
 
+        courseMap = new HashMap<>();
         //make hashMap with course subject+number+section pointing to the course
         for(Course course : allCourses){
             courseMap.put(course.department()+course.code()+course.section(),course);
