@@ -3,7 +3,6 @@ package edu.gcc.hallmonitor;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
-import java.util.Map;
 
 public record Course(
         String name,
@@ -17,7 +16,7 @@ public record Course(
         String location,
         int credits,
         String semester,
-        List<Map<String, String>> times,
+        List<CourseTime> times,
         @JsonProperty("is_lab")
         boolean isLab,
         @JsonProperty("is_open")
