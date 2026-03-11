@@ -51,15 +51,12 @@ public class Schedule {
     public List<Course> getCourses() {
         List<Course> copyCourses = new ArrayList<>();
         for (Course c : courses) {
-            List<Map<String, String>> timesCopy = new ArrayList<>();
+            List<CourseTime> timesCopy = new ArrayList<>();
 
 
-            for (Map<String, String> time : c.times()) {
-                Map<String, String> mapTimeCopy = new HashMap<>();
-                for (String key : time.keySet()) {
-                    mapTimeCopy.put(key, time.get(key));
-                }
-                timesCopy.add(mapTimeCopy);
+            for (CourseTime time : c.times()) {
+
+                timesCopy.add(new CourseTime(time.day(), time.startTime(), time.endTime()));
             }
 
             Course copyCourse = new Course(

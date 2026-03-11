@@ -3,6 +3,7 @@ package edu.gcc.hallmonitor;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +33,7 @@ class ScheduleTest {
             assertEquals(expectedCourse.semester(), actualCourse.semester());
             assertEquals(expectedCourse.times().size(), actualCourse.times().size());
             for (int j = 0; j < actualCourse.times().size(); j++) {
-                assertEquals(expectedCourse.times().get(j).get("day"), actualCourse.times().get(j).get("day"));
-                assertEquals(expectedCourse.times().get(j).get("end_time"), actualCourse.times().get(j).get("end_time"));
-                assertEquals(expectedCourse.times().get(j).get("start_time"), actualCourse.times().get(j).get("start_time"));
+                assertEquals(expectedCourse.times().get(j), actualCourse.times().get(j));
             }
             assertEquals(expectedCourse.isLab(), actualCourse.isLab());
             assertEquals(expectedCourse.isOpen(), actualCourse.isOpen());
@@ -57,20 +56,20 @@ class ScheduleTest {
                         3,
                         "2023_Fall",
                         List.of(
-                                Map.of(
-                                        "day", "M",
-                                        "end_time", "12:50:00",
-                                        "start_time", "12:00:00"
+                                new CourseTime(
+                                        "M",
+                                        LocalTime.of(12, 0, 0),
+                                        LocalTime.of(12, 50, 0)
                                 ),
-                                Map.of(
-                                        "day", "W",
-                                        "end_time", "12:50:00",
-                                        "start_time", "12:00:00"
+                                new CourseTime(
+                                        "W",
+                                        LocalTime.of(12, 0, 0),
+                                        LocalTime.of(12, 50, 0)
                                 ),
-                                Map.of(
-                                        "day", "F",
-                                        "end_time", "12:50:00",
-                                        "start_time", "12:00:00"
+                                new CourseTime(
+                                        "F",
+                                        LocalTime.of(12, 0, 0),
+                                        LocalTime.of(12, 50, 0)
                                 )
                         ),
                         false,
@@ -88,15 +87,15 @@ class ScheduleTest {
                         3,
                         "2023_Fall",
                         List.of(
-                                Map.of(
-                                        "day", "T",
-                                        "end_time", "12:15:00",
-                                        "start_time", "11:00:00"
+                                new CourseTime(
+                                        "T",
+                                        LocalTime.of(11, 0, 0),
+                                        LocalTime.of(12, 15, 0)
                                 ),
-                                Map.of(
-                                        "day", "R",
-                                        "end_time", "12:15:00",
-                                        "start_time", "11:00:00"
+                                new CourseTime(
+                                        "R",
+                                        LocalTime.of(11, 0, 0),
+                                        LocalTime.of(12, 15, 0)
                                 )
                         ),
                         false,
