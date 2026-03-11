@@ -2,19 +2,24 @@ package edu.gcc.hallmonitor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kotlin.Pair;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Search {
 
     private String searchQuery;
     private ArrayList<Filter> filterList;
-    private ArrayList<Course> searchResults;
+    private List<Course> searchResults;
     private ArrayList<Course> matchResults;
     private static List<Course> allCourses;
 
@@ -31,6 +36,10 @@ public class Search {
         return matchResults;
     }
 
+    public static void main(String[] args) {
+        Search s = new Search("COMP");
+    }
+
     //The constructors will search the db for the appropriate courses
     public Search(String searchQuery) {
         this.searchQuery = searchQuery;
@@ -45,16 +54,17 @@ public class Search {
             }
         }
 
+        List<Map.Entry<Integer, Course>> sortList = new ArrayList<>();
+        for(Course course : allCourses){
+            //compare the string of all the relevant attributes of the course to the query string
+            sortList.add(new AbstractMap.SimpleEntry<>(FuzzySearch.tokenSetPartialRatio((course.department() + " " + course.name() + " " + course.professor() + " " + course.code()),searchQuery),course)); //TODO: change department to be a string of all the necessary parameters
+        }
+        //sort the list based on score
+        sortList.sort((a,b)->Integer.compare(b.getKey(),a.getKey()));
+        searchResults = sortList.stream().map(Map.Entry::getValue).collect(Collectors.toList());
 
-        //TODO: parse query, get terms
-
-        //TODO: order (add to) searchResults based on what most closely matches the terms
-
-        //TODO: matchResults = searchResults since there are no filters
-        //matchResults = searchResults;
-
-        //for now:
-        matchResults = new ArrayList<>(allCourses);
+        //applying filters will just need to take the searchresults returned by this code ^^ and only add the matching courses to the matchResults list
+        matchResults = new ArrayList<>(searchResults);
 
 
     }

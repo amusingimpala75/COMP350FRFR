@@ -4,5 +4,57 @@
     <p>
       Hello, world
     </p>
+
+      <!-- temporary, will be moved to search page when it exists !-->
+      <input id="queryInput" placeholder="search for courses">
+      <button id="searchBtn">Search</button>
+      <ul id="courses"></ul>
+
+
+
+<script>
+  /*  event listeners */
+  document.getElementById("searchBtn")
+    .addEventListener("click", search);
+
+
+  /*  get paths  */
+
+  async function loadResults() {
+    const res = await fetch("/search");
+    const items = await res.json();
+
+    const list = document.getElementById("courses");
+    list.innerHTML = "";
+
+    for (const item of items) {
+
+        const li = document.createElement("li");
+
+        // item text
+        li.textContent = item.subject + "" + item.number + " " + item.section + "  " + item.name ;
+
+        list.appendChild(li);
+    }
+
+  }
+
+  /* post paths */
+  async function search(){
+    const input = document.getElementById("queryInput");
+    const query = input.value.trim();
+    if (!query) return;
+
+    await fetch("/search", {
+        method: "POST",
+        body: query
+    });
+
+    loadResults();
+  }
+
+
+</script>
+
   </body>
 </html>
