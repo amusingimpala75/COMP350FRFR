@@ -2,9 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>Schedule</title>
 </head>
 <body>
-$END$
+
+<h1>User Schedule</h1>
+<ul id="courses"></ul>
+
+<script>
+
+
+
+/*  get paths  */
+
+  async function loadCourses() {
+    const res = await fetch("/scheduleItems");
+    const items = await res.json();
+
+    const list = document.getElementById("courses");
+    list.innerHTML = "";
+
+    for (const item of items) {
+
+        const li = document.createElement("li");
+
+        // item text
+        li.textContent = item.subject + "" + item.number + " " + item.section + "  " + item.name ;
+
+        const button = document.createElement("button");
+        button.innerText = "Remove Course";
+        button.id = ""+item.subject+item.number+item.section;
+
+
+        button.addEventListener('click', function(event) {
+            const clickedButton = event.target;
+            removeCourse(clickedButton);
+        });
+
+        li.appendChild(button);
+
+        //TODO: add a button with the subject,number,section, attach an event listener
+        //TODO: inside the button click method, change to add or delete based on what it was already
+
+
+        list.appendChild(li);
+    }
+
+  }
+
+  //TODO: will have the add/remove course option just remove the one, not refresh the whole thing
+
+  async function removeCourse(button){
+    //TODO: change this later
+
+    const courseCode = button.id;
+    await fetch("/addOrDelete", {
+      method: "POST",
+      body: courseCode
+    });
+    loadCourses();
+  }
+
+
+  loadCourses()
+
+
+</script>
+
+
 </body>
 </html>

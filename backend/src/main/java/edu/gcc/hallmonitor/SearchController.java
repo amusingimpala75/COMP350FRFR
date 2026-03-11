@@ -9,6 +9,19 @@ public class SearchController {
 
 
     public static void registerRoutes(Javalin app){
+        app.get("/schedule", ctx -> {
+            ctx.contentType("text/html");
+            ctx.result(
+                    SearchController.class.getResourceAsStream("/public/user_schedule.html")
+            );
+        });
+        app.get("/course_search", ctx -> {
+            ctx.contentType("text/html");
+            ctx.result(
+                    SearchController.class.getResourceAsStream("/public/index.html")
+            );
+        });
+
         app.post("/search", ctx -> {
                     String query = ctx.body();
                     search = new Search(query);
@@ -18,35 +31,35 @@ public class SearchController {
                 ctx.json(search.getMatchResults())      //returns a json of all the courses in the search's match results
         );
 
+
         app.get("/scheduleItems", ctx ->
                 ctx.json(Main.getCurrentSchedule().getCourses())
         );
 
+        /** for the buttons on the courses
+         */
+
+        app.post("/inSchedule", ctx -> {
+            String courseID = ctx.body();
+            Schedule curr = Main.getCurrentSchedule();
+            Course course = Search.getCourseByCode(courseID);
+            if(curr.inSchedule(course)){
+                ctx.json("True");
+            }else {
+                ctx.json("False");
+            }
+        });
+
         app.post("/addOrDelete",  ctx-> {
-                    String courseID = ctx.body();
-                    Schedule currSch = Main.getCurrentSchedule();
-                    Course course = Search.getCourseByCode(courseID);
-                    if(currSch.inSchedule(course)){
-                        currSch.removeCourse(course);
-                    }else {
-                        currSch.addCourse(Search.getCourseByCode(courseID));
-                    }
-                }
-                );
-
-//        app.delete("/delete/{code}", ctx -> {
-//            String courseID = ctx.pathParam("code");
-//            Schedule currSch = Main.getCurrentSchedule();
-//            boolean removed = currSch.removeCourse(Search.getCourseByCode(courseID));
-//
-//            if (removed) {
-//                ctx.status(204); // success, no body
-//            } else {
-//                ctx.status(404);
-//            }
-//        });
-
-        //have one for adding/removing a filter?
+            String courseID = ctx.body();
+            Schedule currSch = Main.getCurrentSchedule();
+            Course course = Search.getCourseByCode(courseID);
+            if(currSch.inSchedule(course)){
+                currSch.removeCourse(course);
+            }else {
+                currSch.addCourse(Search.getCourseByCode(courseID));
+            }
+        });
 
 
     }

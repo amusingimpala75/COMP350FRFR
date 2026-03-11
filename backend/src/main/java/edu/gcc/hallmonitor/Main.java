@@ -13,9 +13,8 @@ public class Main {
     }
 
     public static void run(int port) {
-       Javalin app = Javalin.create(cfg -> { cfg.staticFiles.add("public"); })
+       Javalin app = Javalin.create(cfg -> { cfg.staticFiles.add("/public"); })
                .start(port);
-
         SearchController.registerRoutes(app);
     }
 

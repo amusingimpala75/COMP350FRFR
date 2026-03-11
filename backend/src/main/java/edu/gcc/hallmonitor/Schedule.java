@@ -12,7 +12,7 @@ public class Schedule {
 
 
     public Schedule(ArrayList<Course> courses) {
-        //TODO fill out
+        this.courses = new ArrayList<>(courses);
     }
 
     public Schedule() {
