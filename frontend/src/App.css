@@ -76,6 +76,12 @@ body {
   gap: 1rem;
 }
 
+.search-card {
+  flex: 0;         /* stop stretching */
+  padding: 1.5rem; /* optional: reduce vertical size */
+  max-height: none; /* optional: allow content to dictate height */
+}
+
 /* Results card scroll if too long */
 .results-card {
   max-height: 400px;
