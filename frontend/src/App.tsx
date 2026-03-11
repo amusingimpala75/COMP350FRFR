@@ -6,6 +6,7 @@ interface Course {
   number: string;
   section: string;
   name: string;
+  faculty: string[];
 }
 
 function App() {
@@ -13,6 +14,8 @@ function App() {
   const [department, setDepartment] = useState('ALL');
   const [courses, setCourses] = useState<Course[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
+  const [professor, setProfessor] = useState('ALL');
+  const [professors, setProfessors] = useState<string[]>([]);
 
   const search = async () => {
     //if (!query.trim()) return;
@@ -27,6 +30,7 @@ function App() {
       body: JSON.stringify({
         query: query.trim(),
         department: department,
+        professor: professor,
       }),
     });
 
@@ -40,20 +44,41 @@ function App() {
 
   //populate dropdown with departments on load
   useEffect(() => {
-      fetch('/courses')
-        .then(res => res.json())
-        .then((items: Course[]) => {
-          const depts = Array.from(new Set(items.map(c => c.subject))).sort();
-          setDepartments(depts);
-        });
-    }, []);
+    fetch('/courses')
+      .then(res => res.json())
+      .then((items: Course[]) => {
+
+        const depts = Array.from(
+          new Set(
+            items
+              .map(c => c.subject)
+              .filter(d => d && d !== "ZLOAD")
+          )
+        ).sort();
+        setDepartments(depts);
+
+        const profs = Array.from(
+          new Set(
+            items
+              .flatMap(c => c.faculty || [])
+              .filter(p =>
+                p &&
+                !p.includes("Staff, -") &&
+                p !== "-"
+              ).map(p => p.replace(/,?\s*PhD\.?/i, "").trim())
+          )
+        ).sort();
+        setProfessors(profs);
+
+      });
+  }, []);
 
   return (
     <div className="layout">
 
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
-        <h3>Departments</h3>
+        <h3>Filters</h3>
         <select
           value={department}
           onChange={(e) => setDepartment(e.target.value)}
@@ -65,13 +90,26 @@ function App() {
             </option>
           ))}
         </select>
+
+        <select
+          value={professor}
+          onChange={(e) => setProfessor(e.target.value)}
+        >
+          <option value="ALL">All Professors</option>
+
+          {professors.map((prof) => (
+            <option key={prof} value={prof}>
+              {prof}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* MAIN CONTENT */}
       <div className="main">
 
         {/* Search Card */}
-        <div className="card">
+        <div className="card search-card">
           <h2>HALL Monitor's Scheduler</h2>
 
           <input

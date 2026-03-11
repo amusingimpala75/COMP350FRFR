@@ -40,16 +40,21 @@ jar {
 
 def npmCommand = System.getProperty("os.name").toLowerCase().contains("windows") ? "npm.cmd" : "npm"
 
-tasks.register('buildFrontend', Exec) {
+tasks.register('npmInstall', Exec) {
     workingDir '../frontend'
     commandLine npmCommand, 'install'
+}
+
+tasks.register('buildFrontend', Exec) {
+    dependsOn npmInstall
+    workingDir '../frontend'
     commandLine npmCommand, 'run', 'build'
 }
 
 tasks.register('copyFrontendBuild', Copy) {
     dependsOn buildFrontend
     from('../frontend/dist')
-    into("$buildDir/resources/main/dist")
+    into("$buildDir/resources/main/public")
 }
 
 processResources.dependsOn copyFrontendBuild
