@@ -49,7 +49,7 @@ tasks.register('buildFrontend', Exec) {
 tasks.register('copyFrontendBuild', Copy) {
     dependsOn buildFrontend
     from('../frontend/dist')
-    into("$buildDir/resources/main/dist")
+    into("$buildDir/resources/main/public")
 }
 
 processResources.dependsOn copyFrontendBuild
