@@ -30,10 +30,7 @@
     for (const item of items) {
 
         const li = document.createElement("li");
-
-        // item text
         li.textContent = item.subject + "" + item.number + " " + item.section + "  " + item.name ;
-
         const button = document.createElement("button");
         const inSch = await fetch("/inSchedule");
         if(inSch === "True"){
@@ -42,19 +39,12 @@
           button.innerText = "Add Course";
         }
         button.id = ""+item.subject+item.number+item.section;
-
-
         button.addEventListener('click', function(event) {
             const clickedButton = event.target;
             addOrRemove(clickedButton);
         });
 
         li.appendChild(button);
-
-        //TODO: add a button with the subject,number,section, attach an event listener
-        //TODO: inside the button click method, change to add or delete based on what it was already
-
-
         list.appendChild(li);
     }
 

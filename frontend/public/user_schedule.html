@@ -32,29 +32,19 @@
         const button = document.createElement("button");
         button.innerText = "Remove Course";
         button.id = ""+item.subject+item.number+item.section;
-
-
         button.addEventListener('click', function(event) {
             const clickedButton = event.target;
             removeCourse(clickedButton);
         });
 
         li.appendChild(button);
-
-        //TODO: add a button with the subject,number,section, attach an event listener
-        //TODO: inside the button click method, change to add or delete based on what it was already
-
-
         list.appendChild(li);
     }
 
   }
 
-  //TODO: will have the add/remove course option just remove the one, not refresh the whole thing
 
   async function removeCourse(button){
-    //TODO: change this later
-
     const courseCode = button.id;
     await fetch("/addOrDelete", {
       method: "POST",
