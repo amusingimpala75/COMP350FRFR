@@ -22,22 +22,30 @@ public class Schedule {
 
     }
 
-    public static Schedule loadSchedule() throws IOException {
+    public static Schedule loadSchedule(String filename) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
-        JsonNode root = mapper.readTree(new File(SAVED_SCHEDULE));
+        JsonNode root = mapper.readTree(new File(filename));
         JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
 
         return new Schedule(mapper.readerForListOf(Course.class).readValue(classesNode));
     }
 
-    public void saveSchedule() throws IOException {
+    public static Schedule loadSchedule() throws IOException {
+        return loadSchedule(SAVED_SCHEDULE);
+    }
 
+
+    public void saveSchedule(String filename) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         Map<String, List<Course>> jsonObject = Map.of("classes", courses);
-        mapper.writeValue(new File(SAVED_SCHEDULE), jsonObject);
+        mapper.writeValue(new File(filename), jsonObject);
+    }
+
+    public void saveSchedule() throws IOException {
+        saveSchedule(SAVED_SCHEDULE);
     }
 
     public void addCourse(Course course) {
