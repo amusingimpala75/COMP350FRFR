@@ -20,6 +20,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
 
     implementation 'me.xdrop:fuzzywuzzy:1.4.0'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.3'
 }
 
 java {
@@ -38,13 +39,26 @@ jar {
     }
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDirs += '../frontend'
-        }
-    }
+def npmCommand = System.getProperty("os.name").toLowerCase().contains("windows") ? "npm.cmd" : "npm"
+
+tasks.register('npmInstall', Exec) {
+    workingDir '../frontend'
+    commandLine npmCommand, 'install'
 }
+
+tasks.register('buildFrontend', Exec) {
+    dependsOn npmInstall
+    workingDir '../frontend'
+    commandLine npmCommand, 'run', 'build'
+}
+
+tasks.register('copyFrontendBuild', Copy) {
+    dependsOn buildFrontend
+    from('../frontend/dist')
+    into("$buildDir/resources/main/public")
+}
+
+processResources.dependsOn copyFrontendBuild
 
 test {
     useJUnitPlatform()
