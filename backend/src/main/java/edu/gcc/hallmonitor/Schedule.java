@@ -13,7 +13,8 @@ import java.util.Map;
 public class Schedule {
 
     private List<Course> courses;
-    private static final String SAVED_SCHEDULE = "src/main/saved_schedules/saved-schedule.json";
+    private static final String SAVED_SCHEDULE = "saved-schedule.json";
+    private static final String SAVED_SCHEDULES_FOLDER = "src/main/saved_schedules/";
 
     public Schedule(List<Course> courses) {
         this.courses = courses;
@@ -26,7 +27,7 @@ public class Schedule {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
-        JsonNode root = mapper.readTree(new File(filename));
+        JsonNode root = mapper.readTree(new File(SAVED_SCHEDULES_FOLDER + filename));
         JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
 
         return new Schedule(mapper.readerForListOf(Course.class).readValue(classesNode));
@@ -41,7 +42,7 @@ public class Schedule {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         Map<String, List<Course>> jsonObject = Map.of("classes", courses);
-        mapper.writeValue(new File(filename), jsonObject);
+        mapper.writeValue(new File(SAVED_SCHEDULES_FOLDER + filename), jsonObject);
     }
 
     public void saveSchedule() throws IOException {
