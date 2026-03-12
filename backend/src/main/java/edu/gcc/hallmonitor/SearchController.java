@@ -9,6 +9,21 @@ public class SearchController {
 
 
     public static void registerRoutes(Javalin app){
+
+        app.get("/searchPage", ctx -> {
+            ctx.contentType("text/html");
+            ctx.result(
+                    SearchController.class.getResourceAsStream("/public/index.html")
+            );
+        });
+
+        app.get("/schedulePage", ctx -> {
+            ctx.contentType("text/html");
+            ctx.result(
+                    SearchController.class.getResourceAsStream("/public/index.html")
+            );
+        });
+
         app.get("/schedule", ctx -> {
             ctx.contentType("text/html");
             ctx.result(

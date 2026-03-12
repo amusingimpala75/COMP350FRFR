@@ -9,16 +9,16 @@ function App() {
       {/* Top navigation bar */}
       <header className="top-bar">
         <nav>
-          <NavLink to="/search" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Search</NavLink>
-          <NavLink to="/schedule" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Schedule</NavLink>
+          <NavLink to="/searchPage" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Search</NavLink>
+          <NavLink to="/schedulePage" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Schedule</NavLink>
         </nav>
       </header>
 
       {/* Page content */}
       <main>
         <Routes>
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/searchPage" element={<SearchPage />} />
+          <Route path="/schedulePage" element={<SchedulePage />} />
           <Route path="*" element={<SearchPage />} /> {/* Default to search */}
         </Routes>
       </main>

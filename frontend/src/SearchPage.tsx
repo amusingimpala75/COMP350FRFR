@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 
+interface CourseTime {
+  day: string;
+  start_time: string;
+  end_time: string;
+}
+
 interface Course {
   subject: string;
   number: string;
   section: string;
   name: string;
   faculty: string[];
+  times: CourseTime[];
 }
 
 export default function SearchPage() {
@@ -16,6 +23,7 @@ export default function SearchPage() {
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
   const [schedule, setSchedule] = useState<Set<string>>(new Set());
+  const [days, setDays] = useState<Set<string>>(new Set());
 
   // --- SEARCH ---
   const search = async () => {
@@ -45,6 +53,15 @@ export default function SearchPage() {
       headers: { 'Content-Type': 'text/plain' },
       body: courseId,
     });
+  };
+
+  const toggleDay = (day: string) => {
+    const newDays = new Set(days);
+
+    if (newDays.has(day)) newDays.delete(day);
+    else newDays.add(day);
+
+    setDays(newDays);
   };
 
   // --- LOAD COURSES FOR FILTERS ---
@@ -101,6 +118,21 @@ export default function SearchPage() {
           <option value="ALL">All Professors</option>
           {professors.map(prof => <option key={prof} value={prof}>{prof}</option>)}
         </select>
+
+        <h4>Days</h4>
+
+        <div className="day-selector">
+          {["M","T","W","R","F"].map(day => (
+            <button
+              key={day}
+              className={`day-btn ${days.has(day) ? "selected" : ""}`}
+              onClick={() => toggleDay(day)}
+            >
+              {day}
+            </button>
+          ))}
+        </div>
+
       </div>
 
       {/* MAIN CONTENT */}
@@ -119,18 +151,26 @@ export default function SearchPage() {
         <div className="card results-card">
           <h3>Results</h3>
           <ul>
-            {courses.map(course => {
-              const courseId = `${course.subject}${course.number}${course.section}`;
-              const inSchedule = schedule.has(courseId);
-              return (
-                <li key={courseId}>
-                  {course.subject}{course.number} {course.section} — {course.name}
-                  <button onClick={() => toggleCourse(course)}>
-                    {inSchedule ? 'Remove Course' : 'Add Course'}
-                  </button>
-                </li>
-              );
-            })}
+            {courses
+              .filter(course => {
+                if (days.size === 0) return true;
+
+                const courseDays = course.times?.map(t => t.day) ?? [];
+                return courseDays.some(d => days.has(d));
+              })
+              .map(course => {
+                const courseId = `${course.subject}${course.number}${course.section}`;
+                const inSchedule = schedule.has(courseId);
+
+                return (
+                  <li key={courseId}>
+                    {course.subject}{course.number} {course.section} — {course.name}
+                    <button onClick={() => toggleCourse(course)}>
+                      {inSchedule ? 'Remove Course' : 'Add Course'}
+                    </button>
+                  </li>
+                );
+              })}
           </ul>
         </div>
       </div>
