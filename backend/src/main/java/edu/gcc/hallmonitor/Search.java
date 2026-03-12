@@ -16,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 public class Search {
 
@@ -96,6 +98,8 @@ public class Search {
 
     public static List<Course> loadData(String coursesFilename) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
         if (jsonURL == null) {
