@@ -26,7 +26,7 @@ public class Days extends Filter {
             // If a single day match, keep only the classes that
             // meet exactly only on that day
             return course.times().size() == 1
-                    && course.times().get(0).day().equals(days.get(0));
+                   && course.times().get(0).day().equals(days.get(0));
         }
     }
 }

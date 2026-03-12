@@ -21,6 +21,6 @@ public class Time extends Filter {
 
     private static boolean timesContain(LocalTime time, CourseTime ct) {
         return ct.startTime().compareTo(time) <= 0
-                && ct.endTime().compareTo(time) <= 0;
+               && ct.endTime().compareTo(time) <= 0;
     }
 }
