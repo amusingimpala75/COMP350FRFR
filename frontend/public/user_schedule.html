@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Schedule</title>
+</head>
+<body>
+
+<h1>User Schedule</h1>
+<ul id="courses"></ul>
+
+<script>
+
+
+
+/*  get paths  */
+
+  async function loadCourses() {
+    const res = await fetch("/scheduleItems");
+    const items = await res.json();
+
+    const list = document.getElementById("courses");
+    list.innerHTML = "";
+
+    for (const item of items) {
+
+        const li = document.createElement("li");
+
+        // item text
+        li.textContent = item.subject + "" + item.number + " " + item.section + "  " + item.name ;
+
+        const button = document.createElement("button");
+        button.innerText = "Remove Course";
+        button.id = ""+item.subject+item.number+item.section;
+        button.addEventListener('click', function(event) {
+            const clickedButton = event.target;
+            removeCourse(clickedButton);
+        });
+
+        li.appendChild(button);
+        list.appendChild(li);
+    }
+
+  }
+
+
+  async function removeCourse(button){
+    const courseCode = button.id;
+    await fetch("/addOrDelete", {
+      method: "POST",
+      body: courseCode
+    });
+    loadCourses();
+  }
+
+
+  loadCourses()
+
+
+</script>
+
+
+</body>
+</html>
