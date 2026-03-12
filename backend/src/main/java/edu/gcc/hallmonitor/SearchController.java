@@ -27,9 +27,15 @@ public class SearchController {
                     search = new Search(query);
                 }
                 );
-        app.get("/search", ctx ->
-                ctx.json(search.getMatchResults())      //returns a json of all the courses in the search's match results
-        );
+        app.get("/search", ctx -> {
+            if (search == null) search = new Search(""); // default empty search
+            ctx.json(search.getMatchResults());
+        });
+
+        app.get("/search/results", ctx -> {
+            if (search == null) search = new Search("");
+            ctx.json(search.getMatchResults());
+        });
 
         app.get("/courses", ctx -> {
             // create a Search object with empty query to get all courses

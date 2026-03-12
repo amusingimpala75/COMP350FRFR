@@ -6,7 +6,7 @@ public class ProfName extends Filter {
 
     @Override
     public boolean filter(Course course) {
-        return false;
+        return course.professor().contains(profName);
     }
 
 }

@@ -6,6 +6,6 @@ public class Department extends Filter {
 
     @Override
     public boolean filter(Course course) {
-        return false;
+        return course.department().equals(department);
     }
 }

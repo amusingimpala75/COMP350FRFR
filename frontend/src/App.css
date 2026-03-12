@@ -168,3 +168,60 @@ body {
   margin-top: 1rem;
   font-size: 14px;
 }
+
+
+/* Top navigation bar */
+.top-bar {
+  display: flex;              /* arrange items in a row */
+  gap: 20px;                  /* space between links */
+  padding: 10px 20px;         /* space around the bar */
+  background-color: #333;     /* dark background for contrast */
+  color: white;
+  align-items: center;        /* vertical centering */
+}
+
+/* Links inside the top bar */
+.top-bar .nav-link {
+  color: white;
+  text-decoration: none;      /* remove underline */
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Hover effect */
+.top-bar .nav-link:hover {
+  text-decoration: underline;
+  color: #ffcc00;             /* optional highlight color */
+}
+
+/* Optional: highlight the active page */
+.top-bar .nav-link.active {
+  border-bottom: 2px solid #ffcc00;
+}
+
+/* Top bar container */
+.top-bar nav {
+  display: flex;           /* arrange links in a row */
+  gap: 20px;               /* space between links */
+  justify-content: center; /* center links horizontally */
+  align-items: center;
+}
+
+/* Nav links styling */
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Highlight active link */
+.nav-link.active {
+  border-bottom: 2px solid #ffcc00;
+}
+
+/* Hover effect */
+.nav-link:hover {
+  color: #ffcc00;
+  text-decoration: underline;
+}
