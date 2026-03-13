@@ -4,12 +4,26 @@ import io.javalin.Javalin;
 
 public class SearchController {
 
-    //better to call this? have just one search going on
     private static Search search; //current search
 
 
 
     public static void registerRoutes(Javalin app){
+
+        app.get("/searchPage", ctx -> {
+            ctx.contentType("text/html");
+            ctx.result(
+                    SearchController.class.getResourceAsStream("/public/index.html")
+            );
+        });
+
+        app.get("/schedulePage", ctx -> {
+            ctx.contentType("text/html");
+            ctx.result(
+                    SearchController.class.getResourceAsStream("/public/index.html")
+            );
+        });
+
         app.get("/schedule", ctx -> {
             ctx.contentType("text/html");
             ctx.result(
@@ -28,9 +42,15 @@ public class SearchController {
                     search = new Search(query);
                 }
                 );
-        app.get("/search", ctx ->
-                ctx.json(search.getMatchResults())      //returns a json of all the courses in the search's match results
-        );
+        app.get("/search", ctx -> {
+            if (search == null) search = new Search(""); // default empty search
+            ctx.json(search.getMatchResults());
+        });
+
+        app.get("/search/results", ctx -> {
+            if (search == null) search = new Search("");
+            ctx.json(search.getMatchResults());
+        });
 
         app.get("/courses", ctx -> {
             // create a Search object with empty query to get all courses
@@ -72,4 +92,5 @@ public class SearchController {
 
 
     }
+
 }
