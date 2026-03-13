@@ -30,10 +30,21 @@
     for (const item of items) {
 
         const li = document.createElement("li");
-
-        // item text
         li.textContent = item.subject + "" + item.number + " " + item.section + "  " + item.name ;
+        const button = document.createElement("button");
+        const inSch = await fetch("/inSchedule");
+        if(inSch === "True"){
+          button.innerText = "Remove Course";
+        }else{
+          button.innerText = "Add Course";
+        }
+        button.id = ""+item.subject+item.number+item.section;
+        button.addEventListener('click', function(event) {
+            const clickedButton = event.target;
+            addOrRemove(clickedButton);
+        });
 
+        li.appendChild(button);
         list.appendChild(li);
     }
 
@@ -51,6 +62,20 @@
     });
 
     loadResults();
+  }
+  async function addOrRemove(button){
+    //TODO: change this later
+    if(button.innerText === "Add Course"){
+      button.innerText = "Remove Course";
+    }else{
+      button.innerText = "Add Course";
+    }
+
+    const courseCode = button.id;
+    await fetch("/addOrDelete", {
+      method: "POST",
+      body: courseCode
+    });
   }
 
 

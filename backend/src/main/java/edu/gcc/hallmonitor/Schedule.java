@@ -20,7 +20,11 @@ public class Schedule {
         this.courses = courses;
     }
     public Schedule() {
+        courses = new ArrayList<>();
+    }
 
+    public boolean inSchedule(Course course){
+        return courses.contains(course);
     }
 
     public static Schedule loadSchedule(String filename) throws IOException {
@@ -50,11 +54,11 @@ public class Schedule {
     }
 
     public void addCourse(Course course) {
-
+        courses.add(course);
     }
 
-    public Course removeCourse(Course course) {
-        return null;
+    public boolean removeCourse(Course course) {
+        return courses.remove(course);
     }
 
     public List<Course> getCourses() {

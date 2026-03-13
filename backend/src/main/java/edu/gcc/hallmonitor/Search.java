@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kotlin.Pair;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
+import java.util.HashMap;
+
 
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -14,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 public class Search {
 
@@ -22,6 +26,30 @@ public class Search {
     private List<Course> searchResults;
     private ArrayList<Course> matchResults;
     private static List<Course> allCourses;
+    private static HashMap<String, Course> courseMap;
+
+
+    public static void loadCourses(){
+        //if this is the first search, initialize the allCourses list
+        try {
+            allCourses = loadData("courses.json");
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("File not found: " + fnfe.getMessage());
+        } catch (IOException ioe) {
+            System.err.println("IO Exception occurred: " + ioe.getMessage());
+        }
+
+        courseMap = new HashMap<>();
+        //make hashMap with course subject+number+section pointing to the course
+        for(Course course : allCourses){
+            courseMap.put(course.department()+course.code()+course.section(),course);
+        }
+
+    }
+
+    public static Course getCourseByCode(String code){
+        return courseMap.get(code); //TODO: handle problems with this
+    }
 
     public void applyFilter(Filter filter) {
 
@@ -32,7 +60,6 @@ public class Search {
     }
 
     public ArrayList<Course> getMatchResults() {
-        //TODO: make a /results route and use this method to convert into json
         return matchResults;
     }
 
@@ -43,16 +70,6 @@ public class Search {
     //The constructors will search the db for the appropriate courses
     public Search(String searchQuery) {
         this.searchQuery = searchQuery;
-        //if this is the first search, initialize the allCourses list
-        if(allCourses == null){
-            try {
-                allCourses = loadData("courses.json");
-            } catch (FileNotFoundException fnfe) {
-                System.err.println("File not found: " + fnfe.getMessage());
-            } catch (IOException ioe) {
-                System.err.println("IO Exception occurred: " + ioe.getMessage());
-            }
-        }
 
         List<Map.Entry<Integer, Course>> sortList = new ArrayList<>();
         for(Course course : allCourses){
@@ -70,16 +87,6 @@ public class Search {
     }
 
     public Search(String searchQuery, ArrayList<Filter> filterList) {
-        //initialize the allCourses list if it's the first search
-        if(allCourses == null){
-            try {
-                allCourses = loadData("courses.json");
-            } catch (FileNotFoundException fnfe) {
-                System.err.println("File not found: " + fnfe.getMessage());
-            } catch (IOException ioe) {
-                System.err.println("IO Exception occurred: " + ioe.getMessage());
-            }
-        }
 
     }
 
@@ -91,9 +98,8 @@ public class Search {
 
     public static List<Course> loadData(String coursesFilename) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        // We may want to do this once and keep a global object
-        // if this cost is too large
-        mapper.findAndRegisterModules();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
         if (jsonURL == null) {
