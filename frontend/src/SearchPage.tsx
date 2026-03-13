@@ -27,6 +27,7 @@ export default function SearchPage() {
 
   // --- SEARCH ---
   const search = async () => {
+    setCourses([]);
     await fetch('/search', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
