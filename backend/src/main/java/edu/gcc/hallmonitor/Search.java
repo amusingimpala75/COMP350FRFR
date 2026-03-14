@@ -1,8 +1,6 @@
 package edu.gcc.hallmonitor;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import kotlin.Pair;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import java.util.HashMap;
 
@@ -100,19 +98,15 @@ public class Search {
 
 
     public static List<Course> loadData(String coursesFilename) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
         if (jsonURL == null) {
             throw new FileNotFoundException(String.format("Could not find '%s' in resources directory", coursesFilename));
         }
 
-        JsonNode root = mapper.readTree(jsonURL);
+        JsonNode root = Main.MAPPER.readTree(jsonURL);
         JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
 
-        return mapper.readerForListOf(Course.class).readValue(classesNode);
+        return Main.MAPPER.readerForListOf(Course.class).readValue(classesNode);
     }
 
     public String query() {
