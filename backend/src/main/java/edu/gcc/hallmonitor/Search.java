@@ -28,6 +28,9 @@ public class Search {
     private static List<Course> allCourses;
     private static HashMap<String, Course> courseMap;
 
+    static {
+        loadCourses();
+    }
 
     public static void loadCourses(){
         //if this is the first search, initialize the allCourses list
@@ -110,5 +113,9 @@ public class Search {
         JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
 
         return mapper.readerForListOf(Course.class).readValue(classesNode);
+    }
+
+    public String query() {
+        return this.searchQuery;
     }
 }
