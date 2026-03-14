@@ -30,7 +30,7 @@ public class Search {
         loadCourses();
     }
 
-    public static void loadCourses(){
+    private static void loadCourses() {
         //if this is the first search, initialize the allCourses list
         try {
             allCourses = loadData("courses.json");

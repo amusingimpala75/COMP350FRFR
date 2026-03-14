@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import SearchPage from './SearchPage';
 import SchedulePage from './SchedulePage';
 import './App.css';
@@ -17,9 +17,9 @@ function App() {
       {/* Page content */}
       <main>
         <Routes>
-          <Route path="*" element={<SearchPage />} /> {/* Default to search */}
           <Route path="/search" element={<SearchPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="*" element={<Navigate to="/search" replace />} /> {/* Default to search */}
         </Routes>
       </main>
     </Router>

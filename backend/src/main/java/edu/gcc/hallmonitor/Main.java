@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.Javalin;
 
 public class Main {
-    private static Schedule currentSchedule;
+
     public static final ObjectMapper MAPPER;
     static {
         MAPPER = new ObjectMapper();
@@ -17,8 +17,6 @@ public class Main {
 
     public static void main(String[] args) {
         run(7070);
-        currentSchedule = new Schedule();
-        Search.loadCourses();
     }
 
     public static void run(int port) {
@@ -27,10 +25,6 @@ public class Main {
 
        SearchController.registerRoutes(app);
        ScheduleController.registerRoutes(app);
-    }
-
-    public static Schedule getCurrentSchedule(){
-        return currentSchedule;
     }
 
 }

@@ -18,7 +18,7 @@ public class Schedule {
         this.courses = courses;
     }
     public Schedule() {
-        courses = new ArrayList<>();
+        this(new ArrayList<Course>());
     }
 
     public boolean inSchedule(Course course){
