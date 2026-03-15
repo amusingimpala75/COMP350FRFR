@@ -2,6 +2,9 @@ package edu.gcc.hallmonitor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.javalin.Javalin;
 
@@ -36,7 +39,13 @@ public class SearchController {
             ctx.json(allCoursesSearch.getMatchResults());
         });
 
-        // [TODO] have post for adding/removing a filter
+        app.get("/search/filter", ctx -> {
+            ctx.json(search.getFilters()
+                    .stream()
+                    .map(Filter::toJSON)
+                    .collect(Collectors.toList()));
+        });
+
         app.post("/search/filter", ctx -> {
             Filter f = Filter.fromJSON(Main.MAPPER.readTree(ctx.body()));
             search.applyFilter(f);

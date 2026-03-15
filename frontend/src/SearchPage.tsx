@@ -117,6 +117,17 @@ export default function SearchPage() {
     };
 
     fetchCourses();
+
+    const setFilters = async () => {
+      const resp = await fetch('/search/filter');
+      for (const filter of await resp.json()) {
+        switch (filter.type) {
+          case "department": setDepartment(filter.value);
+        }
+      }
+    };
+
+    setFilters();
   }, []);
 
   // --- LOAD CURRENT SCHEDULE ---
@@ -132,6 +143,7 @@ export default function SearchPage() {
       }
     };
 
+    search();
     fetchSchedule();
   }, []);
 
