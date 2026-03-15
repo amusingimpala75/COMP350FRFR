@@ -37,5 +37,18 @@ public class SearchController {
         });
 
         // [TODO] have post for adding/removing a filter
+        app.post("/search/filter", ctx -> {
+            Filter f = Filter.fromJSON(Main.MAPPER.readTree(ctx.body()));
+            search.applyFilter(f);
+        });
+
+        app.delete("/search/filter", ctx -> {
+            if (ctx.queryParam("all") != null) {
+                search = new Search(search.query());
+            } else {
+                Filter f = Filter.fromJSON(Main.MAPPER.readTree(ctx.body()));
+                search.removeFilter(f);
+            }
+        });
     }
 }
