@@ -3,13 +3,7 @@ package edu.gcc.hallmonitor;
 import java.time.LocalTime;
 import java.util.List;
 
-public class Time extends Filter {
-
-    private List<LocalTime> times;
-
-    public Time(List<LocalTime> times) {
-        this.times = times;
-    }
+public record Time(List<LocalTime> times) implements Filter {
 
     @Override
     public boolean filter(Course course) {

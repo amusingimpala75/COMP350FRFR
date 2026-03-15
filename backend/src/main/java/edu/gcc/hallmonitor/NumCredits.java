@@ -1,12 +1,6 @@
 package edu.gcc.hallmonitor;
 
-public class NumCredits extends Filter {
-
-    public NumCredits(int credits) {
-        this.numCredits = credits;
-    }
-
-    private int numCredits;
+public record NumCredits(int numCredits) implements Filter {
 
     @Override
     public boolean filter(Course course) {

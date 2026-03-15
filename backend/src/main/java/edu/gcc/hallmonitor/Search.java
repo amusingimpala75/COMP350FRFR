@@ -5,7 +5,6 @@ import me.xdrop.fuzzywuzzy.FuzzySearch;
 import java.util.HashMap;
 
 
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -14,15 +13,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 
 public class Search {
 
     private String searchQuery;
-    private ArrayList<Filter> filterList;
+    private List<Filter> filterList = new ArrayList<>();
     private List<Course> searchResults;
-    private ArrayList<Course> matchResults;
+    private List<Course> matchResults;
+
     private static List<Course> allCourses;
     private static HashMap<String, Course> courseMap;
 
@@ -53,49 +51,69 @@ public class Search {
     }
 
     public void applyFilter(Filter filter) {
-
+        this.filterList.add(filter);
+        matchResults = matchResults
+                .stream()
+                .filter(filter)
+                .collect(Collectors.toList());
     }
 
     public void removeFilter(Filter filter) {
+        List<Filter> copy = new ArrayList<>(filterList);
+        copy.remove(filter);
 
+        matchResults = new ArrayList<>(searchResults);
+        filterList = new ArrayList<>();
+
+        for (Filter f : copy) {
+            applyFilter(f);
+        }
     }
 
-    public ArrayList<Course> getMatchResults() {
+    public List<Course> getMatchResults() {
         return matchResults;
     }
 
-    public static void main(String[] args) {
-        Search s = new Search("COMP");
-    }
-
-    //The constructors will search the db for the appropriate courses
-    public Search(String searchQuery) {
+    // The constructors will search the db for the appropriate courses
+    public Search(String searchQuery, ArrayList<Filter> filters) {
         this.searchQuery = searchQuery;
 
-        List<Map.Entry<Integer, Course>> sortList = new ArrayList<>();
-        for(Course course : allCourses){
-            //compare the string of all the relevant attributes of the course to the query string
-            sortList.add(new AbstractMap.SimpleEntry<>(FuzzySearch.tokenSetPartialRatio((course.department() + " " + course.name() + " " + course.professor() + " " + course.code()),searchQuery),course)); //TODO: change department to be a string of all the necessary parameters
-        }
-        //sort the list based on score
-        sortList.sort((a,b)->Integer.compare(b.getKey(),a.getKey()));
-        searchResults = sortList.stream().map(Map.Entry::getValue).collect(Collectors.toList());
+        searchResults = allCourses.stream()
+                .map(course -> {
+                    // compare the string of all the relevant attributes of
+                    // the course to the query string
+                    // TODO: change department to be a string of
+                    // all the necessary parameters
+
+                    String[] searchFields = {
+                        course.department(),
+                        course.name(),
+                        String.join(" ", course.professor()),
+                        String.valueOf(course.code())
+                    };
+                    String searchSpace = String.join(" ", searchFields);
+                    int ranking = FuzzySearch.tokenSetPartialRatio(searchSpace, searchQuery);
+                    return new AbstractMap.SimpleEntry<>(ranking, course);
+                })
+                .sorted((e1, e2) -> Integer.compare(e2.getKey(), e1.getKey()))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
         //applying filters will just need to take the searchresults returned by this code ^^ and only add the matching courses to the matchResults list
         matchResults = new ArrayList<>(searchResults);
 
-
+        for (Filter f : filters) {
+            this.applyFilter(f);
+        }
     }
 
-    public Search(String searchQuery, ArrayList<Filter> filterList) {
-
+    public Search(String searchQuery) {
+        this(searchQuery, new ArrayList<Filter>());
     }
 
-    public ArrayList<Filter> getFilters() {
-        return null;
+    public List<Filter> getFilters() {
+        return this.filterList;
     }
-
-
 
     public static List<Course> loadData(String coursesFilename) throws IOException {
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));

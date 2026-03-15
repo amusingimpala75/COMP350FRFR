@@ -1,12 +1,6 @@
 package edu.gcc.hallmonitor;
 
-public class Department extends Filter {
-
-    public Department(String dept) {
-        this.department = dept;
-    }
-
-    private String department;
+public record Department(String department) implements Filter {
 
     @Override
     public boolean filter(Course course) {

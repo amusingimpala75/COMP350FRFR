@@ -1,12 +1,6 @@
 package edu.gcc.hallmonitor;
 
-public class ProfName extends Filter {
-
-    public ProfName(String profName) {
-        this.profName = profName;
-    }
-
-    private String profName;
+public record ProfName(String profName) implements Filter {
 
     @Override
     public boolean filter(Course course) {

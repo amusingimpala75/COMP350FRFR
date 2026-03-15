@@ -3,13 +3,7 @@ package edu.gcc.hallmonitor;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Days extends Filter {
-
-    private List<String> days;
-
-    public Days(List<String> days) {
-        this.days = days;
-    }
+public record Days(List<String> days) implements Filter {
 
     @Override
     public boolean filter(Course course) {
