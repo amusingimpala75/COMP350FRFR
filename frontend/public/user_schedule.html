@@ -16,7 +16,7 @@
 /*  get paths  */
 
   async function loadCourses() {
-    const res = await fetch("/scheduleItems");
+    const res = await fetch("/schedule/items");
     const items = await res.json();
 
     const list = document.getElementById("courses");
@@ -46,7 +46,7 @@
 
   async function removeCourse(button){
     const courseCode = button.id;
-    await fetch("/addOrDelete", {
+    await fetch("/schedule/items", {
       method: "POST",
       body: courseCode
     });

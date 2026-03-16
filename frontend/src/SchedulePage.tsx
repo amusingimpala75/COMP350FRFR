@@ -21,7 +21,7 @@ export default function SchedulePage() {
   const [courses, setCourses] = useState<Course[]>([]);
 
   const loadCourses = async () => {
-    const res = await fetch('/scheduleItems');
+    const res = await fetch('/schedule/items');
     const items: Course[] = await res.json();
     setCourses(items);
 
@@ -47,7 +47,7 @@ export default function SchedulePage() {
   };
 
   const removeCourse = async (courseId: string) => {
-    await fetch('/addOrDelete', { method: 'POST', body: courseId });
+    await fetch('/schedule/items', { method: 'POST', body: courseId });
     removeEvents(courseId);
     loadCourses();
   };

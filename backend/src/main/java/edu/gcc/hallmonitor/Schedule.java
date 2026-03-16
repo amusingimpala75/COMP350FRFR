@@ -1,8 +1,6 @@
 package edu.gcc.hallmonitor;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,13 +12,13 @@ public class Schedule {
 
     private List<Course> courses;
     private static final String SAVED_SCHEDULE = "saved-schedule.json";
-    private static final String SAVED_SCHEDULES_FOLDER = "src/main/saved_schedules/";
+    private static final String SAVED_SCHEDULES_FOLDER = "schedules/";
 
     public Schedule(List<Course> courses) {
         this.courses = courses;
     }
     public Schedule() {
-        courses = new ArrayList<>();
+        this(new ArrayList<Course>());
     }
 
     public boolean inSchedule(Course course){
@@ -28,25 +26,29 @@ public class Schedule {
     }
 
     public static Schedule loadSchedule(String filename) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        File f = new File(SAVED_SCHEDULES_FOLDER + filename);
+        if (!f.exists()) {
+            return new Schedule();
+        }
 
-        JsonNode root = mapper.readTree(new File(SAVED_SCHEDULES_FOLDER + filename));
+        JsonNode root = Main.MAPPER.readTree(new File(SAVED_SCHEDULES_FOLDER + filename));
         JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
 
-        return new Schedule(mapper.readerForListOf(Course.class).readValue(classesNode));
+        return new Schedule(Main.MAPPER.readerForListOf(Course.class).readValue(classesNode));
     }
 
     public static Schedule loadSchedule() throws IOException {
         return loadSchedule(SAVED_SCHEDULE);
     }
 
-
     public void saveSchedule(String filename) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        File savedDir = new File(SAVED_SCHEDULES_FOLDER);
+        if (!savedDir.exists()) {
+            savedDir.mkdirs();
+        }
+
         Map<String, List<Course>> jsonObject = Map.of("classes", courses);
-        mapper.writeValue(new File(SAVED_SCHEDULES_FOLDER + filename), jsonObject);
+        Main.MAPPER.writeValue(new File(SAVED_SCHEDULES_FOLDER + filename), jsonObject);
     }
 
     public void saveSchedule() throws IOException {

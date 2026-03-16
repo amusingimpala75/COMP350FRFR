@@ -28,13 +28,12 @@ export default function SearchPage() {
   // --- SEARCH ---
   const search = async () => {
     setCourses([]);
-    await fetch('/search', {
+    const res = await fetch('/search', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: query.trim(),
     });
 
-    const res = await fetch('/search/results');
     const items: Course[] = await res.json();
     setCourses(items);
   };
@@ -49,7 +48,7 @@ export default function SearchPage() {
 
     setSchedule(newSchedule);
 
-    await fetch('/addOrDelete', {
+    await fetch('/schedule/items', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: courseId,
@@ -94,7 +93,7 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const res = await fetch('/scheduleItems');
+        const res = await fetch('/schedule/items');
         const items: Course[] = await res.json();
         const ids = new Set(items.map(c => `${c.subject}${c.number}${c.section}`));
         setSchedule(ids);

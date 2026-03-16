@@ -84,7 +84,8 @@ body {
 
 /* Results card scroll if too long */
 .results-card {
-  max-height: 400px;
+  /* max-height: 400px; */
+  max-height: 67vh;
   overflow-y: auto;
 }
 

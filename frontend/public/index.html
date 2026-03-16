@@ -72,7 +72,7 @@
     }
 
     const courseCode = button.id;
-    await fetch("/addOrDelete", {
+    await fetch("/schedule/items", {
       method: "POST",
       body: courseCode
     });
