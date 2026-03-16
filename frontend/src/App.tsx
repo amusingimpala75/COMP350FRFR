@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import SearchPage from './SearchPage';
 import SchedulePage from './SchedulePage';
 import './App.css';
@@ -9,17 +9,17 @@ function App() {
       {/* Top navigation bar */}
       <header className="top-bar">
         <nav>
-          <NavLink to="/searchPage" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Search</NavLink>
-          <NavLink to="/schedulePage" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Schedule</NavLink>
+          <NavLink to="/search" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Search</NavLink>
+          <NavLink to="/schedule" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Schedule</NavLink>
         </nav>
       </header>
 
       {/* Page content */}
       <main>
         <Routes>
-          <Route path="/searchPage" element={<SearchPage />} />
-          <Route path="/schedulePage" element={<SchedulePage />} />
-          <Route path="*" element={<SearchPage />} /> {/* Default to search */}
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="*" element={<Navigate to="/search" replace />} /> {/* Default to search */}
         </Routes>
       </main>
     </Router>
