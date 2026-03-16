@@ -86,6 +86,13 @@ export default function SearchPage() {
       );
     };
 
+    const fetchResults = async() => {
+      const res = await fetch("/search/results");
+      const items = await res.json();
+      setCourses(items);
+    };
+    fetchResults();
+
     fetchCourses();
   }, []);
 
