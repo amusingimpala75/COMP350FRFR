@@ -24,50 +24,63 @@ export default function SchedulePage() {
     const res = await fetch('/scheduleItems');
     const items: Course[] = await res.json();
     setCourses(items);
+
+    //adding events to fullcalendar
+    const calendarApi = calendarRef.current?.getApi()
+    if (!calendarApi) return
+    calendarApi.removeAllEvents()
+
     for(const course of items){
         for(const time of course.times){
-            //has a day, a start time, and an end time
-            console.log(time.day, time.start_time, time.end_time)
-            //addEvent((course.subject+course.number+course.section),)
+            const dayMap: Record<string, number> = {
+              M: 1,
+              T: 2,
+              W: 3,
+              R: 4,
+              F: 5
+            };
+            const day = dayMap[time.day];
+            //add each class day as an event; remove based on the course code. Can't add just one event for the class since it could have multiple days with different times.
+            addEvent(course.subject+course.number+course.section+time.day, course.name, [day], time.start_time, time.end_time);
         }
     }
-    //TODO: do something here to add all the events to the calendar
   };
 
   const removeCourse = async (courseId: string) => {
     await fetch('/addOrDelete', { method: 'POST', body: courseId });
-    //removeEvent(); //TODO: Change this and send in the course to remove
+    removeEvents(courseId);
     loadCourses();
   };
 
   useEffect(() => {
       loadCourses();
-      //addEvent();
       }, []);
 
 
   const calendarRef = useRef<FullCalendar>(null)
 
 
-//   const addEvent = (code:string, name:string, daysArray:number[], start:string, end:string) => {
-//     const calendarApi = calendarRef.current?.getApi()
-//
-//     calendarApi?.addEvent({
-//       id: code,  //courseId
-//       title: name,
-//       daysOfWeek: daysArray,        // Monday
-//       startTime: start,//"10:00",
-//       endTime: end
-//     })
-//   }
+  const addEvent = (code:string, name:string, daysArray:number[], start:string, end:string) => {
+    const calendarApi = calendarRef.current?.getApi()
+    calendarApi?.addEvent({
+      id: code,
+      title: name,
+      daysOfWeek: daysArray,
+      startTime: start,
+      endTime: end
+    })
+  }
 
-//   const removeEvent = () => {
-//     const calendarApi = calendarRef.current?.getApi()
-//
-//     const event = calendarApi?.getEventById("course1")
-//     event?.remove()
-//   }
-
+  const removeEvents = (courseCode: string) => {  //remove all events with the course code (ACCT101A)
+    const calendarApi = calendarRef.current?.getApi()
+    if (!calendarApi) return
+    const events = [...calendarApi.getEvents()];
+    for(const event of events){
+        if (event.id && event.id.includes(courseCode)) {
+              event.remove();
+        }
+    }
+  }
 
 
 
@@ -111,4 +124,3 @@ export default function SchedulePage() {
   );
 }
 
-//this is where the live schedule would be  //hitting remove course should refresh the calendar as well
