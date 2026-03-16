@@ -93,6 +93,14 @@ export default function SearchPage() {
     };
     fetchResults();
 
+    const fetchQuery = async() => {
+      const res = await fetch("/search/query");
+      const text = await res.text();
+      setQuery(text);
+    }
+
+    fetchQuery();
+
     fetchCourses();
   }, []);
 
