@@ -32,6 +32,10 @@ public class SearchController {
             ctx.json(search.getMatchResults());
         });
 
+        app.get("/search/query", ctx -> {
+            ctx.result(search.query());
+        });
+
         // [TODO] there should be a better way to do this
         app.get("/courses", ctx -> { // currently in use for filters
             // create a Search object with empty query to get all courses
