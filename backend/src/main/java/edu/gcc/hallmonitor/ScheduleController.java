@@ -34,7 +34,8 @@ public class ScheduleController {
             }else{
                List<Course> courses = schedule.getCourses();
                for(Course c : courses) {
-                   if (c.code() == course.code() && Objects.equals(c.name(), course.name()) && c.section() != course.section()) { //same class, different sections
+                   //if already scheduled for a different section of the class, end the loop and return the string explaining the error
+                   if (c.code() == course.code() && Objects.equals(c.name(), course.name()) && c.section() != course.section()) {
                        ret = "already scheduled for a different section of this class";
                        break;
                    }
@@ -45,7 +46,7 @@ public class ScheduleController {
                        int ctEndSec = ct.endTime().toSecondOfDay();
                        if(ctEndSec <= ctStartSec) continue;
                        for(CourseTime ct2 : c.times()){
-                           //only perform the check if the classes are on the same day
+                           //only perform the check if the classes are on the same day. If not, cancel checking this day and move to the next.
                            if(Objects.equals(ct.day(), ct2.day())) continue;
 
                            int ct2StartSec = ct2.startTime().toSecondOfDay();
