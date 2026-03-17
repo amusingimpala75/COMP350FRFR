@@ -15,6 +15,12 @@ interface Course {
   times: CourseTime[];
 }
 
+function timeToSeconds(hms: string): number {
+  const [h = '0', m = '0', s = '0'] = hms.split(':');
+  return Number(h) * 3600 + Number(m) * 60 + Number(s);
+}
+
+
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [department, setDepartment] = useState('ALL');
@@ -22,7 +28,7 @@ export default function SearchPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<Set<string>>(new Set());
+  const [schedule, setSchedule] = useState<Set<Course>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
 
   // --- SEARCH ---
@@ -43,8 +49,48 @@ export default function SearchPage() {
     const courseId = `${course.subject}${course.number}${course.section}`;
     const newSchedule = new Set(schedule);
 
-    if (newSchedule.has(courseId)) newSchedule.delete(courseId);
-    else newSchedule.add(courseId);
+
+    //check for the errors first, return if found
+    //first check if the course is a different section of the same class
+    //then check if the course's time overlaps
+    if (newSchedule.has(course)) {
+                newSchedule.delete(course); //should not still change to "remove"
+    }else{
+        let alerted = false;
+        console.log("checking overlap");
+        for(const c of schedule){
+            if(c.number === course.number && c.name === course.name && c.section != course.section){ //same class, different sections
+                alert("already scheduled for a different section of this class");
+                return;
+            }
+            //find if times overlaps
+
+            for(const time of course.times || []){
+                for(const cl of c.times || []){
+                    if(time.day != cl.day) continue; //only check if it's the same day
+                    const tStartSec = timeToSeconds(time.start_time);
+                    const tEndSec = timeToSeconds(time.end_time);
+                    const cStartSec = timeToSeconds(cl.start_time);
+                    const cEndSec = timeToSeconds(cl.end_time);
+                    //check for invalid time blocks
+                    if (Number.isNaN(tStartSec) || Number.isNaN(tEndSec) || tEndSec <= tStartSec
+                        || Number.isNaN(cStartSec) || Number.isNaN(cEndSec) || cEndSec <= cStartSec) continue;
+                    if(tStartSec < cEndSec && tEndSec > cStartSec){
+                        //if t starts or ends within the class blocks
+                        if(!alerted){
+                            alert(`Course ${course.subject}${course.number}${course.section} overlaps with ${c.subject}${c.number}${c.section}`);
+                            alerted = true;
+                        }
+                        return;
+                    }
+
+                }
+            }
+        }
+
+        //if no overlaps:
+        newSchedule.add(course);
+    }
 
     setSchedule(newSchedule);
 
@@ -95,8 +141,8 @@ export default function SearchPage() {
       try {
         const res = await fetch('/schedule/items');
         const items: Course[] = await res.json();
-        const ids = new Set(items.map(c => `${c.subject}${c.number}${c.section}`));
-        setSchedule(ids);
+        //const ids = new Set(items.map(c => `${c.subject}${c.number}${c.section}`));
+        setSchedule(new Set(items));
       } catch (err) {
         console.error('Failed to load schedule', err);
       }
@@ -160,7 +206,7 @@ export default function SearchPage() {
               })
               .map(course => {
                 const courseId = `${course.subject}${course.number}${course.section}`;
-                const inSchedule = schedule.has(courseId);
+                const inSchedule = schedule.has(course);
 
                 return (
                   <li key={courseId}>
