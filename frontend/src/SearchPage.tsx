@@ -13,6 +13,7 @@ interface Course {
   name: string;
   faculty: string[];
   times: CourseTime[];
+  credits: number;
 }
 
 export default function SearchPage() {
@@ -24,6 +25,11 @@ export default function SearchPage() {
   const [professors, setProfessors] = useState<string[]>([]);
   const [schedule, setSchedule] = useState<Set<string>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
+  const [credits, setCredits] = useState<string>('ALL');
+  const [timeStart, setTimeStart] = useState<string>('');
+  const [timeEnd, setTimeEnd] = useState<string>('');
+  const [availableCredits, setAvailableCredits] = useState<string[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
 
   // --- SEARCH ---
   const search = async () => {
@@ -61,11 +67,32 @@ export default function SearchPage() {
 
   const toggleDay = (day: string) => {
     const newDays = new Set(days);
-
     if (newDays.has(day)) newDays.delete(day);
     else newDays.add(day);
-
     setDays(newDays);
+
+    applyFilter('days', Array.from(newDays));
+  };
+
+  const uniqueCourses = Array.from(new Map(
+    courses.map(c => [`${c.subject}${c.number}${c.section}`, c])
+  ).values());
+
+  const applyFilter = async (type: string, value: any) => {
+    if (value === 'ALL' || (Array.isArray(value) && value.length === 0)) {
+      await fetch('/search/filter', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, value })
+      });
+      return;
+    }
+
+    await fetch('/search/filter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, value })
+    });
   };
 
   const updateDept = async (event: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
@@ -94,6 +121,29 @@ export default function SearchPage() {
     setDepartment(updated);
   };
 
+  const updateProfessor = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const old = professor;
+    const updated = event.target.value;
+
+    if (old !== 'ALL') {
+      await fetch('/search/filter', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'text/json' },
+        body: JSON.stringify({ type: "professor", value: old }),
+      });
+    }
+
+    if (updated !== 'ALL') {
+      await fetch('/search/filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/json' },
+        body: JSON.stringify({ type: "professor", value: updated }),
+      });
+    }
+
+    setProfessor(updated);
+  };
+
   // --- LOAD COURSES FOR FILTERS ---
   useEffect(() => {
     const fetchCourses = async () => {
@@ -114,6 +164,15 @@ export default function SearchPage() {
           )
         ).sort()
       );
+
+      setAvailableCredits(
+         Array.from(new Set(items.map(c => c.credits).filter(c => c != null))).map(String).sort()
+       );
+
+      const times = items
+        .flatMap(c => c.times?.map(t => t.start_time) || [])
+        .filter(t => t); // remove empty
+      setAvailableTimes(Array.from(new Set(times)).sort());
     };
 
     fetchCourses();
@@ -152,16 +211,19 @@ export default function SearchPage() {
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
         <h3>Filters</h3>
+
+        <h4> Department & Professor</h4>
+
         <select value={department} onChange={updateDept}>
           <option value="ALL">All Departments</option>
           {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
         </select>
-        <select value={professor} onChange={e => setProfessor(e.target.value)}>
+        <select value={professor} onChange={updateProfessor}>
           <option value="ALL">All Professors</option>
           {professors.map(prof => <option key={prof} value={prof}>{prof}</option>)}
         </select>
 
-        <h4>Days</h4>
+        <h4>Days and Time Range</h4>
 
         <div className="day-selector">
           {["M","T","W","R","F"].map(day => (
@@ -174,6 +236,29 @@ export default function SearchPage() {
             </button>
           ))}
         </div>
+
+        <div className="time-range">
+          <select value={timeStart} onChange={e => { setTimeStart(e.target.value); applyFilter('timeRange', {start: e.target.value, end: timeEnd}); }}>
+            <option value="">Start</option>
+              {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <span>to</span>
+          <select value={timeEnd} onChange={e => { setTimeEnd(e.target.value); applyFilter('timeRange', {start: timeStart, end: e.target.value}); }}>
+            <option value="">End</option>
+              {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+
+        <h4>Credits</h4>
+
+        <select value={credits} onChange={async e => {
+            const val = e.target.value;
+            setCredits(val);
+            await applyFilter('credits', val);
+        }}>
+          <option value="ALL">All</option>
+          {availableCredits.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
 
       </div>
 
@@ -193,7 +278,7 @@ export default function SearchPage() {
         <div className="card results-card">
           <h3>Results</h3>
           <ul>
-            {courses
+            {uniqueCourses
               .filter(course => {
                 if (days.size === 0) return true;
 
