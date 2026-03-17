@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Toaster, toast } from "react-hot-toast";
 
 interface CourseTime {
   day: string;
@@ -51,44 +52,46 @@ export default function SearchPage() {
 
 
     //check for the errors first, return if found
-    //first check if the course is a different section of the same class
     //then check if the course's time overlaps
     if (newSchedule.has(course)) {
-                newSchedule.delete(course); //should not still change to "remove"
+        //remove from schedule if already schedule courses
+        newSchedule.delete(course);
     }else{
         let alerted = false;
-        console.log("checking overlap");
+        //check each course in schedule to see if the times overlap
         for(const c of schedule){
             if(c.number === course.number && c.name === course.name && c.section != course.section){ //same class, different sections
-                alert("already scheduled for a different section of this class");
+                toast("already scheduled for a different section of this class");
                 return;
             }
-            //find if times overlaps
 
+            //check each class time in schedule to see if the times overlap
             for(const time of course.times || []){
-                for(const cl of c.times || []){
-                    if(time.day != cl.day) continue; //only check if it's the same day
-                    const tStartSec = timeToSeconds(time.start_time);
-                    const tEndSec = timeToSeconds(time.end_time);
+                 const tStartSec = timeToSeconds(time.start_time);
+                 const tEndSec = timeToSeconds(time.end_time);
+                 if(Number.isNaN(tStartSec) || Number.isNaN(tEndSec) || tEndSec <= tStartSec) continue;
+                 for(const cl of c.times || []){
+                    //only check if it's the same day
+                    if(time.day != cl.day) continue;
+
                     const cStartSec = timeToSeconds(cl.start_time);
                     const cEndSec = timeToSeconds(cl.end_time);
-                    //check for invalid time blocks
-                    if (Number.isNaN(tStartSec) || Number.isNaN(tEndSec) || tEndSec <= tStartSec
-                        || Number.isNaN(cStartSec) || Number.isNaN(cEndSec) || cEndSec <= cStartSec) continue;
+                    if (Number.isNaN(cStartSec) || Number.isNaN(cEndSec) || cEndSec <= cStartSec) continue;
+
                     if(tStartSec < cEndSec && tEndSec > cStartSec){
-                        //if t starts or ends within the class blocks
+                        //if there is an overlap in the time blocks
                         if(!alerted){
-                            alert(`Course ${course.subject}${course.number}${course.section} overlaps with ${c.subject}${c.number}${c.section}`);
+                            toast(`Course ${course.subject}${course.number}${course.section} overlaps with ${c.subject}${c.number}${c.section}`);
                             alerted = true;
                         }
                         return;
                     }
 
-                }
+                 }
             }
         }
 
-        //if no overlaps:
+        //if no overlaps
         newSchedule.add(course);
     }
 
@@ -153,6 +156,7 @@ export default function SearchPage() {
 
   return (
     <div className="layout">
+    <div><Toaster/></div>
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
         <h3>Filters</h3>
