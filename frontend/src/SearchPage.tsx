@@ -17,12 +17,6 @@ interface Course {
   semester:string;
 }
 
-function timeToSeconds(hms: string): number {
-  const [h = '0', m = '0', s = '0'] = hms.split(':');
-  return Number(h) * 3600 + Number(m) * 60 + Number(s);
-}
-
-
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [department, setDepartment] = useState('ALL');
@@ -55,58 +49,26 @@ export default function SearchPage() {
     const courseId = `${course.subject}${course.number}${course.section}`;
     const newSchedule = new Set(schedule);
 
-    //check for the errors first, return if found
-    //then check if the course's time overlaps
-    if (newSchedule.has(course)) {
-        //remove from schedule if already schedule courses
-        newSchedule.delete(course);
-    }else{
-        let alerted = false;
-        //check each course in schedule to see if the times overlap
-        for(const c of schedule){
-            if(c.number === course.number && c.name === course.name && c.section != course.section){ //same class, different sections
-                toast("already scheduled for a different section of this class");
-                return;
-            }
-
-            //check each class time in schedule to see if the times overlap
-            for(const time of course.times || []){
-                 const tStartSec = timeToSeconds(time.start_time);
-                 const tEndSec = timeToSeconds(time.end_time);
-                 if(Number.isNaN(tStartSec) || Number.isNaN(tEndSec) || tEndSec <= tStartSec) continue;
-                 for(const cl of c.times || []){
-                    //only check if it's the same day
-                    if(time.day != cl.day) continue;
-
-                    const cStartSec = timeToSeconds(cl.start_time);
-                    const cEndSec = timeToSeconds(cl.end_time);
-                    if (Number.isNaN(cStartSec) || Number.isNaN(cEndSec) || cEndSec <= cStartSec) continue;
-
-                    if(tStartSec < cEndSec && tEndSec > cStartSec){
-                        //if there is an overlap in the time blocks
-                        if(!alerted){
-                            toast(`Course ${course.subject}${course.number}${course.section} overlaps with ${c.subject}${c.number}${c.section}`);
-                            alerted = true;
-                        }
-                        return;
-                    }
-
-                 }
-            }
-        }
-
-        //if no overlaps
-        newSchedule.add(course);
-    }
-
-    setSchedule(newSchedule);
-
-    await fetch('/schedule/items', {
+    const result = await fetch('/schedule/items', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: courseId,
     });
+    const text = await result.text();
+
+
+    if(text == "Added"){
+        newSchedule.add(course);
+    }else if(text == "Removed"){
+        newSchedule.delete(course);
+    }else{
+        toast(text)
+    }
+
+
+    setSchedule(newSchedule);
   };
+
 
   const toggleDay = (day: string) => {
     const newDays = new Set(days);

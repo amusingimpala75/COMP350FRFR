@@ -2,6 +2,8 @@ package edu.gcc.hallmonitor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 
 import io.javalin.Javalin;
 
@@ -24,13 +26,58 @@ public class ScheduleController {
             String courseID = ctx.body();
 
             Course course = Search.getCourseByCode(courseID);
+            String ret = "";
+
             if (schedule.inSchedule(course)) {
                 schedule.removeCourse(course);
-            } else {
-                schedule.addCourse(Search.getCourseByCode(courseID));
+                ret = "Removed";
+            }else{
+               List<Course> courses = schedule.getCourses();
+               for(Course c : courses) {
+                   if (c.code() == course.code() && Objects.equals(c.name(), course.name()) && c.section() != course.section()) { //same class, different sections
+                       ret = "already scheduled for a different section of this class";
+                       break;
+                   }
+
+                   //check each class time in schedule to see if the times overlap
+                   for(CourseTime ct : course.times()){
+                       int ctStartSec = ct.startTime().toSecondOfDay();
+                       int ctEndSec = ct.endTime().toSecondOfDay();
+                       if(ctEndSec <= ctStartSec) continue;
+                       for(CourseTime ct2 : c.times()){
+                           //only perform the check if the classes are on the same day
+                           if(Objects.equals(ct.day(), ct2.day())) continue;
+
+                           int ct2StartSec = ct2.startTime().toSecondOfDay();
+                           int ct2EndSec = ct2.endTime().toSecondOfDay();
+                           if(ct2EndSec <= ct2StartSec) continue;
+
+                           if(ctStartSec < ct2EndSec && ctEndSec > ct2StartSec){
+                               //if there is an overlap in the time blocks
+
+                               ret = "Course " + course.department() + course.code() + course.section() + " overlaps with " + c.department() + c.code() + c.section();
+                               break;
+                           }
+
+                       }
+
+
+                   }
+
+               }
+
+               //if there is no conflict with the schedule courses
+                if(ret.equals("")){
+                    schedule.addCourse(Search.getCourseByCode(courseID));
+                    ret = "Added";
+                }
             }
 
+
             schedule.saveSchedule();
+
+            ctx.result(ret);
+
         });
 
         app.get("/schedule/items", ctx -> {
