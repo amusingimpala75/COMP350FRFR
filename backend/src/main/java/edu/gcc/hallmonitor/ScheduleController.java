@@ -54,8 +54,7 @@ public class ScheduleController {
                            if(ct2EndSec <= ct2StartSec) continue;
 
                            if(ctStartSec < ct2EndSec && ctEndSec > ct2StartSec){
-                               //if there is an overlap in the time blocks
-
+                               //if there is an overlap in the time blocks, stop checking other days and return the error message.
                                ret = "Course " + course.department() + course.code() + course.section() + " overlaps with " + c.department() + c.code() + c.section();
                                break;
                            }
