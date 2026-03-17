@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Toaster, toast } from "react-hot-toast";
+import { useEffect, useState } from 'react';
 
 interface CourseTime {
   day: string;
@@ -44,6 +44,10 @@ export default function SearchPage() {
     const items: Course[] = await res.json();
     setCourses(items);
   };
+
+  useEffect(() => {
+    search();
+  }, [department]);
 
   // --- TOGGLE COURSE ---
   const toggleCourse = async (course: Course) => {
@@ -113,6 +117,32 @@ export default function SearchPage() {
     setDays(newDays);
   };
 
+  const updateDept = async (event: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
+    const old = department;
+    const updated = event.target.value;
+    if (old !== 'ALL') {
+      await fetch('/search/filter', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'text/json' },
+        body: JSON.stringify({
+          type: "department",
+          value: old,
+        }),
+      });
+    }
+    if (updated !== 'ALL') {
+      await fetch('/search/filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/json' },
+        body: JSON.stringify({
+          type: "department",
+          value: updated,
+        }),
+      });
+    }
+    setDepartment(updated);
+  };
+
   // --- LOAD COURSES FOR FILTERS ---
   useEffect(() => {
     const fetchCourses = async () => {
@@ -136,6 +166,17 @@ export default function SearchPage() {
     };
 
     fetchCourses();
+
+    const setFilters = async () => {
+      const resp = await fetch('/search/filter');
+      for (const filter of await resp.json()) {
+        switch (filter.type) {
+          case "department": setDepartment(filter.value);
+        }
+      }
+    };
+
+    setFilters();
   }, []);
 
   // --- LOAD CURRENT SCHEDULE ---
@@ -151,6 +192,7 @@ export default function SearchPage() {
       }
     };
 
+    search();
     fetchSchedule();
   }, []);
 
@@ -160,7 +202,7 @@ export default function SearchPage() {
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
         <h3>Filters</h3>
-        <select value={department} onChange={e => setDepartment(e.target.value)}>
+        <select value={department} onChange={updateDept}>
           <option value="ALL">All Departments</option>
           {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
         </select>
