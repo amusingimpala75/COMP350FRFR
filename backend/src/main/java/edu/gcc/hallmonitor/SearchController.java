@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.javalin.Javalin;
 
 public class SearchController {
-    private static Search search = null;
+    private static Search search = new Search();
 
     public static void registerRoutes(Javalin app) {
         app.get("/search", ctx -> ctx.html(
