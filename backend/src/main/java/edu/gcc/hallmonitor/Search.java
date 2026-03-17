@@ -96,7 +96,7 @@ public class Search {
     }
 
     public ArrayList<Filter> getFilters() {
-        return null;
+        return filterList;
     }
 
 
