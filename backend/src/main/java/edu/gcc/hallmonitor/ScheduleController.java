@@ -47,7 +47,7 @@ public class ScheduleController {
                        if(ctEndSec <= ctStartSec) continue;
                        for(CourseTime ct2 : c.times()){
                            //only perform the check if the classes are on the same day. If not, cancel checking this day and move to the next.
-                           if(Objects.equals(ct.day(), ct2.day())) continue;
+                           if(ct.day() != ct2.day()) continue;
 
                            int ct2StartSec = ct2.startTime().toSecondOfDay();
                            int ct2EndSec = ct2.endTime().toSecondOfDay();
@@ -58,7 +58,6 @@ public class ScheduleController {
                                ret = "Course " + course.department() + course.code() + course.section() + " overlaps with " + c.department() + c.code() + c.section();
                                break;
                            }
-
                        }
 
 
