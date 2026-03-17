@@ -88,7 +88,11 @@ public class Search {
     }
 
     public Search(String searchQuery, ArrayList<Filter> filterList) {
+        this(searchQuery);
 
+        for (Filter filter : filterList) {
+            applyFilter(filter);
+        }
     }
 
     public ArrayList<Filter> getFilters() {
