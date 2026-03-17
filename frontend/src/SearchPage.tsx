@@ -40,7 +40,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     search();
-  }, [department]);
+  }, [department, professor]);
 
   // --- TOGGLE COURSE ---
   const toggleCourse = async (course: Course) => {
@@ -94,6 +94,32 @@ export default function SearchPage() {
     setDepartment(updated);
   };
 
+  const updateProf = async (event: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
+    const old = professor;
+    const updated = event.target.value;
+    if (old !== 'ALL') {
+      await fetch('/search/filter', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'text/json' },
+        body: JSON.stringify({
+          type: "professor",
+          value: old,
+        }),
+      });
+    }
+    if (updated !== 'ALL') {
+      await fetch('/search/filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/json' },
+        body: JSON.stringify({
+          type: "professor",
+          value: updated,
+        }),
+      });
+    }
+    setProfessor(updated);
+  };
+
   // --- LOAD COURSES FOR FILTERS ---
   useEffect(() => {
     const fetchCourses = async () => {
@@ -122,7 +148,12 @@ export default function SearchPage() {
       const resp = await fetch('/search/filter');
       for (const filter of await resp.json()) {
         switch (filter.type) {
-          case "department": setDepartment(filter.value);
+          case "department":
+            setDepartment(filter.value);
+            break;
+          case "professor":
+            setProfessor(filter.value);
+            break;
         }
       }
     };
@@ -156,7 +187,7 @@ export default function SearchPage() {
           <option value="ALL">All Departments</option>
           {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
         </select>
-        <select value={professor} onChange={e => setProfessor(e.target.value)}>
+        <select value={professor} onChange={updateProf}>
           <option value="ALL">All Professors</option>
           {professors.map(prof => <option key={prof} value={prof}>{prof}</option>)}
         </select>
