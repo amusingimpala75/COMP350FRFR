@@ -14,6 +14,7 @@ interface Course {
   name: string;
   faculty: string[];
   times: CourseTime[];
+  semester:string;
 }
 
 function timeToSeconds(hms: string): number {
@@ -53,7 +54,6 @@ export default function SearchPage() {
   const toggleCourse = async (course: Course) => {
     const courseId = `${course.subject}${course.number}${course.section}`;
     const newSchedule = new Set(schedule);
-
 
     //check for the errors first, return if found
     //then check if the course's time overlaps
