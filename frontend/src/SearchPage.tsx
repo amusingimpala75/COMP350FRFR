@@ -210,7 +210,10 @@ export default function SearchPage() {
               })
               .map(course => {
                 const courseId = `${course.subject}${course.number}${course.section}`;
-                const inSchedule = schedule.has(course);
+                let inSchedule = false;
+                for(const c of schedule){
+                    if(c.subject == course.subject && c.section == course.section && c.number == course.number){inSchedule=true;}
+                }
 
                 return (
                   <li key={courseId}>
