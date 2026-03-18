@@ -30,8 +30,8 @@ export default function SearchPage() {
   const [schedule, setSchedule] = useState<Set<Course>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<string>('ALL');
-  const [timeStart, setTimeStart] = useState<string>('');
-  const [timeEnd, setTimeEnd] = useState<string>('');
+  const [timeStart, setTimeStart] = useState<string>('00:01');
+  const [timeEnd, setTimeEnd] = useState<string>('23:59');
   const [availableCredits, setAvailableCredits] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
@@ -210,17 +210,25 @@ export default function SearchPage() {
         switch (filter.type) {
           // TODO: add times later hehe haha
           case "department":
-              setDepartment(filter.value);
-              break;
+            setDepartment(filter.value);
+            break;
           case "professor":
-              setProfessor(filter.value);
-              break;
+            setProfessor(filter.value);
+            break;
           case "credits":
-              setCredits(filter.value);
-              break;
+            setCredits(filter.value);
+            break;
           case "days":
-              setDays(new Set(filter.value));
-              break;
+            setDays(new Set(filter.value));
+            break;
+          case "timeRange":
+            if (filter.value.start != "00:01") {
+              setTimeStart(filter.value.start);
+            }
+            if (filter.value.end != "23:59") {
+              setTimeEnd(filter.value.end);
+            }
+            break;
         }
       }
     };
@@ -278,12 +286,12 @@ export default function SearchPage() {
 
         <div className="time-range">
           <select value={timeStart} onChange={e => updateTimeStart(e.target.value)}>
-            <option value="">Start</option>
+            <option value="00:01">Start</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <span>to</span>
           <select value={timeEnd} onChange={e => updateTimeEnd(e.target.value)}>
-            <option value="">End</option>
+            <option value="23:59">End</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
