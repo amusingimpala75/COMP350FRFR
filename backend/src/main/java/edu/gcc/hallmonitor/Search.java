@@ -116,6 +116,12 @@ public class Search {
         this(searchQuery, new ArrayList<Filter>());
     }
 
+    public Search() {
+        searchQuery = "";
+        searchResults = new ArrayList<>();
+        matchResults = new ArrayList<>();
+    }
+
     public List<Filter> getFilters() {
         return this.filterList;
     }

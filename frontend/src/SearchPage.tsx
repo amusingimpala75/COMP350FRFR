@@ -169,6 +169,21 @@ export default function SearchPage() {
       setAvailableTimes(Array.from(new Set(times)).sort());
     };
 
+    const fetchResults = async() => {
+      const res = await fetch("/search/results");
+      const items = await res.json();
+      setCourses(items);
+    };
+    fetchResults();
+
+    const fetchQuery = async() => {
+      const res = await fetch("/search/query");
+      const text = await res.text();
+      setQuery(text);
+    }
+
+    fetchQuery();
+
     fetchCourses();
 
     const setFilters = async () => {
@@ -208,7 +223,6 @@ export default function SearchPage() {
       }
     };
 
-    search();
     fetchSchedule();
   }, []);
 
