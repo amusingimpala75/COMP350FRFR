@@ -22,10 +22,8 @@ public class SearchController {
 
 
         app.post("/search", ctx -> {
-            if (search == null || !ctx.body().equals(search.query())) {
-                String query = ctx.body();
-                search = new Search(query);
-            }
+            String query = ctx.body();
+            search = new Search(query);
             ctx.json(search.getMatchResults());
         });
 
