@@ -23,7 +23,9 @@ public class SearchController {
 
         app.post("/search", ctx -> {
             String query = ctx.body();
+            Search old = search;
             search = new Search(query);
+            old.getFilters().forEach(search::applyFilter);
             ctx.json(search.getMatchResults());
         });
 
