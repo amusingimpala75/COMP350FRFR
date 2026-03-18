@@ -175,7 +175,19 @@ export default function SearchPage() {
       const resp = await fetch('/search/filter');
       for (const filter of await resp.json()) {
         switch (filter.type) {
-          case "department": setDepartment(filter.value);
+          // TODO: add times later hehe haha
+          case "department":
+              setDepartment(filter.value);
+              break;
+          case "professor":
+              setProfessor(filter.value);
+              break;
+          case "credits":
+              setCredits(filter.value);
+              break;
+          case "days":
+              setDays(new Set(filter.value));
+              break;
         }
       }
     };
@@ -247,7 +259,11 @@ export default function SearchPage() {
 
         <select value={credits} onChange={e => updateCredits(e.target.value)}>
           <option value="ALL">All</option>
-          {availableCredits.map(c => <option key={c} value={c}>{c}</option>)}
+          {availableCredits
+            .slice()                       // copy the array so we don’t mutate the original
+            .sort((a, b) => Number(a) - Number(b))  // numeric sort
+            .map(c => <option key={c} value={c}>{c}</option>)
+          }
         </select>
 
       </div>
