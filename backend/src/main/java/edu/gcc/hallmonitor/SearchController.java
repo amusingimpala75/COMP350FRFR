@@ -4,12 +4,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import io.javalin.Javalin;
 
 public class SearchController {
-    private static Search search = new Search("");
+    private static Search search = new Search();
 
     public static void registerRoutes(Javalin app) {
         app.get("/search", ctx -> ctx.html(
@@ -24,15 +22,23 @@ public class SearchController {
 
 
         app.post("/search", ctx -> {
-            if (!ctx.body().equals(search.query())) {
-                String query = ctx.body();
-                search = new Search(query);
-            }
+            String query = ctx.body();
+            Search old = search;
+            search = new Search(query);
+            old.getFilters().forEach(search::applyFilter);
             ctx.json(search.getMatchResults());
         });
 
+        app.get("/search/results", ctx -> {
+            ctx.json(search.getMatchResults());
+        });
+
+        app.get("/search/query", ctx -> {
+            ctx.result(search.query());
+        });
+
         // [TODO] there should be a better way to do this
-        app.get("/courses", ctx -> {
+        app.get("/courses", ctx -> { // currently in use for filters
             // create a Search object with empty query to get all courses
             // pls keep this so my frontend works -Luca
             Search allCoursesSearch = new Search("");
