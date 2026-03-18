@@ -255,3 +255,28 @@ body {
 .fc-day-today {
   background-color: transparent !important;
 }
+
+.results-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.course-row {
+  display: flex;
+  flex-direction: row;   /* ensures left → right layout */
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.card .course-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+}
+
+.course-text {
+  display: inline-block;
+}
