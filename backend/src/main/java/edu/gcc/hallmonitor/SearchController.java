@@ -32,11 +32,7 @@ public class SearchController {
         });
 
         app.get("/search/query", ctx -> {
-            if (search == null) {
-                ctx.result("");
-            } else {
-                ctx.result(search.query());
-            }
+            ctx.result(search.query());
         });
 
         // [TODO] there should be a better way to do this
