@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface CourseTime {
   day: string;
@@ -30,6 +30,7 @@ export default function SearchPage() {
   const [timeEnd, setTimeEnd] = useState<string>('');
   const [availableCredits, setAvailableCredits] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const didMount = useRef(false);
 
   // --- SEARCH ---
   const search = async () => {
@@ -45,6 +46,10 @@ export default function SearchPage() {
   };
 
   useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
     search();
   }, [department, professor, days, credits, timeStart, timeEnd]);
 
