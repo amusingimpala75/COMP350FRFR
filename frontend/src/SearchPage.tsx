@@ -46,7 +46,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     search();
-  }, [query, department, professor, days, credits, timeStart, timeEnd]);
+  }, [department, professor, days, credits, timeStart, timeEnd]);
 
   // --- TOGGLE COURSE ---
   const toggleCourse = async (course: Course) => {
