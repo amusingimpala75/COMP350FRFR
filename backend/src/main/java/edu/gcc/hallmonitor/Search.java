@@ -37,6 +37,11 @@ public class Search {
         } catch (IOException ioe) {
             System.err.println("IO Exception occurred: " + ioe.getMessage());
         }
+        // We only want the fall classes
+        // This is a KLUDGE to make this work
+        // for the MVP only!! Please change
+        // when we have more time.
+        allCourses.removeIf(c -> !c.semester().equals("2023_Fall"));
 
         courseMap = new HashMap<>();
         //make hashMap with course subject+number+section pointing to the course
