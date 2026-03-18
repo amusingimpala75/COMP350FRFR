@@ -38,10 +38,6 @@ export default function SearchPage() {
     setCourses(items);
   };
 
-  useEffect(() => {
-    search();
-  }, [department]);
-
   // --- TOGGLE COURSE ---
   const toggleCourse = async (course: Course) => {
     const courseId = `${course.subject}${course.number}${course.section}`;
@@ -158,7 +154,6 @@ export default function SearchPage() {
       }
     };
 
-    search();
     fetchSchedule();
   }, []);
 
