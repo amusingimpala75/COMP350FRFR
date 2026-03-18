@@ -47,7 +47,7 @@ public class ScheduleController {
                        if(ctEndSec <= ctStartSec) continue;
                        for(CourseTime ct2 : c.times()){
                            //only perform the check if the classes are on the same day. If not, cancel checking this day and move to the next.
-                           if(ct.day() != ct2.day()) continue;
+                           if(!ct.day().equals(ct2.day())) continue;
 
                            int ct2StartSec = ct2.startTime().toSecondOfDay();
                            int ct2EndSec = ct2.endTime().toSecondOfDay();
@@ -66,7 +66,7 @@ public class ScheduleController {
                }
 
                //if there is no conflict with the schedule courses
-                if(ret.equals("")){
+                if(ret.isEmpty()){
                     schedule.addCourse(Search.getCourseByCode(courseID));
                     ret = "Added";
                 }
