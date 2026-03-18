@@ -46,7 +46,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     search();
-  }, [department]);
+  }, [query, department, professor, days, credits, timeStart, timeEnd]);
 
   // --- TOGGLE COURSE ---
   const toggleCourse = async (course: Course) => {
@@ -65,84 +65,78 @@ export default function SearchPage() {
     });
   };
 
-  const toggleDay = (day: string) => {
+  const toggleDay = async (day: string) => {
     const newDays = new Set(days);
     if (newDays.has(day)) newDays.delete(day);
     else newDays.add(day);
+    const newArray = Array.from(newDays);
+    await updateFilter('days', Array.from(days), newArray);
     setDays(newDays);
-
-    applyFilter('days', Array.from(newDays));
   };
 
-  const uniqueCourses = Array.from(new Map(
-    courses.map(c => [`${c.subject}${c.number}${c.section}`, c])
-  ).values());
-
-  const applyFilter = async (type: string, value: any) => {
-    if (value === 'ALL' || (Array.isArray(value) && value.length === 0)) {
+  const updateFilter = async (type: string, oldValue: any, newValue: any) => {
+    // remove old filter
+    if (
+      oldValue !== 'ALL' &&
+      !(Array.isArray(oldValue) && oldValue.length === 0)
+    ) {
       await fetch('/search/filter', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, value })
-      });
-      return;
-    }
-
-    await fetch('/search/filter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, value })
-    });
-  };
-
-  const updateDept = async (event: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
-    const old = department;
-    const updated = event.target.value;
-    if (old !== 'ALL') {
-      await fetch('/search/filter', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'text/json' },
-        body: JSON.stringify({
-          type: "department",
-          value: old,
-        }),
+        body: JSON.stringify({ type, value: oldValue }),
       });
     }
-    if (updated !== 'ALL') {
+
+    // add new filter
+    if (
+      newValue !== 'ALL' &&
+      !(Array.isArray(newValue) && newValue.length === 0)
+    ) {
       await fetch('/search/filter', {
         method: 'POST',
-        headers: { 'Content-Type': 'text/json' },
-        body: JSON.stringify({
-          type: "department",
-          value: updated,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, value: newValue }),
       });
     }
+  };
+
+  const updateDept = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const updated = event.target.value;
+    await updateFilter('department', department, updated);
     setDepartment(updated);
   };
 
   const updateProfessor = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const old = professor;
     const updated = event.target.value;
-
-    if (old !== 'ALL') {
-      await fetch('/search/filter', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'text/json' },
-        body: JSON.stringify({ type: "professor", value: old }),
-      });
-    }
-
-    if (updated !== 'ALL') {
-      await fetch('/search/filter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/json' },
-        body: JSON.stringify({ type: "professor", value: updated }),
-      });
-    }
-
+    await updateFilter('professor', professor, updated);
     setProfessor(updated);
   };
+
+  const updateCredits = async (value: string) => {
+    await updateFilter('credits', credits, value);
+    setCredits(value);
+  };
+
+  const updateTimeStart = async (start: string) => {
+    const newValue = { start, end: timeEnd };
+    const oldValue = { start: timeStart, end: timeEnd };
+
+    await updateFilter('timeRange', oldValue, newValue);
+    setTimeStart(start);
+  };
+
+  const updateTimeEnd = async (end: string) => {
+    const newValue = { start: timeStart, end };
+    const oldValue = { start: timeStart, end: timeEnd };
+
+    await updateFilter('timeRange', oldValue, newValue);
+    setTimeEnd(end);
+  };
+
+
+
+
+
 
   // --- LOAD COURSES FOR FILTERS ---
   useEffect(() => {
@@ -238,12 +232,12 @@ export default function SearchPage() {
         </div>
 
         <div className="time-range">
-          <select value={timeStart} onChange={e => { setTimeStart(e.target.value); applyFilter('timeRange', {start: e.target.value, end: timeEnd}); }}>
+          <select value={timeStart} onChange={e => updateTimeStart(e.target.value)}>
             <option value="">Start</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <span>to</span>
-          <select value={timeEnd} onChange={e => { setTimeEnd(e.target.value); applyFilter('timeRange', {start: timeStart, end: e.target.value}); }}>
+          <select value={timeEnd} onChange={e => updateTimeEnd(e.target.value)}>
             <option value="">End</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
@@ -251,11 +245,7 @@ export default function SearchPage() {
 
         <h4>Credits</h4>
 
-        <select value={credits} onChange={async e => {
-            const val = e.target.value;
-            setCredits(val);
-            await applyFilter('credits', val);
-        }}>
+        <select value={credits} onChange={e => updateCredits(e.target.value)}>
           <option value="ALL">All</option>
           {availableCredits.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
@@ -278,14 +268,7 @@ export default function SearchPage() {
         <div className="card results-card">
           <h3>Results</h3>
           <ul>
-            {uniqueCourses
-              .filter(course => {
-                if (days.size === 0) return true;
-
-                const courseDays = course.times?.map(t => t.day) ?? [];
-                return courseDays.some(d => days.has(d));
-              })
-              .map(course => {
+            {courses.map(course => {
                 const courseId = `${course.subject}${course.number}${course.section}`;
                 const inSchedule = schedule.has(courseId);
 
