@@ -17,7 +17,13 @@ public record Time(LocalTime start, LocalTime end) implements Filter {
         return !course.times().isEmpty() &&
                course.times()
                        .stream()
-                       .allMatch(ct -> start.isBefore(ct.startTime()) && end.isAfter(ct.endTime()));
+                       .allMatch(ct -> {
+                           if (ct.startTime().isBefore(start)
+                               || ct.endTime().isAfter(end)) {
+                               return false;
+                           }
+                           return true;
+                       });
     }
 
     @Override
