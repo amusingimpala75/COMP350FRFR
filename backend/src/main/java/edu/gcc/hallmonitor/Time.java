@@ -14,10 +14,10 @@ public record Time(LocalTime start, LocalTime end) implements Filter {
 
     @Override
     public boolean filter(Course course) {
-        return course.times().size() > 0 &&
+        return !course.times().isEmpty() &&
                course.times()
-                .stream()
-                .allMatch(ct -> start.compareTo(ct.startTime()) <= 0 && ct.endTime().compareTo(end) <= 0);
+                       .stream()
+                       .allMatch(ct -> start.isBefore(ct.startTime()) && end.isAfter(ct.endTime()));
     }
 
     @Override
