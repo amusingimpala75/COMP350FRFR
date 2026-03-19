@@ -122,7 +122,7 @@ export default function SchedulePage() {
             );
           })}
         </ul>
-        <button onClick={handleDownload} style={{ margin: '10px 0', width: 'auto'}}>Download PDF</button>
+        <button onClick={handleDownload} style={{ margin: '10px', width: 'auto'}}>Download PDF</button>
 
               <div className="Schedule">
               <FullCalendar
