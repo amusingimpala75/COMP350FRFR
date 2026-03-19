@@ -1,4 +1,7 @@
+
+import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
+
 
 interface CourseTime {
   day: string;
@@ -13,6 +16,7 @@ interface Course {
   name: string;
   faculty: string[];
   times: CourseTime[];
+  semester:string;
   credits: number;
 }
 
@@ -23,7 +27,7 @@ export default function SearchPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<Set<string>>(new Set());
+  const [schedule, setSchedule] = useState<Set<Course>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<string>('ALL');
   const [timeStart, setTimeStart] = useState<string>('');
@@ -58,17 +62,26 @@ export default function SearchPage() {
     const courseId = `${course.subject}${course.number}${course.section}`;
     const newSchedule = new Set(schedule);
 
-    if (newSchedule.has(courseId)) newSchedule.delete(courseId);
-    else newSchedule.add(courseId);
-
-    setSchedule(newSchedule);
-
-    await fetch('/schedule/items', {
+    const result = await fetch('/schedule/items', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: courseId,
     });
+    const text = await result.text();
+
+
+    if(text == "Added"){
+        newSchedule.add(course);
+    }else if(text == "Removed"){
+        newSchedule.delete(course);
+    }else{
+        toast(text)
+    }
+
+
+    setSchedule(newSchedule);
   };
+
 
   const toggleDay = async (day: string) => {
     const newDays = new Set(days);
@@ -221,8 +234,8 @@ export default function SearchPage() {
       try {
         const res = await fetch('/schedule/items');
         const items: Course[] = await res.json();
-        const ids = new Set(items.map(c => `${c.subject}${c.number}${c.section}`));
-        setSchedule(ids);
+        //const ids = new Set(items.map(c => `${c.subject}${c.number}${c.section}`));
+        setSchedule(new Set(items));
       } catch (err) {
         console.error('Failed to load schedule', err);
       }
@@ -233,6 +246,7 @@ export default function SearchPage() {
 
   return (
     <div className="layout">
+    <div><Toaster/></div>
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
         <h3>Filters</h3>
@@ -305,7 +319,10 @@ export default function SearchPage() {
           <ul>
             {courses.map(course => {
                 const courseId = `${course.subject}${course.number}${course.section}`;
-                const inSchedule = schedule.has(courseId);
+                let inSchedule = false;
+                for(const c of schedule){
+                    if(c.subject == course.subject && c.section == course.section && c.number == course.number){inSchedule=true;}
+                }
 
               return (
                 <li key={courseId} className="course-row">
