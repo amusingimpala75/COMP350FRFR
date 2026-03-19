@@ -92,12 +92,15 @@ export default function SearchPage() {
     setDays(newDays);
   };
 
+  const isDefaultValue = (value: any) => {
+    return value === 'ALL'
+      || (Array.isArray(value) && value.length === 0)
+      || (value.start === '00:01' && value.end === '23:59');
+  };
+
   const updateFilter = async (type: string, oldValue: any, newValue: any) => {
     // remove old filter
-    if (
-      oldValue !== 'ALL' &&
-      !(Array.isArray(oldValue) && oldValue.length === 0)
-    ) {
+    if (!isDefaultValue(oldValue)) {
       await fetch('/search/filter', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -106,10 +109,7 @@ export default function SearchPage() {
     }
 
     // add new filter
-    if (
-      newValue !== 'ALL' &&
-      !(Array.isArray(newValue) && newValue.length === 0)
-    ) {
+    if (!isDefaultValue(newValue)) {
       await fetch('/search/filter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -208,7 +208,6 @@ export default function SearchPage() {
       const resp = await fetch('/search/filter');
       for (const filter of await resp.json()) {
         switch (filter.type) {
-          // TODO: add times later hehe haha
           case "department":
             setDepartment(filter.value);
             break;
@@ -222,11 +221,12 @@ export default function SearchPage() {
             setDays(new Set(filter.value));
             break;
           case "timeRange":
-            if (filter.value.start != "00:01") {
-              setTimeStart(filter.value.start);
+            // [TODO] this isn't working for some reason
+            if (filter.value.start !== "00:01") {
+              setTimeStart(filter.value.start + ':00');
             }
-            if (filter.value.end != "23:59") {
-              setTimeEnd(filter.value.end);
+            if (filter.value.end !== "23:59") {
+              setTimeEnd(filter.value.end + ':00');
             }
             break;
         }
