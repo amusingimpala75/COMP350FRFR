@@ -22,3 +22,19 @@ To install the latest stable version of TypeScript, run ```npm install -D typesc
 ### Vite
 
 To install the latest stable version of Vite, run ```npm install -D vite```.
+
+## Backend Dependencies
+
+### Java
+
+A java JDK installation of version at least 21 is required to build and run this project.
+You can install one with ```winget install EclipseAdoptium.Temurin.21.JDK```.
+
+## Running
+
+Currently, we do not have a prebuilt executable. You can run the project by executing the `run` gradle task.
+There are two ways to do this:
+1. Change directories to the backend folder and run `./gradlew run`
+2. Open the project in IntelliJ and execute the `application/run` gradle task from
+   the right hand menu.
+3. Navigate to `http://localhost:7070`.
