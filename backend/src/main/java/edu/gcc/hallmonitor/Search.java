@@ -85,19 +85,20 @@ public class Search {
 
         searchResults = allCourses.stream()
                 .map(course -> {
-                    // compare the string of all the relevant attributes of
-                    // the course to the query string
-                    // TODO: change department to be a string of
-                    // all the necessary parameters
+                    // compare the string of all the relevant attributes of the course to the query string
+                    String prof = String.join(" ", course.professor());
+                    String code = String.valueOf(course.code());
 
-                    String[] searchFields = {
-                        course.department(),
-                        course.name(),
-                        String.join(" ", course.professor()),
-                        String.valueOf(course.code())
-                    };
-                    String searchSpace = String.join(" ", searchFields);
-                    int ranking = FuzzySearch.tokenSetPartialRatio(searchSpace, searchQuery);
+                    //find the score of each attribute
+                    int titleScore = FuzzySearch.tokenSetRatio(course.name(), searchQuery);
+                    int deptScore = FuzzySearch.partialRatio(course.department(), searchQuery);
+                    int profScore = FuzzySearch.partialRatio(prof, searchQuery);
+                    int codeScore = FuzzySearch.partialRatio(code, searchQuery);
+
+                    //weight the title match and the code higher
+                    int ranking = (titleScore * 5) + deptScore + profScore + (codeScore * 2);
+
+                    //attach the score to the course, sort by the score
                     return new AbstractMap.SimpleEntry<>(ranking, course);
                 })
                 .sorted((e1, e2) -> Integer.compare(e2.getKey(), e1.getKey()))

@@ -14,7 +14,7 @@ public class TimeTest {
         Course c10 = emptyAtTimes(List.of(LocalTime.of(10, 0)));
         Course c2 = emptyAtTimes(List.of(LocalTime.of(14, 0)));
 
-        Time filter = new Time(List.of(LocalTime.of(10, 0)));
+        Time filter = new Time(LocalTime.of(9, 0), LocalTime.of(13, 0));
 
         assertEquals(false, filter.filter(c2));
         assertEquals(true, filter.filter(c10));
