@@ -30,6 +30,7 @@ public class ScheduleController {
      */
     private static List<String> wrapText(String text, PDType1Font font, float fontSize, float maxWidth) throws IOException {
         List<String> lines = new ArrayList<>();
+        text = text.replace("\n", " ");
         String[] words = text.split(" ");
         StringBuilder line = new StringBuilder();
 
@@ -86,6 +87,7 @@ public class ScheduleController {
                 //lines without indent
                 String first = c.department() + c.code() + c.section() + " " + c.name();
                 for (String line : wrapText(first, font, fontSize, maxWidth)) {
+
                     //add a new page if necessary
                     if (y < margin) {
                         content.endText();
