@@ -27,14 +27,17 @@ export default function SearchPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<Set<Course>>(new Set());
+  const [schedule, setSchedule] = useState<Set<string>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<string>('ALL');
-  const [timeStart, setTimeStart] = useState<string>('');
-  const [timeEnd, setTimeEnd] = useState<string>('');
+  const [timeStart, setTimeStart] = useState<string>('00:01');
+  const [timeEnd, setTimeEnd] = useState<string>('23:59');
   const [availableCredits, setAvailableCredits] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
+
+  const getCourseId = (course: Course) =>
+    `${course.subject}${course.number}${course.section}`;
 
   // --- SEARCH ---
   const search = async () => {
@@ -59,8 +62,8 @@ export default function SearchPage() {
 
   // --- TOGGLE COURSE ---
   const toggleCourse = async (course: Course) => {
-    const courseId = `${course.subject}${course.number}${course.section}`;
     const newSchedule = new Set(schedule);
+    const courseId = getCourseId(course)
 
     const result = await fetch('/schedule/items', {
       method: 'POST',
@@ -71,9 +74,9 @@ export default function SearchPage() {
 
 
     if(text == "Added"){
-        newSchedule.add(course);
+        newSchedule.add(courseId);
     }else if(text == "Removed"){
-        newSchedule.delete(course);
+        newSchedule.delete(courseId);
     }else{
         toast(text)
     }
@@ -92,12 +95,15 @@ export default function SearchPage() {
     setDays(newDays);
   };
 
+  const isDefaultValue = (value: any) => {
+    return value === 'ALL'
+      || (Array.isArray(value) && value.length === 0)
+      || (value.start === '00:01' && value.end === '23:59');
+  };
+
   const updateFilter = async (type: string, oldValue: any, newValue: any) => {
     // remove old filter
-    if (
-      oldValue !== 'ALL' &&
-      !(Array.isArray(oldValue) && oldValue.length === 0)
-    ) {
+    if (!isDefaultValue(oldValue)) {
       await fetch('/search/filter', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -106,10 +112,7 @@ export default function SearchPage() {
     }
 
     // add new filter
-    if (
-      newValue !== 'ALL' &&
-      !(Array.isArray(newValue) && newValue.length === 0)
-    ) {
+    if (!isDefaultValue(newValue)) {
       await fetch('/search/filter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -208,19 +211,27 @@ export default function SearchPage() {
       const resp = await fetch('/search/filter');
       for (const filter of await resp.json()) {
         switch (filter.type) {
-          // TODO: add times later hehe haha
           case "department":
-              setDepartment(filter.value);
-              break;
+            setDepartment(filter.value);
+            break;
           case "professor":
-              setProfessor(filter.value);
-              break;
+            setProfessor(filter.value);
+            break;
           case "credits":
-              setCredits(filter.value);
-              break;
+            setCredits(filter.value);
+            break;
           case "days":
-              setDays(new Set(filter.value));
-              break;
+            setDays(new Set(filter.value));
+            break;
+          case "timeRange":
+            // [TODO] this isn't working for some reason
+            if (filter.value.start !== "00:01") {
+              setTimeStart(filter.value.start + ':00');
+            }
+            if (filter.value.end !== "23:59") {
+              setTimeEnd(filter.value.end + ':00');
+            }
+            break;
         }
       }
     };
@@ -234,8 +245,8 @@ export default function SearchPage() {
       try {
         const res = await fetch('/schedule/items');
         const items: Course[] = await res.json();
-        //const ids = new Set(items.map(c => `${c.subject}${c.number}${c.section}`));
-        setSchedule(new Set(items));
+        const ids = new Set(items.map(c => getCourseId(c)));
+        setSchedule(ids);
       } catch (err) {
         console.error('Failed to load schedule', err);
       }
@@ -278,12 +289,12 @@ export default function SearchPage() {
 
         <div className="time-range">
           <select value={timeStart} onChange={e => updateTimeStart(e.target.value)}>
-            <option value="">Start</option>
+            <option value="00:01">Start</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <span>to</span>
           <select value={timeEnd} onChange={e => updateTimeEnd(e.target.value)}>
-            <option value="">End</option>
+            <option value="23:59">End</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
@@ -319,10 +330,7 @@ export default function SearchPage() {
           <ul>
             {courses.map(course => {
                 const courseId = `${course.subject}${course.number}${course.section}`;
-                let inSchedule = false;
-                for(const c of schedule){
-                    if(c.subject == course.subject && c.section == course.section && c.number == course.number){inSchedule=true;}
-                }
+                let inSchedule = schedule.has(courseId)
 
               return (
                 <li key={courseId} className="course-row">
