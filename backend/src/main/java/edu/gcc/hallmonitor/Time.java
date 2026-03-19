@@ -1,52 +1,64 @@
 package edu.gcc.hallmonitor;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public record Time(List<LocalTime> times) implements Filter {
+public record Time(LocalTime start, LocalTime end) implements Filter {
 
     @Override
     public boolean filter(Course course) {
-        return course.times()
-                .stream()
-                .allMatch(ct -> times.stream()
-                        .anyMatch(time -> timesContain(time, ct)));
-    }
-
-    private static boolean timesContain(LocalTime time, CourseTime ct) {
-        return ct.startTime().compareTo(time) <= 0
-               && ct.endTime().compareTo(time) <= 0;
+        return !course.times().isEmpty() &&
+               course.times()
+                       .stream()
+                       .allMatch(ct -> {
+                           if (ct.startTime().isBefore(start)
+                               || ct.endTime().isAfter(end)) {
+                               return false;
+                           }
+                           return true;
+                       });
     }
 
     @Override
     public JsonNode toJSON() {
         ObjectNode root = Main.MAPPER.createObjectNode();
-        root.put("type", "days");
-        ArrayNode values = Main.MAPPER.createArrayNode();
-        times().stream()
-                .map(LocalTime::toString)
-                .forEach(values::add);
-        root.set("value", values);
+        root.put("type", "timeRange");
+        ObjectNode value = Main.MAPPER.createObjectNode();
+        value.put("start", start.toString());
+        value.put("end", end.toString());
+        root.set("value", value);
 
         return root;
     }
 
     private static Filter deserialize(JsonNode value) {
-        // [TODO]
-        throw new UnsupportedOperationException("unimplemented");
+        String[] startList = value.get("start").asText().split(":");
+        LocalTime start = LocalTime.of(Integer.parseInt(startList[0]), Integer.parseInt(startList[1]));
+        String[] endList = value.get("end").asText().split(":");
+        LocalTime end = LocalTime.of(Integer.parseInt(endList[0]), Integer.parseInt(endList[1]));
+        return new Time(start, end);
     }
 
     private static Set<String> possibleValues(List<Course> courses) {
-        // [TODO]
-        throw new UnsupportedOperationException("unimplemented");
+        Set<String> times = new HashSet<>();
+        courses.stream()
+                .map(Course::times)
+                .flatMap(List::stream)
+                .map(time -> List.of(time.startTime(), time.endTime()))
+                .flatMap(List::stream)
+                .map(time -> time.format(DateTimeFormatter.ofPattern("HH:MM")))
+                .forEach(times::add);
+        return times;
     }
 
     public static void init() {
-        Filter.registerFilterType("time", Time::deserialize, Time::possibleValues);
+        Filter.registerFilterType("timeRange", Time::deserialize, Time::possibleValues);
     }
 }
