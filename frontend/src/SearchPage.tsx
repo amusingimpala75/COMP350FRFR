@@ -27,7 +27,7 @@ export default function SearchPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<Set<Course>>(new Set());
+  const [schedule, setSchedule] = useState<Set<string>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<string>('ALL');
   const [timeStart, setTimeStart] = useState<string>('00:01');
@@ -35,6 +35,9 @@ export default function SearchPage() {
   const [availableCredits, setAvailableCredits] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
+
+  const getCourseId = (course: Course) =>
+    `${course.subject}${course.number}${course.section}`;
 
   // --- SEARCH ---
   const search = async () => {
@@ -59,8 +62,8 @@ export default function SearchPage() {
 
   // --- TOGGLE COURSE ---
   const toggleCourse = async (course: Course) => {
-    const courseId = `${course.subject}${course.number}${course.section}`;
     const newSchedule = new Set(schedule);
+    const courseId = getCourseId(course)
 
     const result = await fetch('/schedule/items', {
       method: 'POST',
@@ -71,9 +74,9 @@ export default function SearchPage() {
 
 
     if(text == "Added"){
-        newSchedule.add(course);
+        newSchedule.add(courseId);
     }else if(text == "Removed"){
-        newSchedule.delete(course);
+        newSchedule.delete(courseId);
     }else{
         toast(text)
     }
@@ -242,8 +245,8 @@ export default function SearchPage() {
       try {
         const res = await fetch('/schedule/items');
         const items: Course[] = await res.json();
-        //const ids = new Set(items.map(c => `${c.subject}${c.number}${c.section}`));
-        setSchedule(new Set(items));
+        const ids = new Set(items.map(c => getCourseId(c)));
+        setSchedule(ids);
       } catch (err) {
         console.error('Failed to load schedule', err);
       }
@@ -327,10 +330,7 @@ export default function SearchPage() {
           <ul>
             {courses.map(course => {
                 const courseId = `${course.subject}${course.number}${course.section}`;
-                let inSchedule = false;
-                for(const c of schedule){
-                    if(c.subject == course.subject && c.section == course.section && c.number == course.number){inSchedule=true;}
-                }
+                let inSchedule = schedule.has(courseId)
 
               return (
                 <li key={courseId} className="course-row">
