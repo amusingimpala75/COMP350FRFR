@@ -35,8 +35,9 @@ public class ScheduleController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
             for(Course c : schedule.getCourses()){
                 body = body + c.department() + c.code() + c.section() + " " + c.name() + "\n";
+                body += "      " + String.join(" ", c.professor()) + "\n";
                 body += "      ";
-//                String days = "";
+//                String days = "";  //group it by the days with the same class times?
 //                String times = "";
                 if(c.times() != null){
                     for(CourseTime ct : c.times()){
@@ -44,6 +45,7 @@ public class ScheduleController {
                         body += ct.day() + ct.startTime().format(formatter) + " - " +  ct.endTime().format(formatter) + "   ";
                     }
                 }
+                body += "\n";
             }
 
             try (PDPageContentStream content = new PDPageContentStream(document, page)) {
@@ -53,7 +55,10 @@ public class ScheduleController {
                         12
                 );
                 content.newLineAtOffset(100, 700);
-                content.showText(body);
+                for (String line : body.split("\n")) {
+                    content.showText(line);
+                    content.newLineAtOffset(0, -20);
+                }
                 content.endText();
             }
 
