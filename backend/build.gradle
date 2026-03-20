@@ -21,6 +21,8 @@ dependencies {
 
     implementation 'me.xdrop:fuzzywuzzy:1.4.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.3'
+
+    implementation 'org.apache.pdfbox:pdfbox:3.0.4'
 }
 
 java {
