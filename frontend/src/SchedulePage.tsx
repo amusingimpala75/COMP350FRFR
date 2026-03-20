@@ -28,8 +28,9 @@ export default function SchedulePage() {
     //adding events to fullcalendar
     const calendarApi = calendarRef.current?.getApi()
     if (!calendarApi) return
-    calendarApi.removeAllEvents()
+    calendarApi.removeAllEvents() //refresh the calendar
 
+    //convert days to their numerical representation and add each class day of a course to the calendar
     for(const course of items){
         for(const time of course.times){
             const dayMap: Record<string, number> = {
@@ -48,6 +49,7 @@ export default function SchedulePage() {
 
   const removeCourse = async (courseId: string) => {
     await fetch('/schedule/items', { method: 'POST', body: courseId });
+    //remove from calendar
     removeEvents(courseId);
     loadCourses();
   };
@@ -71,6 +73,7 @@ export default function SchedulePage() {
     })
   }
 
+  //removing the course from the visual display
   const removeEvents = (courseCode: string) => {  //remove all events with the course code (ACCT101A)
     const calendarApi = calendarRef.current?.getApi()
     if (!calendarApi) return
@@ -82,6 +85,29 @@ export default function SchedulePage() {
     }
   }
 
+
+
+  //for downloading the schedule pdf
+  const handleDownload = async (): Promise<void> => {
+      const res = await fetch('/download-pdf');
+      if (!res.ok) {
+          throw new Error('Download failed');
+      }
+
+      //reads http response body, converts to a pdf file in memory
+      const blob = await res.blob();
+
+      //creates a fake url for the file, tells browser to download instead of redirecting
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'schedule.pdf';
+      document.body.appendChild(a);
+      //clicks link, removes temporary element
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+  };
 
 
   return (
@@ -99,6 +125,7 @@ export default function SchedulePage() {
             );
           })}
         </ul>
+        <button onClick={handleDownload} style={{ margin: '10px', width: 'auto'}}>Download PDF</button>
 
               <div className="Schedule">
               <FullCalendar

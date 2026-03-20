@@ -17,6 +17,7 @@ function App() {
       {/* Page content */}
       <main>
         <Routes>
+          // content per page
           <Route path="/search" element={<SearchPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="*" element={<Navigate to="/search" replace />} /> {/* Default to search */}
