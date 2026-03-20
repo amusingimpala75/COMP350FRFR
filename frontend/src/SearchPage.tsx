@@ -312,7 +312,20 @@ export default function SearchPage() {
                   </button>
 
                   <span className="course-text">
-                    {course.subject}{course.number} {course.section} — {course.name}
+                    {course.subject}{course.number} {course.section} — {course.name} — {
+                      course.times?.length
+                        ? Array.from(
+                            course.times.reduce((acc, t) => {
+                              const key = `${t.start_time?.slice(0,5)} - ${t.end_time?.slice(0,5)}`;
+                              if (!acc.has(key)) acc.set(key, []);
+                              acc.get(key)!.push(t.day);
+                              return acc;
+                            }, new Map<string, string[]>())
+                          )
+                            .map(([time, days]) => `${days.join("")}, ${time}`)
+                            .join(" & ")
+                        : "TBA"
+                    } — {course.faculty}
                   </span>
                 </li>
               );
