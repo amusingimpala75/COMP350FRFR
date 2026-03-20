@@ -232,6 +232,7 @@ public class ScheduleController {
 
         });
 
+        // Get the schedule that is saved
         app.get("/schedule/items", ctx -> {
             ctx.json(Schedule.loadSchedule().getCourses()); // Return the loaded schedule as a json
         });
