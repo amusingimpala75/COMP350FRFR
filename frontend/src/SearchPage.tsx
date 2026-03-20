@@ -48,7 +48,10 @@ export default function SearchPage() {
     });
 
     const items: Course[] = await res.json();
-    setCourses(items);
+
+    //remove unwanted ZLOAD courses
+    const filtered = items.filter(c => c.subject !== 'ZLOAD');
+    setCourses(filtered);
   };
   // sending course info to backend
   useEffect(() => {
@@ -195,8 +198,8 @@ export default function SearchPage() {
 
     const fetchResults = async() => {
       const res = await fetch("/search/results");
-      const items = await res.json();
-      setCourses(items);
+      const items = (await res.json()) as Course[];
+      setCourses(items.filter(c => c.subject !== 'ZLOAD'));
     };
     fetchResults();
 
