@@ -6,6 +6,7 @@ import './App.css';
 function App() {
   return (
     <Router>
+      //links for the different pages
       {/* Top navigation bar */}
       <header className="top-bar">
         <nav>
@@ -17,6 +18,7 @@ function App() {
       {/* Page content */}
       <main>
         <Routes>
+          // content per page
           <Route path="/search" element={<SearchPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="*" element={<Navigate to="/search" replace />} /> {/* Default to search */}
