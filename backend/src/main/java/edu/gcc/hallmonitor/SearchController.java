@@ -20,7 +20,7 @@ public class SearchController {
             )
         ));
 
-
+        //creates and returns results from a new search object based on the user's query and filter selections
         app.post("/search", ctx -> {
             String query = ctx.body();
             Search old = search;

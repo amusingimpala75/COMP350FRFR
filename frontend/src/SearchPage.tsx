@@ -1,4 +1,3 @@
-
 import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
 
@@ -60,11 +59,14 @@ export default function SearchPage() {
     search();
   }, [department, professor, days, credits, timeStart, timeEnd]);
 
-  // --- TOGGLE COURSE ---
+
+  //Toggles a course in the user's schedule and syncs with the backend.
+  //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
     const newSchedule = new Set(schedule);
     const courseId = getCourseId(course)
 
+    //send the course identifier to the backend
     const result = await fetch('/schedule/items', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
@@ -80,7 +82,6 @@ export default function SearchPage() {
     }else{
         toast(text)
     }
-
 
     setSchedule(newSchedule);
   };

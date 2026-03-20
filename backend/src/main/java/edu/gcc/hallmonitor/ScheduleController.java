@@ -161,6 +161,7 @@ public class ScheduleController {
     }
 
     public static void registerRoutes(Javalin app) {
+        //Defines a /schedule route that reads from index.html
         app.get("/schedule", ctx -> ctx.html(
             Files.readString(
                 Path.of(
@@ -171,23 +172,24 @@ public class ScheduleController {
             )
         ));
 
+        //adds or removes a course based on the ID
         app.post("/schedule/items", ctx -> {
             Schedule schedule = Schedule.loadSchedule();
-
             String courseID = ctx.body();
 
             Course course = Search.getCourseByCode(courseID);
             String ret = "";
 
+            //remove the course if it's already present in the schedule
             if (schedule.inSchedule(course)) {
                 schedule.removeCourse(course);
                 ret = "Removed";
             }else{
                List<Course> courses = schedule.getCourses();
                for(Course c : courses) {
-                   //if already scheduled for a different section of the class, end the loop and return the string explaining the error
+                   //if another section of the class is in the schedule, end the loop and return the string explaining the error
                    if (c.code() == course.code() && Objects.equals(c.name(), course.name()) && c.section() != course.section()) {
-                       ret = "already scheduled for a different section of this class";
+                       ret = "Already scheduled for a different section of this class";
                        break;
                    }
 

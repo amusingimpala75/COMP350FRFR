@@ -28,8 +28,9 @@ export default function SchedulePage() {
     //adding events to fullcalendar
     const calendarApi = calendarRef.current?.getApi()
     if (!calendarApi) return
-    calendarApi.removeAllEvents()
+    calendarApi.removeAllEvents() //refresh the calendar
 
+    //convert days to their numerical representation and add each class day of a course to the calendar
     for(const course of items){
         for(const time of course.times){
             const dayMap: Record<string, number> = {
@@ -48,6 +49,7 @@ export default function SchedulePage() {
 
   const removeCourse = async (courseId: string) => {
     await fetch('/schedule/items', { method: 'POST', body: courseId });
+    //remove from calendar
     removeEvents(courseId);
     loadCourses();
   };
@@ -71,6 +73,7 @@ export default function SchedulePage() {
     })
   }
 
+  //removing the course from the visual display
   const removeEvents = (courseCode: string) => {  //remove all events with the course code (ACCT101A)
     const calendarApi = calendarRef.current?.getApi()
     if (!calendarApi) return
