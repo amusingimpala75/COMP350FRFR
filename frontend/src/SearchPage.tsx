@@ -1,4 +1,3 @@
-
 import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
 
@@ -49,9 +48,12 @@ export default function SearchPage() {
     });
 
     const items: Course[] = await res.json();
-    setCourses(items);
-  };
 
+    //remove unwanted ZLOAD courses
+    const filtered = items.filter(c => c.subject !== 'ZLOAD');
+    setCourses(filtered);
+  };
+  // sending course info to backend
   useEffect(() => {
     if (!didMount.current) {
       didMount.current = true;
@@ -60,11 +62,14 @@ export default function SearchPage() {
     search();
   }, [department, professor, days, credits, timeStart, timeEnd]);
 
-  // --- TOGGLE COURSE ---
+
+  //Toggles a course in the user's schedule and syncs with the backend.
+  //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
     const newSchedule = new Set(schedule);
     const courseId = getCourseId(course)
 
+    //send the course identifier to the backend
     const result = await fetch('/schedule/items', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
@@ -81,11 +86,10 @@ export default function SearchPage() {
         toast(text)
     }
 
-
     setSchedule(newSchedule);
   };
 
-
+  // updating days selected
   const toggleDay = async (day: string) => {
     const newDays = new Set(days);
     if (newDays.has(day)) newDays.delete(day);
@@ -94,7 +98,7 @@ export default function SearchPage() {
     await updateFilter('days', Array.from(days), newArray);
     setDays(newDays);
   };
-
+  // defining default values for filters
   const isDefaultValue = (value: any) => {
     return value === 'ALL'
       || (Array.isArray(value) && value.length === 0)
@@ -120,6 +124,8 @@ export default function SearchPage() {
       });
     }
   };
+
+  // updating all the filters
 
   const updateDept = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const updated = event.target.value;
@@ -192,8 +198,8 @@ export default function SearchPage() {
 
     const fetchResults = async() => {
       const res = await fetch("/search/results");
-      const items = await res.json();
-      setCourses(items);
+      const items = (await res.json()) as Course[];
+      setCourses(items.filter(c => c.subject !== 'ZLOAD'));
     };
     fetchResults();
 
@@ -342,7 +348,20 @@ export default function SearchPage() {
                   </button>
 
                   <span className="course-text">
-                    {course.subject}{course.number} {course.section} — {course.name}
+                    {course.subject}{course.number} {course.section} — {course.name} — {
+                      course.times?.length
+                        ? Array.from(
+                            course.times.reduce((acc, t) => {
+                              const key = `${t.start_time?.slice(0,5)} - ${t.end_time?.slice(0,5)}`;
+                              if (!acc.has(key)) acc.set(key, []);
+                              acc.get(key)!.push(t.day);
+                              return acc;
+                            }, new Map<string, string[]>())
+                          )
+                            .map(([time, days]) => `${days.join("")}, ${time}`)
+                            .join(" & ")
+                        : "TBA"
+                    } — {course.faculty}
                   </span>
                 </li>
               );
