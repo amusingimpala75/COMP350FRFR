@@ -51,7 +51,7 @@ export default function SearchPage() {
     const items: Course[] = await res.json();
     setCourses(items);
   };
-
+  // sending course info to backend
   useEffect(() => {
     if (!didMount.current) {
       didMount.current = true;
@@ -85,7 +85,7 @@ export default function SearchPage() {
     setSchedule(newSchedule);
   };
 
-
+  // updating days selected
   const toggleDay = async (day: string) => {
     const newDays = new Set(days);
     if (newDays.has(day)) newDays.delete(day);
@@ -94,7 +94,7 @@ export default function SearchPage() {
     await updateFilter('days', Array.from(days), newArray);
     setDays(newDays);
   };
-
+  // defining default values for filters
   const isDefaultValue = (value: any) => {
     return value === 'ALL'
       || (Array.isArray(value) && value.length === 0)
@@ -120,6 +120,8 @@ export default function SearchPage() {
       });
     }
   };
+
+  // updating all the filters
 
   const updateDept = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const updated = event.target.value;
