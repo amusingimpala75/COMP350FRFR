@@ -86,18 +86,44 @@ public class Search {
         //sort all courses based on which match the search query best
         searchResults = allCourses.stream()
                 .map(course -> {
-                    // compare the string of all the relevant attributes of the course to the query string
-                    String prof = String.join(" ", course.professor());
-                    String code = String.valueOf(course.code());
+//                    String prof = String.join(" ", course.professor()).toLowerCase();
+//                    String code = String.valueOf(course.code());
+//
+//                    //find the score of each attribute
+//                    int titleScore = FuzzySearch.tokenSetRatio(course.name().toLowerCase(), searchQuery);
+//                    int deptScore = FuzzySearch.partialRatio(course.department().toLowerCase(), searchQuery);
+//                    int profScore = FuzzySearch.partialRatio(prof, searchQuery);
+//                    int codeScore = FuzzySearch.partialRatio(code, searchQuery);
+//
+//                    //weight the title match and the code higher
+//                    int ranking = (titleScore * 5) + deptScore + profScore + (codeScore * 2);
+//
+//                    //adding bonuses to the rating if it contains an exact match
+//                    if (title.equals(query)) ranking += 10000;
+//                    if (code.equals(query)) ranking += 9000;
+//                    if (dept.equals(query)) ranking += 8000;
 
-                    //find the score of each attribute
-                    int titleScore = FuzzySearch.tokenSetRatio(course.name(), searchQuery);
-                    int deptScore = FuzzySearch.partialRatio(course.department(), searchQuery);
-                    int profScore = FuzzySearch.partialRatio(prof, searchQuery);
-                    int codeScore = FuzzySearch.partialRatio(code, searchQuery);
 
-                    //weight the title match and the code higher
+                    String query = searchQuery.trim().toLowerCase();
+                    String title = course.name().toLowerCase();
+                    String dept = course.department().toLowerCase();
+                    String prof = String.join(" ", course.professor()).toLowerCase();
+                    String code = String.valueOf(course.code()).toLowerCase();
+
+                    //find the score of each attribute, allowing typos
+                    int titleScore = FuzzySearch.tokenSetRatio(title, query);
+                    int deptScore = FuzzySearch.partialRatio(dept, query);
+                    int profScore = FuzzySearch.partialRatio(prof, query);
+                    int codeScore = FuzzySearch.partialRatio(code, query);
+
                     int ranking = (titleScore * 5) + deptScore + profScore + (codeScore * 2);
+
+                    //adding bonuses to the rating if it contains an exact match to reduce fuzzy similarity results from partialRatio
+                    if (title.equals(query)) ranking += 10000;
+                    if (title.contains(" " + query + " ")) ranking += 2000; //looking for the query as an isolated word and not a substring
+                    if (dept.equals(query)) ranking += 8000;
+                    if (dept.contains(query)) ranking += 1500;
+                    if (code.equals(query)) ranking += 9000;
 
                     //attach the score to the course, sort by the score
                     return new AbstractMap.SimpleEntry<>(ranking, course);
