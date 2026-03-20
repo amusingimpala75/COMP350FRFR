@@ -10,6 +10,7 @@ public class SearchController {
     private static Search search = new Search();
 
     public static void registerRoutes(Javalin app) {
+        // Get the search page
         app.get("/search", ctx -> ctx.html(
             Files.readString(
                 Path.of(
@@ -21,6 +22,7 @@ public class SearchController {
         ));
 
 
+        // Post a search query to the backend and return the results
         app.post("/search", ctx -> {
             String query = ctx.body();
             Search old = search;
@@ -29,15 +31,18 @@ public class SearchController {
             ctx.json(search.getMatchResults());
         });
 
+        // Get the previous search results
         app.get("/search/results", ctx -> {
             ctx.json(search.getMatchResults());
         });
 
+        // Get the previous search query
         app.get("/search/query", ctx -> {
             ctx.result(search.query());
         });
 
         // [TODO] there should be a better way to do this
+        // Get the available course information for filters
         app.get("/courses", ctx -> { // currently in use for filters
             // create a Search object with empty query to get all courses
             // pls keep this so my frontend works -Luca
@@ -45,6 +50,7 @@ public class SearchController {
             ctx.json(allCoursesSearch.getMatchResults());
         });
 
+        // Get the previous filters
         app.get("/search/filter", ctx -> {
             ctx.json(search.getFilters()
                     .stream()
@@ -52,11 +58,13 @@ public class SearchController {
                     .collect(Collectors.toList()));
         });
 
+        // Add a filter
         app.post("/search/filter", ctx -> {
             Filter f = Filter.fromJSON(Main.MAPPER.readTree(ctx.body()));
             search.applyFilter(f);
         });
 
+        // Delete a filter
         app.delete("/search/filter", ctx -> {
             if (ctx.queryParam("all") != null) {
                 search = new Search(search.query());
