@@ -6,7 +6,6 @@ import './App.css';
 function App() {
   return (
     <Router>
-      //links for the different pages
       {/* Top navigation bar */}
       <header className="top-bar">
         <nav>
