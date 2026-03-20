@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import java.util.HashMap;
 
-
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 public class Search {
 
@@ -44,7 +44,7 @@ public class Search {
         allCourses.removeIf(c -> !c.semester().equals("2023_Fall"));
 
         courseMap = new HashMap<>();
-        //make hashMap with course subject+number+section pointing to the course
+        //hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
         for(Course course : allCourses){
             courseMap.put(course.department()+course.code()+course.section(),course);
         }
@@ -79,24 +79,40 @@ public class Search {
         return matchResults;
     }
 
-    // The constructors will search the db for the appropriate courses
+
     public Search(String searchQuery, ArrayList<Filter> filters) {
         this.searchQuery = searchQuery;
 
+        //sort all courses based on which match the search query best
         searchResults = allCourses.stream()
                 .map(course -> {
-                    // compare the string of all the relevant attributes of the course to the query string
-                    String prof = String.join(" ", course.professor());
-                    String code = String.valueOf(course.code());
+                    String query = searchQuery.trim().toLowerCase();
+                    String title = course.name().toLowerCase();
+                    String dept = course.department().toLowerCase();
+                    String prof = String.join(" ", course.professor()).toLowerCase();
+                    String code = String.valueOf(course.code()).toLowerCase();
 
-                    //find the score of each attribute
-                    int titleScore = FuzzySearch.tokenSetRatio(course.name(), searchQuery);
-                    int deptScore = FuzzySearch.partialRatio(course.department(), searchQuery);
-                    int profScore = FuzzySearch.partialRatio(prof, searchQuery);
-                    int codeScore = FuzzySearch.partialRatio(code, searchQuery);
+                    //Find the score of each attribute, allowing typos
+                    //These scores are helpful when there is no exact match with the query
+                    int titleScore = FuzzySearch.tokenSetRatio(title, query);
+                    int deptScore = FuzzySearch.partialRatio(dept, query);
+                    int profScore = FuzzySearch.partialRatio(prof, query);
+                    int codeScore = FuzzySearch.partialRatio(code, query);
 
-                    //weight the title match and the code higher
                     int ranking = (titleScore * 5) + deptScore + profScore + (codeScore * 2);
+
+                    //boost aggressively for exact matches since the fuzzySearch can give high scores to unrelated strings
+                    if (query.equals(title)) ranking += 20000;
+                    if (title.contains((" " + query + " "))) ranking += 8000; //looking for the query as an isolated word and not a substring
+                    if (title.startsWith(query)) ranking += 4000;
+                    if(prof.equals(query)) ranking += 20000;
+                    if(prof.contains(query)) ranking += 8000;
+                    if(prof.startsWith(query)) ranking += 4000;
+                    if (dept.equals(query)) ranking += 20000;
+                    if (dept.contains(query)) ranking += 8000;
+                    if (dept.startsWith(query)) ranking += 4000;
+                    if (code.equals(query)) ranking += 24000;
+                    if (code.startsWith(query)) ranking += 4000;
 
                     //attach the score to the course, sort by the score
                     return new AbstractMap.SimpleEntry<>(ranking, course);
@@ -105,7 +121,7 @@ public class Search {
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
-        //applying filters will just need to take the searchresults returned by this code ^^ and only add the matching courses to the matchResults list
+        //matchResults is the arrayList of all courses sorted based on the query. Filters are applied to this list.
         matchResults = new ArrayList<>(searchResults);
 
         for (Filter f : filters) {
@@ -127,6 +143,7 @@ public class Search {
         return this.filterList;
     }
 
+    //reads json and converts to courses
     public static List<Course> loadData(String coursesFilename) throws IOException {
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
         if (jsonURL == null) {
