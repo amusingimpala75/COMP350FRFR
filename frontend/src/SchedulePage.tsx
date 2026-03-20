@@ -87,6 +87,29 @@ export default function SchedulePage() {
 
 
 
+  //for downloading the schedule pdf
+  const handleDownload = async (): Promise<void> => {
+      const res = await fetch('/download-pdf');
+      if (!res.ok) {
+          throw new Error('Download failed');
+      }
+
+      //reads http response body, converts to a pdf file in memory
+      const blob = await res.blob();
+
+      //creates a fake url for the file, tells browser to download instead of redirecting
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'schedule.pdf';
+      document.body.appendChild(a);
+      //clicks link, removes temporary element
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+  };
+
+
   return (
     <div className="layout">
       <div className="main">
@@ -102,6 +125,7 @@ export default function SchedulePage() {
             );
           })}
         </ul>
+        <button onClick={handleDownload} style={{ margin: '10px', width: 'auto'}}>Download PDF</button>
 
               <div className="Schedule">
               <FullCalendar
