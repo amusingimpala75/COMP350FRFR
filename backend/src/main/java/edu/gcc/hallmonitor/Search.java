@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import java.util.HashMap;
 
-
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 public class Search {
 
@@ -44,7 +44,7 @@ public class Search {
         allCourses.removeIf(c -> !c.semester().equals("2023_Fall"));
 
         courseMap = new HashMap<>();
-        //make hashMap with course subject+number+section pointing to the course
+        //hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
         for(Course course : allCourses){
             courseMap.put(course.department()+course.code()+course.section(),course);
         }
@@ -79,10 +79,11 @@ public class Search {
         return matchResults;
     }
 
-    // The constructors will search the db for the appropriate courses
+
     public Search(String searchQuery, ArrayList<Filter> filters) {
         this.searchQuery = searchQuery;
 
+        //sort all courses based on which match the search query best
         searchResults = allCourses.stream()
                 .map(course -> {
                     // compare the string of all the relevant attributes of the course to the query string
@@ -105,7 +106,7 @@ public class Search {
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
-        //applying filters will just need to take the searchresults returned by this code ^^ and only add the matching courses to the matchResults list
+        //matchResults is the arrayList of all courses sorted based on the query. Filters are applied to this list.
         matchResults = new ArrayList<>(searchResults);
 
         for (Filter f : filters) {
@@ -127,6 +128,7 @@ public class Search {
         return this.filterList;
     }
 
+    //reads json and converts to courses
     public static List<Course> loadData(String coursesFilename) throws IOException {
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
         if (jsonURL == null) {
