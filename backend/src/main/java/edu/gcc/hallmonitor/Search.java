@@ -180,18 +180,6 @@ public class Search {
         return this.filterList;
     }
 
-    public static List<Course> loadData(String coursesFilename) throws IOException {
-        URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
-        if (jsonURL == null) {
-            throw new FileNotFoundException(String.format("Could not find '%s' in resources directory", coursesFilename));
-        }
-
-        JsonNode root = Main.MAPPER.readTree(jsonURL);
-        JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
-
-        return Main.MAPPER.readerForListOf(Course.class).readValue(classesNode);
-    }
-
     public String query() {
         return this.searchQuery;
     }
