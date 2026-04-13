@@ -35,6 +35,7 @@ public class Search {
     }
 
     private static void loadCourses() {
+        allCourses = new ArrayList<>();
         //if this is the first search, initialize the allCourses list
         try {
             Connection conn = Database.getConnection();
@@ -68,6 +69,7 @@ public class Search {
                         rs.getInt("open_seats"),
                         rs.getInt("total_seats")
                 );
+                allCourses.add(c);
             }
         } catch (SQLException sqle) {
             System.err.println("Error connecting to database: " + sqle.getMessage());
