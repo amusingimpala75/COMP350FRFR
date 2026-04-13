@@ -49,7 +49,8 @@ public class Search {
                 List<String> facultyList = Arrays.asList(facultyArray);
 
                 String time_json = rs.getString("times");
-                List<CourseTime> courseTimes = mapper.readValue(time_json, new TypeReference<List<CourseTime>>() {});
+                List<CourseTime> courseTimes = mapper.readValue(time_json, new TypeReference<>() {
+                });
 
 
                 Course c = new Course(
