@@ -1,16 +1,22 @@
 package edu.gcc.hallmonitor;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
-import java.util.HashMap;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
 
 import java.net.URL;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -31,11 +37,41 @@ public class Search {
     private static void loadCourses() {
         //if this is the first search, initialize the allCourses list
         try {
-            allCourses = loadData("courses.json");
-        } catch (FileNotFoundException fnfe) {
-            System.err.println("File not found: " + fnfe.getMessage());
-        } catch (IOException ioe) {
-            System.err.println("IO Exception occurred: " + ioe.getMessage());
+            Connection conn = Database.getConnection();
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM courses");
+
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+
+            while (rs.next()) {
+                String[] facultyArray = (String[]) rs.getArray("faculty").getArray();
+                List<String> facultyList = Arrays.asList(facultyArray);
+
+                String time_json = rs.getString("times");
+                List<CourseTime> courseTimes = mapper.readValue(time_json, new TypeReference<List<CourseTime>>() {});
+
+
+                Course c = new Course(
+                        rs.getString("name"),
+                        facultyList,
+                        rs.getString("department"),
+                        rs.getInt("code"),
+                        rs.getString("section").charAt(0),
+                        rs.getString("location"),
+                        rs.getInt("credits"),
+                        rs.getString("semester"),
+                        courseTimes,
+                        rs.getBoolean("is_lab"),
+                        rs.getBoolean("is_open"),
+                        rs.getInt("open_seats"),
+                        rs.getInt("total_seats")
+                );
+            }
+        } catch (SQLException sqle) {
+            System.err.println("Error connecting to database: " + sqle.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
         // We only want the fall classes
         // This is a KLUDGE to make this work
@@ -143,7 +179,6 @@ public class Search {
         return this.filterList;
     }
 
-    //reads json and converts to courses
     public static List<Course> loadData(String coursesFilename) throws IOException {
         URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
         if (jsonURL == null) {
