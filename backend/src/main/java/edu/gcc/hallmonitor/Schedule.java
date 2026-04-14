@@ -1,12 +1,12 @@
 package edu.gcc.hallmonitor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class Schedule {
 

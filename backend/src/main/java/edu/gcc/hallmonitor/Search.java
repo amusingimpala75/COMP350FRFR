@@ -1,18 +1,18 @@
 package edu.gcc.hallmonitor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import me.xdrop.fuzzywuzzy.FuzzySearch;
-import java.util.HashMap;
-
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 public class Search {
 

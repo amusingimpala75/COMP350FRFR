@@ -1,8 +1,8 @@
 package edu.gcc.hallmonitor;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record Course(
         String name,

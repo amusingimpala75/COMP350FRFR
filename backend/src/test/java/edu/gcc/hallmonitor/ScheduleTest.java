@@ -1,11 +1,10 @@
 package edu.gcc.hallmonitor;
 
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ScheduleTest {

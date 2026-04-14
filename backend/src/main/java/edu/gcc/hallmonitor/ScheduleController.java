@@ -1,21 +1,21 @@
 package edu.gcc.hallmonitor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.javalin.Javalin;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import java.time.format.DateTimeFormatter;
-
-import io.javalin.Javalin;
 
 public class ScheduleController {
 
