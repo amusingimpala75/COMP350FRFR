@@ -18,7 +18,6 @@ public class NumCreditsTest {
         assertEquals(false, filter.filter(two));
     }
 
-
     private static Course emptyWithCredits(int credits) {
         return new Course(
             "",

@@ -213,7 +213,6 @@ public class ScheduleController {
                             }
                         }
 
-
                     }
 
                 }
@@ -224,7 +223,6 @@ public class ScheduleController {
                     ret = "Added";
                 }
             }
-
 
             schedule.saveSchedule();
 

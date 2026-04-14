@@ -79,7 +79,6 @@ public class Search {
         return matchResults;
     }
 
-
     public Search(String searchQuery, ArrayList<Filter> filters) {
         this.searchQuery = searchQuery;
 

@@ -17,6 +17,7 @@ public class Schedule {
     public Schedule(List<Course> courses) {
         this.courses = courses;
     }
+
     public Schedule() {
         this(new ArrayList<Course>());
     }
@@ -98,6 +99,5 @@ public class Schedule {
 
         return copyCourses;
     }
-
 
 }

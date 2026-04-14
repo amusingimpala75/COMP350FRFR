@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public interface Filter extends Predicate<Course> {
     boolean filter(Course c);
+
     JsonNode toJSON();
 
     default boolean test(Course c) {

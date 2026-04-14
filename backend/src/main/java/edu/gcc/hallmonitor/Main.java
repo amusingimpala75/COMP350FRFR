@@ -9,6 +9,7 @@ import io.javalin.Javalin;
 public class Main {
 
     public static final ObjectMapper MAPPER;
+
     static {
         MAPPER = new ObjectMapper();
         MAPPER.registerModule(new JavaTimeModule());

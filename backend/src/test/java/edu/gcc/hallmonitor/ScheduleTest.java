@@ -40,7 +40,6 @@ class ScheduleTest {
         }
     }
 
-
     @Test
     void loadSaveSchedule() {
         Schedule expectedSchedule = new Schedule(List.of(
