@@ -102,17 +102,17 @@ public class Search {
                     int ranking = (titleScore * 5) + deptScore + profScore + (codeScore * 2);
 
                     //boost aggressively for exact matches since the fuzzySearch can give high scores to unrelated strings
-                    if (query.equals(title)) ranking += 20000;
-                    if (title.contains((" " + query + " "))) ranking += 8000; //looking for the query as an isolated word and not a substring
-                    if (title.startsWith(query)) ranking += 4000;
-                    if (prof.equals(query)) ranking += 20000;
-                    if (prof.contains(query)) ranking += 8000;
-                    if (prof.startsWith(query)) ranking += 4000;
-                    if (dept.equals(query)) ranking += 20000;
-                    if (dept.contains(query)) ranking += 8000;
-                    if (dept.startsWith(query)) ranking += 4000;
-                    if (code.equals(query)) ranking += 24000;
-                    if (code.startsWith(query)) ranking += 4000;
+                    if (query.equals(title)) { ranking += 20000; }
+                    if (title.contains((" " + query + " "))) { ranking += 8000; } //looking for the query as an isolated word and not a substring
+                    if (title.startsWith(query)) { ranking += 4000; }
+                    if (prof.equals(query)) { ranking += 20000; }
+                    if (prof.contains(query)) { ranking += 8000; }
+                    if (prof.startsWith(query)) { ranking += 4000; }
+                    if (dept.equals(query)) { ranking += 20000; }
+                    if (dept.contains(query)) { ranking += 8000; }
+                    if (dept.startsWith(query)) { ranking += 4000; }
+                    if (code.equals(query)) { ranking += 24000; }
+                    if (code.startsWith(query)) { ranking += 4000; }
 
                     //attach the score to the course, sort by the score
                     return new AbstractMap.SimpleEntry<>(ranking, course);

@@ -197,14 +197,14 @@ public class ScheduleController {
                     for (CourseTime ct : course.times()) {
                         int ctStartSec = ct.startTime().toSecondOfDay();
                         int ctEndSec = ct.endTime().toSecondOfDay();
-                        if (ctEndSec <= ctStartSec) continue;
+                        if (ctEndSec <= ctStartSec) { continue; }
                         for (CourseTime ct2 : c.times()) {
                             //only perform the check if the classes are on the same day. If not, cancel checking this day and move to the next.
-                            if (!ct.day().equals(ct2.day())) continue;
+                            if (!ct.day().equals(ct2.day())) { continue; }
 
                             int ct2StartSec = ct2.startTime().toSecondOfDay();
                             int ct2EndSec = ct2.endTime().toSecondOfDay();
-                            if (ct2EndSec <= ct2StartSec) continue;
+                            if (ct2EndSec <= ct2StartSec) { continue; }
 
                             if (ctStartSec < ct2EndSec && ctEndSec > ct2StartSec) {
                                 //if there is an overlap in the time blocks, stop checking other days and return the error message.

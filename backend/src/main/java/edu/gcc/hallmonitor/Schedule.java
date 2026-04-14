@@ -67,7 +67,7 @@ public class Schedule {
         List<Course> copyCourses = new ArrayList<>();
         for (Course c : courses) {
             //if the course can't be found, don't cause a server error
-            if (c == null) continue;
+            if (c == null) { continue; }
             List<CourseTime> timesCopy = new ArrayList<>();
 
             if (c.times() != null) {
