@@ -40,7 +40,7 @@ public class Search {
         try {
             Connection conn = Database.getConnection();
             Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM courses");
+            ResultSet rs = statement.executeQuery("SELECT * FROM public.\"Courses\"");
 
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
@@ -50,15 +50,14 @@ public class Search {
                 List<String> facultyList = Arrays.asList(facultyArray);
 
                 String time_json = rs.getString("times");
-                List<CourseTime> courseTimes = mapper.readValue(time_json, new TypeReference<>() {
-                });
+                List<CourseTime> courseTimes = mapper.readerForListOf(CourseTime.class).readValue(time_json);
 
 
                 Course c = new Course(
                         rs.getString("name"),
                         facultyList,
-                        rs.getString("department"),
-                        rs.getInt("code"),
+                        rs.getString("subject"),
+                        rs.getInt("number"),
                         rs.getString("section").charAt(0),
                         rs.getString("location"),
                         rs.getInt("credits"),
@@ -73,6 +72,7 @@ public class Search {
             }
         } catch (SQLException sqle) {
             System.err.println("Error connecting to database: " + sqle.getMessage());
+            sqle.printStackTrace();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
