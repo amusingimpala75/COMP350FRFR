@@ -27,8 +27,8 @@ public interface Filter extends Predicate<Course> {
         return VALUE_FETCHERS.get(type).apply(courses);
     }
 
-    static Map<String, Function<JsonNode, Filter>> DESERIALIZERS = new HashMap<>();
-    static Map<String, Function<List<Course>, Set<String>>> VALUE_FETCHERS = new HashMap<>();
+    Map<String, Function<JsonNode, Filter>> DESERIALIZERS = new HashMap<>();
+    Map<String, Function<List<Course>, Set<String>>> VALUE_FETCHERS = new HashMap<>();
 
     static void registerFilterType(
         String name,
