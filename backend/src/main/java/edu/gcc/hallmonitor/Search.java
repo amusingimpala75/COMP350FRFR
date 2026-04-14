@@ -44,15 +44,15 @@ public class Search {
         allCourses.removeIf(c -> !c.semester().equals("2023_Fall"));
 
         courseMap = new HashMap<>();
-        //hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
-        for(Course course : allCourses){
-            courseMap.put(course.department()+course.code()+course.section(),course);
+        // hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
+        for (Course course : allCourses) {
+            courseMap.put(course.department() + course.code() + course.section(), course);
         }
 
     }
 
-    public static Course getCourseByCode(String code){
-        return courseMap.get(code); //TODO: handle problems with this
+    public static Course getCourseByCode(String code) {
+        return courseMap.get(code); // TODO: handle problems with this
     }
 
     public void applyFilter(Filter filter) {
@@ -105,9 +105,9 @@ public class Search {
                     if (query.equals(title)) ranking += 20000;
                     if (title.contains((" " + query + " "))) ranking += 8000; //looking for the query as an isolated word and not a substring
                     if (title.startsWith(query)) ranking += 4000;
-                    if(prof.equals(query)) ranking += 20000;
-                    if(prof.contains(query)) ranking += 8000;
-                    if(prof.startsWith(query)) ranking += 4000;
+                    if (prof.equals(query)) ranking += 20000;
+                    if (prof.contains(query)) ranking += 8000;
+                    if (prof.startsWith(query)) ranking += 4000;
                     if (dept.equals(query)) ranking += 20000;
                     if (dept.contains(query)) ranking += 8000;
                     if (dept.startsWith(query)) ranking += 4000;

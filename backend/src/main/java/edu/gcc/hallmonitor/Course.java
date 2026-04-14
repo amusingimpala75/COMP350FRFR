@@ -25,4 +25,4 @@ public record Course(
         int numOpenSeats,
         @JsonProperty("total_seats")
         int totalSeats
-) {}
+) { }
