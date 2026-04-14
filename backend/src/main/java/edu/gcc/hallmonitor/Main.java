@@ -21,11 +21,11 @@ public class Main {
     }
 
     public static void run(int port) {
-       Javalin app = Javalin.create(cfg -> { cfg.staticFiles.add("/public"); })
-               .start(port);
+        Javalin app = Javalin.create(cfg -> { cfg.staticFiles.add("/public"); })
+                .start(port);
 
-       SearchController.registerRoutes(app);
-       ScheduleController.registerRoutes(app);
+        SearchController.registerRoutes(app);
+        ScheduleController.registerRoutes(app);
     }
 
 }
