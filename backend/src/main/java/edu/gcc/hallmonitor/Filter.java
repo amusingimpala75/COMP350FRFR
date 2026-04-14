@@ -20,23 +20,23 @@ public interface Filter extends Predicate<Course> {
     static Filter fromJSON(JsonNode root) {
         String type = root.get("type").asText();
         JsonNode value = root.get("value");
-        return deserializers.get(type).apply(value);
+        return DESERIALIZERS.get(type).apply(value);
     }
 
     static Set<String> possibleValues(String type, List<Course> courses) {
-        return valueFetchers.get(type).apply(courses);
+        return VALUE_FETCHERS.get(type).apply(courses);
     }
 
-    static Map<String, Function<JsonNode, Filter>> deserializers = new HashMap<>();
-    static Map<String, Function<List<Course>, Set<String>>> valueFetchers = new HashMap<>();
+    static Map<String, Function<JsonNode, Filter>> DESERIALIZERS = new HashMap<>();
+    static Map<String, Function<List<Course>, Set<String>>> VALUE_FETCHERS = new HashMap<>();
 
     static void registerFilterType(
         String name,
         Function<JsonNode, Filter> deserialize,
         Function<List<Course>, Set<String>> valueFetcher
     ) {
-        deserializers.put(name, deserialize);
-        valueFetchers.put(name, valueFetcher);
+        DESERIALIZERS.put(name, deserialize);
+        VALUE_FETCHERS.put(name, valueFetcher);
     }
 
     static void init() {
