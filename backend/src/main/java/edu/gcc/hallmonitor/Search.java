@@ -1,30 +1,20 @@
 package edu.gcc.hallmonitor;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import me.xdrop.fuzzywuzzy.FuzzySearch;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
-
-import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
@@ -59,7 +49,6 @@ public class Search {
 
                 String time_json = rs.getString("times");
                 List<CourseTime> courseTimes = mapper.readerForListOf(CourseTime.class).readValue(time_json);
-
 
                 Course c = new Course(
                         rs.getString("name"),
