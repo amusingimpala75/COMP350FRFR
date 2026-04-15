@@ -76,7 +76,12 @@ gradle.taskGraph.whenReady { graph ->
 
 def hasDocker = { ->
     try {
-        new ProcessBuilder('docker', '--help').start().waitFor() == 0
+        def p = new ProcessBuilder('docker', '--help').start()
+
+        p.inputStream.consume()
+        p.errorStream.consume()
+
+        p.waitFor() == 0
     } catch(Exception e) {
         false
     }
