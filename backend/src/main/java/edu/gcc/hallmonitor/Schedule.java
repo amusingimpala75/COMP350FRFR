@@ -10,19 +10,41 @@ import java.util.Map;
 
 public class Schedule {
 
-    private List<Course> courses;
+    private List<Course> fallCourses;
+    private List<Course> springCourses;
+    private List<Course> summerCourses;
+    private List<Course> winterCourses;
     private static final String SAVED_SCHEDULE = "saved-schedule.json";
     private static final String SAVED_SCHEDULES_FOLDER = "schedules/";
 
     public Schedule(List<Course> courses) {
-        this.courses = courses;
+        fallCourses = new ArrayList<>();
+        springCourses = new ArrayList<>();
+        summerCourses = new ArrayList<>();
+        winterCourses = new ArrayList<>();
+
+        for(Course c : courses){ //Example semester: 2023_Fall
+            addCourse(c);
+        }
     }
     public Schedule() {
         this(new ArrayList<Course>());
     }
 
     public boolean inSchedule(Course course){
-        return courses.contains(course);
+        if (course.semester().contains("Fall")){
+            //add to fall list
+            return fallCourses.contains(course);
+        }else if(course.semester().contains("Spring")){
+            //add to spring list
+            return springCourses.contains(course);
+        }else if(course.semester().contains("Summer")){
+            //add to summer list
+            return summerCourses.contains(course);
+        }else{
+            //add to winter list
+            return winterCourses.contains(course);
+        }
     }
 
     public static Schedule loadSchedule(String filename) throws IOException {
@@ -41,13 +63,23 @@ public class Schedule {
         return loadSchedule(SAVED_SCHEDULE);
     }
 
+    private List<Course> allCourses(){
+        //condense all courses to one list
+        List<Course> courses = new ArrayList<>();
+        courses.addAll(fallCourses);
+        courses.addAll(springCourses);
+        courses.addAll(winterCourses);
+        courses.addAll(summerCourses);
+        return courses;
+    }
+
     public void saveSchedule(String filename) throws IOException {
         File savedDir = new File(SAVED_SCHEDULES_FOLDER);
         if (!savedDir.exists()) {
             savedDir.mkdirs();
         }
 
-        Map<String, List<Course>> jsonObject = Map.of("classes", courses);
+        Map<String, List<Course>> jsonObject = Map.of("classes", allCourses());
         Main.MAPPER.writeValue(new File(SAVED_SCHEDULES_FOLDER + filename), jsonObject);
     }
 
@@ -56,16 +88,44 @@ public class Schedule {
     }
 
     public void addCourse(Course course) {
-        courses.add(course);
+        if (course.semester().contains("Fall")){
+            //add to fall list
+            fallCourses.add(course);
+        }else if(course.semester().contains("Spring")){
+            //add to spring list
+            springCourses.add(course);
+        }else if(course.semester().contains("Summer")){
+            //add to summer list
+            summerCourses.add(course);
+        }else{
+            //add to winter list
+            winterCourses.add(course);
+        }
     }
 
     public boolean removeCourse(Course course) {
-        return courses.remove(course);
+        if (course.semester().contains("Fall")){
+            //add to fall list
+            return fallCourses.remove(course);
+        }else if(course.semester().contains("Spring")){
+            //add to spring list
+            return springCourses.remove(course);
+        }else if(course.semester().contains("Summer")){
+            return summerCourses.remove(course);
+        }else{
+            return winterCourses.remove(course);
+        }
+    }
+
+    //TODO: add a checkForOverlap method, and make sure to check only in the same term
+    public String checkForOverlap(Course c){
+
+        return "stub";
     }
 
     public List<Course> getCourses() {
         List<Course> copyCourses = new ArrayList<>();
-        for (Course c : courses) {
+        for (Course c : allCourses()) {
             //if the course can't be found, don't cause a server error
             if(c == null) continue;
             List<CourseTime> timesCopy = new ArrayList<>();

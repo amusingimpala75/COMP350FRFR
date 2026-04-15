@@ -82,7 +82,7 @@ public class ScheduleController {
             content.newLineAtOffset(margin, yStart);
 
             //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
-            for (Course c : schedule.getCourses()) {
+            for (Course c : schedule.getCourses()) {  //TODO change the PDF to reflect the different semesters
 
                 //lines without indent
                 String first = c.department() + c.code() + c.section() + " " + c.name();
