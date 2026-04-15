@@ -40,7 +40,7 @@ public class Search {
         try {
             Connection conn = Database.getConnection();
             Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM public.\"Courses\"");
+            ResultSet rs = statement.executeQuery("SELECT * FROM public.\"courses\"");
 
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
