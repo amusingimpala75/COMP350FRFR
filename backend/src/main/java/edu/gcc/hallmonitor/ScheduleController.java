@@ -184,7 +184,25 @@ public class ScheduleController {
             if (schedule.inSchedule(course)) {
                 schedule.removeCourse(course);
                 ret = "Removed";
-            }else{
+            }else {
+                if (schedule.hasDifferentSection(course)) {
+                    //check for a different section of the class
+                    ret = "Already scheduled for a different section of this class";
+                } else {
+                    //check for overlap
+                    String overlap = schedule.checkForOverlap(course);
+                    if (!Objects.equals(overlap, "")) {
+                        ret = overlap;
+                    } else {
+                        //doesn't overlap, not scheduled for a different section
+                        schedule.addCourse(Search.getCourseByCode(courseID));
+                        ret = "Added";
+                    }
+
+                }
+            }
+
+                /*
                List<Course> courses = schedule.getCourses();
                for(Course c : courses) {
                    //if another section of the class is in the schedule, end the loop and return the string explaining the error
@@ -224,6 +242,9 @@ public class ScheduleController {
                     ret = "Added";
                 }
             }
+
+                 */
+
 
 
             schedule.saveSchedule();

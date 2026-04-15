@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Schedule {
 
@@ -31,20 +32,18 @@ public class Schedule {
         this(new ArrayList<Course>());
     }
 
+    //helper method to prevent duplicate code
+    private List<Course> getCoursesForTerm(Course course) {
+        String semester = course.semester();
+
+        if (semester.contains("Fall")) return fallCourses;
+        if (semester.contains("Spring")) return springCourses;
+        if (semester.contains("Summer")) return summerCourses;
+        return winterCourses;
+    }
+
     public boolean inSchedule(Course course){
-        if (course.semester().contains("Fall")){
-            //add to fall list
-            return fallCourses.contains(course);
-        }else if(course.semester().contains("Spring")){
-            //add to spring list
-            return springCourses.contains(course);
-        }else if(course.semester().contains("Summer")){
-            //add to summer list
-            return summerCourses.contains(course);
-        }else{
-            //add to winter list
-            return winterCourses.contains(course);
-        }
+        return getCoursesForTerm(course).contains(course);
     }
 
     public static Schedule loadSchedule(String filename) throws IOException {
@@ -88,39 +87,50 @@ public class Schedule {
     }
 
     public void addCourse(Course course) {
-        if (course.semester().contains("Fall")){
-            //add to fall list
-            fallCourses.add(course);
-        }else if(course.semester().contains("Spring")){
-            //add to spring list
-            springCourses.add(course);
-        }else if(course.semester().contains("Summer")){
-            //add to summer list
-            summerCourses.add(course);
-        }else{
-            //add to winter list
-            winterCourses.add(course);
-        }
+        getCoursesForTerm(course).add(course);
     }
 
     public boolean removeCourse(Course course) {
-        if (course.semester().contains("Fall")){
-            //add to fall list
-            return fallCourses.remove(course);
-        }else if(course.semester().contains("Spring")){
-            //add to spring list
-            return springCourses.remove(course);
-        }else if(course.semester().contains("Summer")){
-            return summerCourses.remove(course);
-        }else{
-            return winterCourses.remove(course);
-        }
+        return getCoursesForTerm(course).remove(course);
     }
 
     //TODO: add a checkForOverlap method, and make sure to check only in the same term
-    public String checkForOverlap(Course c){
+    //moving the schedule controller logic into the schedule class
+    public String checkForOverlap(Course course){ //TODO: add unit tests
+        for(Course c: getCoursesForTerm(course)){
+            for(CourseTime ct : course.times()){
+                int ctStartSec = ct.startTime().toSecondOfDay();
+                int ctEndSec = ct.endTime().toSecondOfDay();
+                if(ctEndSec <= ctStartSec) continue;
+                for(CourseTime ct2 : c.times()){
+                    //only perform the check if the classes are on the same day. If not, cancel checking this day and move to the next.
+                    if(!ct.day().equals(ct2.day())) continue;
 
-        return "stub";
+                    int ct2StartSec = ct2.startTime().toSecondOfDay();
+                    int ct2EndSec = ct2.endTime().toSecondOfDay();
+                    if(ct2EndSec <= ct2StartSec) continue;
+
+                    if(ctStartSec < ct2EndSec && ctEndSec > ct2StartSec){
+                        //if there is an overlap in the time blocks, stop checking other days and return the error message.
+                        return "Course " + course.department() + course.code() + course.section() + " overlaps with " + c.department() + c.code() + c.section();
+                    }
+                }
+
+
+            }
+        }
+        return "";
+    }
+
+    //checks if the schedule has already saved a different section of the same class
+    public boolean hasDifferentSection(Course course){ //TODO: add unit tests
+        for(Course c : getCoursesForTerm(course)) {
+            //if another section of the class is in the schedule, return true
+            if (c.code() == course.code() && Objects.equals(c.name(), course.name()) && c.section() != course.section()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Course> getCourses() {
