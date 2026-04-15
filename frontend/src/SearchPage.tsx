@@ -34,6 +34,7 @@ export default function SearchPage() {
   const [availableCredits, setAvailableCredits] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
+  const isClearing = useRef(false);
 
   const getCourseId = (course: Course) =>
     `${course.subject}${course.number}${course.section}`;
@@ -59,6 +60,12 @@ export default function SearchPage() {
       didMount.current = true;
       return;
     }
+
+    if (isClearing.current) {
+      isClearing.current = false;
+      return;
+    }
+
     search();
   }, [department, professor, days, credits, timeStart, timeEnd]);
 
@@ -261,6 +268,30 @@ export default function SearchPage() {
     fetchSchedule();
   }, []);
 
+
+  const clearAllFilters = async () => {
+    isClearing.current = true;
+
+    const currentFilters = await fetch('/search/filter').then(res => res.json());
+
+    for (const { type, value } of currentFilters) {
+      await fetch('/search/filter', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, value }),
+      });
+    }
+
+    setDepartment('ALL');
+    setProfessor('ALL');
+    setDays(new Set());
+    setCredits('ALL');
+    setTimeStart('00:01');
+    setTimeEnd('23:59');
+
+    setCourses([]); // clear results
+  };
+
   return (
     <div className="layout">
     <div><Toaster/></div>
@@ -315,6 +346,11 @@ export default function SearchPage() {
             .map(c => <option key={c} value={c}>{c}</option>)
           }
         </select>
+
+        <h5></h5>
+        <button className="clear-btn" onClick={clearAllFilters}>
+          Clear All Filters
+        </button>
 
       </div>
 
