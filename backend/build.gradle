@@ -74,25 +74,39 @@ gradle.taskGraph.whenReady { graph ->
     }
 }
 
-def hasDocker = { ->
+ext {
+    containerTool = findProperty("containerTool") ?: detectContainerTool()
+}
+
+def isCommandAvailable(String command) {
     try {
-        def p = new ProcessBuilder('docker', '--help').start()
-
-        p.inputStream.consume()
-        p.errorStream.consume()
-
-        p.waitFor() == 0
-    } catch(Exception e) {
-        false
+        def output = new ByteArrayOutputStream()
+        exec {
+            commandLine command, "--version"
+            standardOutput = output
+            errorOutput = new ByteArrayOutputStream()
+            ignoreExitValue = true
+        }
+        return output.toString().toLowerCase().contains(command)
+    } catch (Exception ignored) {
+        return false
     }
 }
 
-def containerRuntime = hasDocker() ? 'docker' : 'podman'
+def detectContainerTool() {
+    if (isCommandAvailable("docker")) {
+        return "docker"
+    }
+    if (isCommandAvailable("podman")) {
+        return "podman"
+    }
+    throw new GradleException("Neither Docker nor Podman is available on PATH.")
+}
 
 tasks.register('containerBuild', Exec) {
     dependsOn shadowJar
 
-    commandLine containerRuntime, 'build', '-o=type=tar,dest=hallmonitor.tar', '../', '-t', 'hallmonitor'
+    commandLine containerTool, 'build', '-o=type=tar,dest=hallmonitor.tar', '../', '-t', 'hallmonitor'
 }
 
 processResources.dependsOn copyFrontendBuild
