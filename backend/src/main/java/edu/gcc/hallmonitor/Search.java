@@ -1,18 +1,18 @@
 package edu.gcc.hallmonitor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import me.xdrop.fuzzywuzzy.FuzzySearch;
-import java.util.HashMap;
-
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 public class Search {
 
@@ -44,15 +44,15 @@ public class Search {
         allCourses.removeIf(c -> !c.semester().equals("2023_Fall"));
 
         courseMap = new HashMap<>();
-        //hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
-        for(Course course : allCourses){
-            courseMap.put(course.department()+course.code()+course.section(),course);
+        // hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
+        for (Course course : allCourses) {
+            courseMap.put(course.department() + course.code() + course.section(), course);
         }
 
     }
 
-    public static Course getCourseByCode(String code){
-        return courseMap.get(code); //TODO: handle problems with this
+    public static Course getCourseByCode(String code) {
+        return courseMap.get(code); // TODO: handle problems with this
     }
 
     public void applyFilter(Filter filter) {
@@ -79,7 +79,6 @@ public class Search {
         return matchResults;
     }
 
-
     public Search(String searchQuery, ArrayList<Filter> filters) {
         this.searchQuery = searchQuery;
 
@@ -102,17 +101,17 @@ public class Search {
                     int ranking = (titleScore * 5) + deptScore + profScore + (codeScore * 2);
 
                     //boost aggressively for exact matches since the fuzzySearch can give high scores to unrelated strings
-                    if (query.equals(title)) ranking += 20000;
-                    if (title.contains((" " + query + " "))) ranking += 8000; //looking for the query as an isolated word and not a substring
-                    if (title.startsWith(query)) ranking += 4000;
-                    if(prof.equals(query)) ranking += 20000;
-                    if(prof.contains(query)) ranking += 8000;
-                    if(prof.startsWith(query)) ranking += 4000;
-                    if (dept.equals(query)) ranking += 20000;
-                    if (dept.contains(query)) ranking += 8000;
-                    if (dept.startsWith(query)) ranking += 4000;
-                    if (code.equals(query)) ranking += 24000;
-                    if (code.startsWith(query)) ranking += 4000;
+                    if (query.equals(title)) { ranking += 20000; }
+                    if (title.contains((" " + query + " "))) { ranking += 8000; } //looking for the query as an isolated word and not a substring
+                    if (title.startsWith(query)) { ranking += 4000; }
+                    if (prof.equals(query)) { ranking += 20000; }
+                    if (prof.contains(query)) { ranking += 8000; }
+                    if (prof.startsWith(query)) { ranking += 4000; }
+                    if (dept.equals(query)) { ranking += 20000; }
+                    if (dept.contains(query)) { ranking += 8000; }
+                    if (dept.startsWith(query)) { ranking += 4000; }
+                    if (code.equals(query)) { ranking += 24000; }
+                    if (code.startsWith(query)) { ranking += 4000; }
 
                     //attach the score to the course, sort by the score
                     return new AbstractMap.SimpleEntry<>(ranking, course);
