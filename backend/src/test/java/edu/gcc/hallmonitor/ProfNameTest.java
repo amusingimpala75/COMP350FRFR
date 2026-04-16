@@ -1,11 +1,10 @@
 package edu.gcc.hallmonitor;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProfNameTest {
     @Test
