@@ -15,6 +15,7 @@ interface Course {
   section: string;
   name: string;
   times: CourseTime[];
+  semester: string;
 }
 
 export default function SchedulePage() {
@@ -116,10 +117,10 @@ export default function SchedulePage() {
         <h1>User Schedule</h1>
         <ul>
           {courses.map(course => {
-            const courseId = `${course.subject}${course.number}${course.section}`;
+            const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
             return (
               <li key={courseId}>
-                {course.subject}{course.number} {course.section} — {course.name}
+                {course.semester} {course.subject}{course.number} {course.section} — {course.name}
                 <button onClick={() => removeCourse(courseId)}>Remove Course</button>
               </li>
             );
