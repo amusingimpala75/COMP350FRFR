@@ -1,12 +1,11 @@
 package edu.gcc.hallmonitor;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DaysTest {
     @Test

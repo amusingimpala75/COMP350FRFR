@@ -1,12 +1,12 @@
 package edu.gcc.hallmonitor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class Schedule {
 
@@ -17,11 +17,12 @@ public class Schedule {
     public Schedule(List<Course> courses) {
         this.courses = courses;
     }
+
     public Schedule() {
         this(new ArrayList<Course>());
     }
 
-    public boolean inSchedule(Course course){
+    public boolean inSchedule(Course course) {
         return courses.contains(course);
     }
 
@@ -67,10 +68,10 @@ public class Schedule {
         List<Course> copyCourses = new ArrayList<>();
         for (Course c : courses) {
             //if the course can't be found, don't cause a server error
-            if(c == null) continue;
+            if (c == null) { continue; }
             List<CourseTime> timesCopy = new ArrayList<>();
 
-            if(c.times() != null) {
+            if (c.times() != null) {
                 for (CourseTime time : c.times()) {
 
                     timesCopy.add(new CourseTime(time.day(), time.startTime(), time.endTime()));
@@ -98,6 +99,5 @@ public class Schedule {
 
         return copyCourses;
     }
-
 
 }

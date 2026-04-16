@@ -13,6 +13,7 @@ public record NumCredits(int numCredits) implements Filter {
     public boolean filter(Course course) {
         return course.credits() == numCredits;
     }
+
     @Override
     public JsonNode toJSON() {
         ObjectNode root = Main.MAPPER.createObjectNode();
