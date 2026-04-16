@@ -34,9 +34,10 @@ export default function SearchPage() {
   const [availableCredits, setAvailableCredits] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
+  const isClearing = useRef(false);
 
   const getCourseId = (course: Course) =>
-    `${course.subject}${course.number}${course.section}`;
+    `${course.subject}${course.number}${course.section}${course.semester}`; //
 
   // --- SEARCH ---
   const search = async () => {
@@ -59,6 +60,12 @@ export default function SearchPage() {
       didMount.current = true;
       return;
     }
+
+    if (isClearing.current) {
+      isClearing.current = false;
+      return;
+    }
+
     search();
   }, [department, professor, days, credits, timeStart, timeEnd]);
 
@@ -204,6 +211,7 @@ export default function SearchPage() {
     fetchResults();
 
     const fetchQuery = async() => {
+      if (isClearing.current) return;
       const res = await fetch("/search/query");
       const text = await res.text();
       setQuery(text);
@@ -261,6 +269,25 @@ export default function SearchPage() {
     fetchSchedule();
   }, []);
 
+
+  const clearAllFilters = async () => {
+    isClearing.current = true;
+
+    await fetch('/search/filter?all=true', {
+      method: 'DELETE',
+    });
+
+    setDepartment('ALL');
+    setProfessor('ALL');
+    setDays(new Set());
+    setCredits('ALL');
+    setTimeStart('00:01');
+    setTimeEnd('23:59');
+    setQuery('');
+
+    setCourses([]);
+};
+
   return (
     <div className="layout">
     <div><Toaster/></div>
@@ -316,6 +343,11 @@ export default function SearchPage() {
           }
         </select>
 
+        <h5></h5>
+        <button className="clear-btn" onClick={clearAllFilters}>
+          Clear All Filters
+        </button>
+
       </div>
 
       {/* MAIN CONTENT */}
@@ -335,7 +367,7 @@ export default function SearchPage() {
           <h3>Results</h3>
           <ul>
             {courses.map(course => {
-                const courseId = `${course.subject}${course.number}${course.section}`;
+                const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
                 let inSchedule = schedule.has(courseId)
 
               return (
@@ -348,7 +380,7 @@ export default function SearchPage() {
                   </button>
 
                   <span className="course-text">
-                    {course.subject}{course.number} {course.section} — {course.name} — {
+                    {course.semester} {course.subject}{course.number} {course.section} — {course.name} — {
                       course.times?.length
                         ? Array.from(
                             course.times.reduce((acc, t) => {

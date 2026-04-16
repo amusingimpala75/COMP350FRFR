@@ -82,7 +82,7 @@ public class Search {
         courseMap = new HashMap<>();
         // hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
         for (Course course : allCourses) {
-            courseMap.put(course.department() + course.code() + course.section(), course);
+            courseMap.put(course.department() + course.code() + course.section() + course.semester(), course);
         }
 
     }
