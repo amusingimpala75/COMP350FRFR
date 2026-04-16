@@ -37,7 +37,7 @@ export default function SearchPage() {
   const isClearing = useRef(false);
 
   const getCourseId = (course: Course) =>
-    `${course.subject}${course.number}${course.section}`;
+    `${course.subject}${course.number}${course.section}${course.semester}`; //
 
   // --- SEARCH ---
   const search = async () => {
@@ -367,7 +367,7 @@ export default function SearchPage() {
           <h3>Results</h3>
           <ul>
             {courses.map(course => {
-                const courseId = `${course.subject}${course.number}${course.section}`;
+                const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
                 let inSchedule = schedule.has(courseId)
 
               return (
@@ -380,7 +380,7 @@ export default function SearchPage() {
                   </button>
 
                   <span className="course-text">
-                    {course.subject}{course.number} {course.section} — {course.name} — {
+                    {course.semester} {course.subject}{course.number} {course.section} — {course.name} — {
                       course.times?.length
                         ? Array.from(
                             course.times.reduce((acc, t) => {
