@@ -44,9 +44,9 @@ public class Search {
         allCourses.removeIf(c -> !c.semester().equals("2023_Fall"));
 
         courseMap = new HashMap<>();
-        //hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
-        for(Course course : allCourses){
-            courseMap.put(course.department()+course.code()+course.section()+course.semester(),course);
+        // hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
+        for (Course course : allCourses) {
+            courseMap.put(course.department() + course.code() + course.section() + course.semester(), course);
         }
 
     }
