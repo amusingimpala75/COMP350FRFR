@@ -211,6 +211,7 @@ export default function SearchPage() {
     fetchResults();
 
     const fetchQuery = async() => {
+      if (isClearing.current) return;
       const res = await fetch("/search/query");
       const text = await res.text();
       setQuery(text);
@@ -272,15 +273,9 @@ export default function SearchPage() {
   const clearAllFilters = async () => {
     isClearing.current = true;
 
-    const currentFilters = await fetch('/search/filter').then(res => res.json());
-
-    for (const { type, value } of currentFilters) {
-      await fetch('/search/filter', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, value }),
-      });
-    }
+    await fetch('/search/filter?all=true', {
+      method: 'DELETE',
+    });
 
     setDepartment('ALL');
     setProfessor('ALL');
@@ -288,9 +283,10 @@ export default function SearchPage() {
     setCredits('ALL');
     setTimeStart('00:01');
     setTimeEnd('23:59');
+    setQuery('');
 
-    setCourses([]); // clear results
-  };
+    setCourses([]);
+};
 
   return (
     <div className="layout">
