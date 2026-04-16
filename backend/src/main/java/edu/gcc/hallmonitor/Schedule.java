@@ -95,8 +95,7 @@ public class Schedule {
         return getCoursesForTerm(course).remove(course);
     }
 
-    //TODO: add a checkForOverlap method, and make sure to check only in the same term
-    //moving the schedule controller logic into the schedule class
+    //check each course in the current schedule to find any overlap in time between them and course
     public String checkForOverlap(Course course){ //TODO: add unit tests
         for(Course c: getCoursesForTerm(course)){
             for(CourseTime ct : course.times()){
