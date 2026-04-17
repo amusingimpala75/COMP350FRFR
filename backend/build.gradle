@@ -106,7 +106,8 @@ def detectContainerTool() {
 tasks.register('containerBuild', Exec) {
     dependsOn shadowJar
 
-    commandLine containerTool, 'build', '-o=type=tar,dest=hallmonitor.tar', '../', '-t', 'hallmonitor', '-f', 'Containerfile'
+    workingDir '..'
+    commandLine containerTool, 'build', '-o=type=tar,dest=hallmonitor.tar', '.', '-t', 'hallmonitor', '-f', 'Containerfile'
 }
 
 processResources.dependsOn copyFrontendBuild
