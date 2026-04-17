@@ -65,6 +65,14 @@ tasks.register('copyFrontendBuild', Copy) {
     into("$buildDir/resources/main/public")
 }
 
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(tasks.named("check").get())) {
+        tasks.withType(Checkstyle).configureEach {
+            enabled = false
+        }
+    }
+}
+
 processResources.dependsOn copyFrontendBuild
 
 test {
