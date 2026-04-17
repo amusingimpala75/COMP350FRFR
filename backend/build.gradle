@@ -109,7 +109,7 @@ tasks.register('containerBuild', Exec) {
     dependsOn shadowJar
 
     workingDir '..'
-    commandLine containerTool, 'build', '-o=type=tar,dest=hallmonitor.tar', '.', '-t', 'hallmonitor', '-f', 'Containerfile'
+    commandLine containerTool, 'build', '.', '-t', 'hallmonitor:latest', '-f', 'Containerfile'
 }
 
 processResources.dependsOn copyFrontendBuild
