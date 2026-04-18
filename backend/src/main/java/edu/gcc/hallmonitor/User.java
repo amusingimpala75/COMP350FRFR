@@ -94,6 +94,11 @@ public class User {
         return rs.next();
     }
 
+    /**
+     * Checks if the current username member variable is in use in the database
+     * @return if the username is already used
+     * @throws SQLException if the connection fails
+     */
     public boolean isUsernameTaken() throws SQLException {
         PreparedStatement prepStatement = connection.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
@@ -106,6 +111,11 @@ public class User {
         return rs.next();
     }
 
+    /**
+     * Adds a user if the username is not already taken
+     * @return if the user was successfully added
+     * @throws SQLException if the connection fails
+     */
     public boolean addUser() throws SQLException {
         // Two users should not share a username
         if (isUsernameTaken()) {
@@ -125,7 +135,15 @@ public class User {
         return isUser();
     }
 
+    /**
+     * Deletes a user from the database. If a user is not in the database, then this method returns false
+     * @return if the user is no longer present in the database
+     * @throws SQLException if the connection fails
+     */
     public boolean deleteUser() throws SQLException {
+        if (!isUser()) {
+            return false;
+        }
         PreparedStatement prepStatement = connection.prepareStatement(
                 "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
         );
