@@ -1,13 +1,41 @@
 package edu.gcc.hallmonitor;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.sql.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserTest {
+
+    public static Connection connection;
+
+    @BeforeAll
+    public static void setup() throws SQLException {
+        connection = Database.getConnection();
+
+        // Validate the test user is present in the database
+        User user = new User("testuser", "password");
+
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "SELECT * FROM public.\"users\"" +
+                    "WHERE username = ? AND password_hash = ?"
+        );
+        prepStatement.setString(1, user.getUsername());
+        prepStatement.setBytes(2, user.getPasswordHash());
+        ResultSet rs = prepStatement.executeQuery();
+
+        assertTrue(rs.next()); // should have a result
+    }
+
+    @AfterAll
+    public static void tearDown() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    }
+
+
     @Test
     public void isUserTest() {
         User user = null;
@@ -76,11 +104,9 @@ public class UserTest {
     public void addUserTest() {
         // Delete the test user
         User user = null;
-        Connection connection = null;
         try {
             user = new User("testuser", "password");
 
-            connection = Database.getConnection();
             PreparedStatement prepStatement = connection.prepareStatement(
                     "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
             );
@@ -110,7 +136,6 @@ public class UserTest {
             assertTrue(user.deleteUser());
 
             // Add the user back
-            Connection connection = Database.getConnection();
             PreparedStatement prepStatement = connection.prepareStatement(
                     "INSERT INTO public.\"users\" (username, password_hash)" +
                             "VALUES (?, ?)"
@@ -148,7 +173,6 @@ public class UserTest {
             assertTrue(newUser.isUser());
 
             // Delete the user we added
-            Connection connection = Database.getConnection();
             PreparedStatement prepStatement = connection.prepareStatement(
                     "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
             );
@@ -162,15 +186,26 @@ public class UserTest {
 
     }
 
-    public String getUnusedUsername() throws SQLException {
+    @Test
+    public void authenticateNewUserWithTakenUsername() throws SQLException {
+        String usedUsername = getUsedUsername();
+
+        assertThrows(SecurityException.class, () -> User.authenticate(usedUsername, "1234"));
+
+    }
+
+    public String getUsedUsername() throws SQLException {
         // Get a username in the database
-        Connection conn = Database.getConnection();
-        Statement statement = conn.createStatement();
+        Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery(
                 "SELECT username FROM public.\"users\" LIMIT 1"
         );
         rs.next();
-        StringBuilder usernameBuilder = new StringBuilder(rs.getString(1));
+        return rs.getString(1);
+    }
+
+    public String getUnusedUsername() throws SQLException {
+        StringBuilder usernameBuilder = new StringBuilder(getUsedUsername());
 
         User user = null;
         boolean isUsernameTaken = true;
