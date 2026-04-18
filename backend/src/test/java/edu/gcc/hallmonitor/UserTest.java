@@ -79,10 +79,11 @@ public class UserTest {
     public void addUserTest() {
         // Delete the test user
         User user = null;
+        Connection connection = null;
         try {
             user = new User("testuser", "password");
 
-            Connection connection = Database.getConnection();
+            connection = Database.getConnection();
             PreparedStatement prepStatement = connection.prepareStatement(
                     "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
             );
@@ -97,8 +98,42 @@ public class UserTest {
         // Add the user back
         try {
             assertTrue(user.addUser());
+            // Change the id to 1 so that it doesn't go up by 1 each test
+            PreparedStatement prepStatement = connection.prepareStatement(
+                    "UPDATE public.\"users\" SET id = ? WHERE username = ? AND password_hash = ?"
+            );
+            prepStatement.setInt(1, 1);
+            prepStatement.setString(2, user.getUsername());
+            prepStatement.setBytes(3, user.getPasswordHash());
+
         } catch (SQLException sqle) {
             fail("Unable to establish database connection");
         }
+    }
+
+    @Test
+    public void deleteUserTest() {
+        // Delete the test user
+        User user = null;
+        try {
+            user = new User("testuser", "password");
+            assertTrue(user.deleteUser());
+
+            // Add the user back
+            Connection connection = Database.getConnection();
+            PreparedStatement prepStatement = connection.prepareStatement(
+                    "INSERT INTO public.\"users\" (id, username, password_hash)" +
+                            "VALUES (?, ?, ?)"
+            );
+            prepStatement.setInt(1, 1); // We don't want the tests to add 1 to the id every time
+            prepStatement.setString(2, user.getUsername());
+            prepStatement.setBytes(3, user.getPasswordHash());
+            prepStatement.execute();
+
+
+        } catch (SQLException sqle) {
+            fail("Unable to establish database connection");
+        }
+
     }
 }
