@@ -11,10 +11,6 @@ public class User {
     private int gradYear;
     private Connection connection;
 
-    public User() {
-
-    }
-
     public User(String username, String password) throws IllegalArgumentException, SQLException {
         if (password.isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
@@ -29,6 +25,14 @@ public class User {
         } catch (NoSuchAlgorithmException ignored) {} // won't fail since sha256 is hardcoded
 
         connection = Database.getConnection();
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public byte[] getPasswordHash() {
+        return passwordHash;
     }
 
     public void setGradYear(int gradYear) {
