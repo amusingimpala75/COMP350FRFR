@@ -3,9 +3,7 @@ package edu.gcc.hallmonitor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,13 +16,13 @@ public class UserTest {
         } catch (IllegalArgumentException iae) {
             fail(); // username and password are not empty, so this should not happen
         } catch (SQLException sqle) {
-            fail("Unable to establish connection with database");
+            fail(sqle.getMessage());
         }
 
         try {
             assertTrue(user.isUser()); // the test user should be in the database and isUser should return true
         } catch (SQLException sqle) {
-            fail("Unable to establish database connection");
+            fail(sqle.getMessage());
         }
     }
 
@@ -46,13 +44,13 @@ public class UserTest {
         } catch (IllegalArgumentException iae) {
             fail(); // username and password are not empty, so this should not happen
         } catch (SQLException sqle) {
-            fail("Unable to establish connection with database");
+            fail(sqle.getMessage());
         }
 
         try {
             assertTrue(user.isUsernameTaken());
         } catch (SQLException sqle) {
-            fail("Unable to establish database connection");
+            fail(sqle.getMessage());
         }
     }
 
@@ -64,13 +62,13 @@ public class UserTest {
         } catch (IllegalArgumentException iae) {
             fail(); // username and password are not empty, so this should not happen
         } catch (SQLException sqle) {
-            fail("Unable to establish connection with database");
+            fail(sqle.getMessage());
         }
 
         try {
             assertFalse(user.addUser()); // should fail
         } catch (SQLException sqle) {
-            fail("Unable to establish database connection");
+            fail(sqle.getMessage());
         }
     }
 
@@ -91,29 +89,22 @@ public class UserTest {
             prepStatement.execute();
 
         } catch (SQLException sqle) {
-            fail("Unable to establish database connection");
+            fail(sqle.getMessage());
         }
 
         // Add the user back
         try {
             assertTrue(user.addUser());
-            // Change the id to 1 so that it doesn't go up by 1 each test
-            PreparedStatement prepStatement = connection.prepareStatement(
-                    "UPDATE public.\"users\" SET id = ? WHERE username = ? AND password_hash = ?"
-            );
-            prepStatement.setInt(1, 1);
-            prepStatement.setString(2, user.getUsername());
-            prepStatement.setBytes(3, user.getPasswordHash());
 
         } catch (SQLException sqle) {
-            fail("Unable to establish database connection");
+            fail(sqle.getMessage());
         }
     }
 
     @Test
     public void deleteUserTest() {
         // Delete the test user
-        User user = null;
+        User user;
         try {
             user = new User("testuser", "password");
             assertTrue(user.deleteUser());
@@ -121,19 +112,17 @@ public class UserTest {
             // Add the user back
             Connection connection = Database.getConnection();
             PreparedStatement prepStatement = connection.prepareStatement(
-                    "INSERT INTO public.\"users\" (id, username, password_hash)" +
-                            "VALUES (?, ?, ?)"
+                    "INSERT INTO public.\"users\" (username, password_hash)" +
+                            "VALUES (?, ?)"
             );
-            prepStatement.setInt(1, 1); // We don't want the tests to add 1 to the id every time
-            prepStatement.setString(2, user.getUsername());
-            prepStatement.setBytes(3, user.getPasswordHash());
+            prepStatement.setString(1, user.getUsername());
+            prepStatement.setBytes(2, user.getPasswordHash());
             prepStatement.execute();
 
 
         } catch (SQLException sqle) {
-            fail("Unable to establish database connection");
+            fail(sqle.getMessage());
         }
-
     }
 
     @Test
@@ -145,7 +134,58 @@ public class UserTest {
         } catch (SecurityException se) {
             fail(); // username and password should be in the database, so shouldn't happen
         } catch (SQLException sqle) {
-            fail("Unable to establish database connection");
+            fail(sqle.getMessage());
         }
+    }
+
+    @Test
+    public void authenticateNewUser() {
+        String username;
+        try {
+            username = getUnusedUsername();
+            User newUser = User.authenticate(username, "1234");
+
+            assertTrue(newUser.isUser());
+
+            // Delete the user we added
+            Connection connection = Database.getConnection();
+            PreparedStatement prepStatement = connection.prepareStatement(
+                    "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
+            );
+            prepStatement.setString(1, newUser.getUsername());
+            prepStatement.setBytes(2, newUser.getPasswordHash());
+            prepStatement.execute();
+
+        } catch (SQLException sqle) {
+            fail(sqle.getMessage());
+        }
+
+    }
+
+    public String getUnusedUsername() throws SQLException {
+        // Get a username in the database
+        Connection conn = Database.getConnection();
+        Statement statement = conn.createStatement();
+        ResultSet rs = statement.executeQuery(
+                "SELECT username FROM public.\"users\" LIMIT 1"
+        );
+        rs.next();
+        StringBuilder usernameBuilder = new StringBuilder(rs.getString(1));
+
+        User user = null;
+        boolean isUsernameTaken = true;
+
+        // If the current one is taken, add an 'a' and check again
+        while (isUsernameTaken) {
+            user = new User(usernameBuilder.toString(), "1234");
+
+            if (user.isUsernameTaken()) {
+                usernameBuilder.append("a");
+            } else {
+                isUsernameTaken = false;
+            }
+        }
+
+        return usernameBuilder.toString();
     }
 }
