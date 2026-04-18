@@ -79,7 +79,21 @@ public class User {
         return rs.next();
     }
 
-    public boolean addUser() {
-        return false;
+    public boolean addUser() throws SQLException {
+        // Two users should not share a username
+        if (isUsernameTaken()) {
+            return false;
+        }
+
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "INSERT INTO public.\"users\" (username, password_hash, grad_year)" +
+                    "VALUES (?, ?, ?)"
+        );
+        prepStatement.setString(1, username);
+        prepStatement.setBytes(2, passwordHash);
+        prepStatement.setInt(3, gradYear);
+
+        // Validate that the username and password have been added
+        return isUser();
     }
 }
