@@ -39,7 +39,17 @@ public class User {
         this.gradYear = gradYear;
     }
 
-    public static User authenticate(String username, String password) throws Exception {
+    /**
+     * Validate that the username and password are in the database. If they are not, validate that the username
+     * is not taken already. If it is not, add the user. The user object is then returned.
+     * @param username the username to authenticate
+     * @param password the password to authenticate
+     * @return an authenticated User object
+     * @throws IllegalArgumentException if the username or password are empty
+     * @throws SecurityException if the user cannot be authenticated
+     * @throws SQLException if there is an error with the database connection
+     */
+    public static User authenticate(String username, String password) throws IllegalArgumentException, SecurityException, SQLException {
         User user = new User(username, password);
 
         // If they are not a user and they can't successfully be added, throw an error
