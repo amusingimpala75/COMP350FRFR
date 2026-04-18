@@ -11,6 +11,15 @@ public class User {
     private int gradYear;
     private Connection connection;
 
+    /**
+     * Basic constructor that sets the username and password hash. NOTE: YOU SHOULD USE THE authenticate() METHOD
+     * FOR CREATING NEW USERS WHICH IN TURN CALLS THIS FUNCTION. YOU SHOULD PRIMARILY USE THIS METHOD BY ITSELF
+     * FOR TESTING THE METHODS THAT GO INTO authenticate().
+     * @param username the username of the user
+     * @param password the password of the user
+     * @throws IllegalArgumentException if the username or password are empty
+     * @throws SQLException if the connection can't be established.
+     */
     public User(String username, String password) throws IllegalArgumentException, SQLException {
         if (password.isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
