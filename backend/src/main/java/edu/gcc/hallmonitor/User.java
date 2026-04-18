@@ -96,6 +96,7 @@ public class User {
         prepStatement.setString(1, username);
         prepStatement.setBytes(2, passwordHash);
         prepStatement.setInt(3, gradYear);
+        prepStatement.execute();
 
         // Validate that the username and password have been added
         return isUser();
