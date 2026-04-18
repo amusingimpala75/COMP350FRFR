@@ -53,4 +53,22 @@ public class UserTest {
             fail("Unable to establish database connection");
         }
     }
+
+    @Test
+    public void addUserWithSameNameTest() {
+        User user = null;
+        try {
+            user = new User("testuser", "notpassword");
+        } catch (IllegalArgumentException iae) {
+            fail(); // username and password are not empty, so this should not happen
+        } catch (SQLException sqle) {
+            fail("Unable to establish connection with database");
+        }
+
+        try {
+            assertFalse(user.addUser()); // should fail
+        } catch (SQLException sqle) {
+            fail("Unable to establish database connection");
+        }
+    }
 }
