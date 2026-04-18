@@ -1,10 +1,20 @@
 package edu.gcc.hallmonitor;
 
-import org.junit.jupiter.api.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import java.sql.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class UserTest {
 
@@ -34,7 +44,6 @@ public class UserTest {
             connection.close();
         }
     }
-
 
     @Test
     public void isUserTest() {
@@ -143,7 +152,6 @@ public class UserTest {
             prepStatement.setString(1, user.getUsername());
             prepStatement.setBytes(2, user.getPasswordHash());
             prepStatement.execute();
-
 
         } catch (SQLException sqle) {
             fail(sqle.getMessage());

@@ -3,7 +3,10 @@ package edu.gcc.hallmonitor;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class User {
     private String username;
@@ -31,7 +34,9 @@ public class User {
         try {
             MessageDigest digest = MessageDigest.getInstance("sha256");
             passwordHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException ignored) {} // won't fail since sha256 is hardcoded
+        } catch (NoSuchAlgorithmException ignored) {
+            throw new IllegalArgumentException("sha256 not found");
+        } // won't fail since sha256 is hardcoded
 
         connection = Database.getConnection();
     }
