@@ -101,4 +101,16 @@ public class User {
         // Validate that the username and password have been added
         return isUser();
     }
+
+    public boolean deleteUser() throws SQLException {
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
+        );
+        prepStatement.setString(1, username);
+        prepStatement.setBytes(2, passwordHash);
+        prepStatement.execute();
+
+        // Validate that the username and password have been deleted
+        return !isUser();
+    }
 }
