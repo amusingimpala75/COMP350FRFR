@@ -3,7 +3,10 @@ package edu.gcc.hallmonitor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -67,6 +70,33 @@ public class UserTest {
 
         try {
             assertFalse(user.addUser()); // should fail
+        } catch (SQLException sqle) {
+            fail("Unable to establish database connection");
+        }
+    }
+
+    @Test
+    public void addUserTest() {
+        // Delete the test user
+        User user = null;
+        try {
+            user = new User("testuser", "password");
+
+            Connection connection = Database.getConnection();
+            PreparedStatement prepStatement = connection.prepareStatement(
+                    "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
+            );
+            prepStatement.setString(1, user.getUsername());
+            prepStatement.setBytes(2, user.getPasswordHash());
+            prepStatement.execute();
+
+        } catch (SQLException sqle) {
+            fail("Unable to establish database connection");
+        }
+
+        // Add the user back
+        try {
+            assertTrue(user.addUser());
         } catch (SQLException sqle) {
             fail("Unable to establish database connection");
         }
