@@ -1,16 +1,20 @@
 package edu.gcc.hallmonitor;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
@@ -29,13 +33,45 @@ public class Search {
     }
 
     private static void loadCourses() {
+        allCourses = new ArrayList<>();
         //if this is the first search, initialize the allCourses list
         try {
-            allCourses = loadData("courses.json");
-        } catch (FileNotFoundException fnfe) {
-            System.err.println("File not found: " + fnfe.getMessage());
-        } catch (IOException ioe) {
-            System.err.println("IO Exception occurred: " + ioe.getMessage());
+            Connection conn = Database.getConnection();
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM public.\"courses\"");
+
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+
+            while (rs.next()) {
+                String[] facultyArray = (String[]) rs.getArray("faculty").getArray();
+                List<String> facultyList = Arrays.asList(facultyArray);
+
+                String time_json = rs.getString("times");
+                List<CourseTime> courseTimes = mapper.readerForListOf(CourseTime.class).readValue(time_json);
+
+                Course c = new Course(
+                        rs.getString("name"),
+                        facultyList,
+                        rs.getString("subject"),
+                        rs.getInt("number"),
+                        rs.getString("section").charAt(0),
+                        rs.getString("location"),
+                        rs.getInt("credits"),
+                        rs.getString("semester"),
+                        courseTimes,
+                        rs.getBoolean("is_lab"),
+                        rs.getBoolean("is_open"),
+                        rs.getInt("open_seats"),
+                        rs.getInt("total_seats")
+                );
+                allCourses.add(c);
+            }
+        } catch (SQLException sqle) {
+            System.err.println("Error connecting to database: " + sqle.getMessage());
+            sqle.printStackTrace();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
         // We only want the fall classes
         // This is a KLUDGE to make this work
@@ -46,7 +82,7 @@ public class Search {
         courseMap = new HashMap<>();
         // hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
         for (Course course : allCourses) {
-            courseMap.put(course.department() + course.code() + course.section(), course);
+            courseMap.put(course.department() + course.code() + course.section() + course.semester(), course);
         }
 
     }
@@ -140,19 +176,6 @@ public class Search {
 
     public List<Filter> getFilters() {
         return this.filterList;
-    }
-
-    //reads json and converts to courses
-    public static List<Course> loadData(String coursesFilename) throws IOException {
-        URL jsonURL = Main.class.getResource(String.format("/%s", coursesFilename));
-        if (jsonURL == null) {
-            throw new FileNotFoundException(String.format("Could not find '%s' in resources directory", coursesFilename));
-        }
-
-        JsonNode root = Main.MAPPER.readTree(jsonURL);
-        JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
-
-        return Main.MAPPER.readerForListOf(Course.class).readValue(classesNode);
     }
 
     public String query() {
