@@ -9,12 +9,13 @@ public class User {
     private String username;
     private byte[] passwordHash;
     private int gradYear;
+    private Connection connection;
 
     public User() {
 
     }
 
-    public User(String username, String password) throws IllegalArgumentException {
+    public User(String username, String password) throws IllegalArgumentException, SQLException {
         if (password.isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
         } else if (username.isEmpty()) {
@@ -26,6 +27,8 @@ public class User {
             MessageDigest digest = MessageDigest.getInstance("sha256");
             passwordHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException ignored) {} // won't fail since sha256 is hardcoded
+
+        connection = Database.getConnection();
     }
 
     public void setGradYear(int gradYear) {
@@ -51,9 +54,8 @@ public class User {
      * @throws SQLException if the connection fails
      */
     public boolean isUser() throws SQLException {
-        Connection conn = Database.getConnection();
         // Get all the users that match the current user (should be at max 1)
-        PreparedStatement prepStatement = conn.prepareStatement(
+        PreparedStatement prepStatement = connection.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
                     "WHERE username = ? AND password_hash = ?"
         );
