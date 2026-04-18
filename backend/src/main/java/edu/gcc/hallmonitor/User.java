@@ -44,6 +44,10 @@ public class User {
         return passwordHash;
     }
 
+    public int getGradYear() {
+        return gradYear;
+    }
+
     public void setGradYear(int gradYear) {
         this.gradYear = gradYear;
     }
