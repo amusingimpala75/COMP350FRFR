@@ -194,6 +194,13 @@ public class UserTest {
 
     }
 
+    @Test
+    public void getAndSetGradYearTest() throws SQLException {
+        User user = new User("testuser", "password");
+        user.setGradYear(2023);
+        assertEquals(2023, user.getGradYear());
+    }
+
     public String getUsedUsername() throws SQLException {
         // Get a username in the database
         Statement statement = connection.createStatement();
