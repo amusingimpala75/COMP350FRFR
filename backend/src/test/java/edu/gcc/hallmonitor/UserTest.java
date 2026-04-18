@@ -135,4 +135,17 @@ public class UserTest {
         }
 
     }
+
+    @Test
+    public void authenticateCurrentUser() {
+        try {
+            User.authenticate("testuser", "password");
+        } catch (IllegalArgumentException iae) {
+            fail(); // username and password aren't empty, so shouldn't happen
+        } catch (SecurityException se) {
+            fail(); // username and password should be in the database, so shouldn't happen
+        } catch (SQLException sqle) {
+            fail("Unable to establish database connection");
+        }
+    }
 }
