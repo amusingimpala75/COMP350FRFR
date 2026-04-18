@@ -63,7 +63,19 @@ public class User {
         prepStatement.setBytes(2, passwordHash);
         ResultSet rs = prepStatement.executeQuery();
 
-        // If the result set is empty, return false. If the result set has a next, return true
+        // If the query result is empty, return false
+        return rs.next();
+    }
+
+    public boolean isUsernameTaken() throws SQLException {
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "SELECT * FROM public.\"users\"" +
+                    "WHERE username = ?"
+        );
+        prepStatement.setString(1, username);
+        ResultSet rs = prepStatement.executeQuery();
+
+        // If the query result is empty, return false
         return rs.next();
     }
 
