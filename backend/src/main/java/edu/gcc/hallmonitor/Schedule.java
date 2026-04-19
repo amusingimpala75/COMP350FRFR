@@ -112,7 +112,7 @@ public class Schedule {
 
                     if(ctStartSec < ct2EndSec && ctEndSec > ct2StartSec){
                         //if there is an overlap in the time blocks, stop checking other days and return the error message.
-                        return "Course " + course.department() + course.code() + course.section() + " overlaps with " + c.department() + c.code() + c.section();
+                        return course.department()+course.code()+course.section()+" overlaps with "+c.department()+c.code() + c.section();
                     }
                 }
 
