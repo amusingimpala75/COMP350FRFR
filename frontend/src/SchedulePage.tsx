@@ -3,6 +3,13 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { useRef } from 'react'
 
+
+//for sending into the /schedule/items endpoint
+type Term = 'Fall' | 'Winter' | 'Spring' | 'Summer';
+const TERMS: Term[] = ['Fall', 'Winter', 'Spring', 'Summer'];
+
+
+
 interface CourseTime {
   day: string
   start_time: string
@@ -20,9 +27,12 @@ interface Course {
 
 export default function SchedulePage() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [activeTerm, setActiveTerm] = useState<Term>('Fall');
+  //const calendarRef = useRef<FullCalendar>(null);
 
-  const loadCourses = async () => {
-    const res = await fetch('/schedule/items');
+
+  const loadCourses = async (term: Term) => {
+    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}`);
     const items: Course[] = await res.json();
     setCourses(items);
 
@@ -52,12 +62,12 @@ export default function SchedulePage() {
     await fetch('/schedule/items', { method: 'POST', body: courseId });
     //remove from calendar
     removeEvents(courseId);
-    loadCourses();
+    loadCourses(activeTerm);
   };
 
   useEffect(() => {
-      loadCourses();
-      }, []);
+      loadCourses(activeTerm);
+      }, [activeTerm]);
 
 
   const calendarRef = useRef<FullCalendar>(null)
@@ -114,7 +124,53 @@ export default function SchedulePage() {
   return (
     <div className="layout">
       <div className="main">
-        <h1>User Schedule</h1>
+        <h1>User Schedule — {activeTerm}</h1>
+        <div style={{
+                display: 'flex',
+                gap: 6,
+                marginBottom: 12,
+                alignItems: 'center'   // key fix
+              }}>
+                {TERMS.map(term => (
+                  <button
+                    key={term}
+                    onClick={() => setActiveTerm(term)}
+                    style={{
+                      fontSize: '0.8rem',
+                      padding: '4px 8px',
+                      height: 'auto',          // prevent stretching
+                      alignSelf: 'center',     // extra safety
+                      borderRadius: '6px',
+                      border: '1px solid #ccc',
+                      backgroundColor: activeTerm === term ? '#ddd' : '#f7f7f7',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+              {(activeTerm === 'Fall' || activeTerm === 'Spring') && (
+                <div className="Schedule">
+                      <FullCalendar
+                      ref={calendarRef}
+                      plugins={[timeGridPlugin]}
+                      initialView="timeGridWeek"
+                      weekends={false}
+                      editable={false}
+                      selectable={false}
+                      eventStartEditable={false}
+                      eventDurationEditable={false}
+                      headerToolbar={false}
+                      height="auto"
+                      slotMinTime="08:00:00"
+                      slotMaxTime="22:00:00"
+                      dayHeaderFormat={{ weekday: 'short' }}
+                      allDaySlot={false}
+
+                  />
+                </div>
+                )}
         <ul>
           {courses.map(course => {
             const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
@@ -128,25 +184,7 @@ export default function SchedulePage() {
         </ul>
         <button onClick={handleDownload} style={{ margin: '10px', width: 'auto'}}>Download PDF</button>
 
-              <div className="Schedule">
-              <FullCalendar
-              ref={calendarRef}
-              plugins={[timeGridPlugin]}
-              initialView="timeGridWeek"
-              weekends={false}
-              editable={false}
-              selectable={false}
-              eventStartEditable={false}
-              eventDurationEditable={false}
-              headerToolbar={false}
-              height="auto"
-              slotMinTime="08:00:00"
-              slotMaxTime="22:00:00"
-              dayHeaderFormat={{ weekday: 'short' }}
-              allDaySlot={false}
 
-              />
-              </div>
       </div>
     </div>
   );

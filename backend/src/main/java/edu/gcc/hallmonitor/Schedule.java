@@ -34,7 +34,7 @@ public class Schedule {
     }
 
     //helper method to prevent duplicate code
-    private List<Course> getCoursesForTerm(Course course) {
+    public List<Course> getCoursesForTerm(Course course) {
         String semester = course.semester();
 
         if (semester.contains("Fall")) return fallCourses;
