@@ -159,47 +159,32 @@ public class UserTest {
     }
 
     @Test
-    public void authenticateCurrentUser() {
-        try {
-            User.authenticate("testuser", "password");
-        } catch (IllegalArgumentException iae) {
-            fail(); // username and password aren't empty, so shouldn't happen
-        } catch (SecurityException se) {
-            fail(); // username and password should be in the database, so shouldn't happen
-        } catch (SQLException sqle) {
-            fail(sqle.getMessage());
-        }
+    public void loginUserInDatabase() throws SQLException {
+        User.login("testuser", "password");
     }
 
     @Test
-    public void authenticateNewUser() {
-        String username;
-        try {
-            username = getUnusedUsername();
-            User newUser = User.authenticate(username, "1234");
-
-            assertTrue(newUser.isUser());
-
-            // Delete the user we added
-            PreparedStatement prepStatement = connection.prepareStatement(
-                    "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
-            );
-            prepStatement.setString(1, newUser.getUsername());
-            prepStatement.setBytes(2, newUser.getPasswordHash());
-            prepStatement.execute();
-
-        } catch (SQLException sqle) {
-            fail(sqle.getMessage());
-        }
-
+    public void loginUserNotInDatabase() {
+        assertThrows(SecurityException.class, () -> User.login("testuser", "notapassword"));
     }
 
     @Test
-    public void authenticateNewUserWithTakenUsername() throws SQLException {
-        String usedUsername = getUsedUsername();
+    public void signUpUserNotInDatabase() throws SQLException {
+        User user = User.signup(getUnusedUsername(), "password");
 
-        assertThrows(SecurityException.class, () -> User.authenticate(usedUsername, "1234"));
+        assertTrue(user.isUser());
 
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
+        );
+        prepStatement.setString(1, user.getUsername());
+        prepStatement.setBytes(2, user.getPasswordHash());
+        prepStatement.execute();
+    }
+
+    @Test
+    public void signUpUserInDatabase() {
+        assertThrows(SecurityException.class, () -> User.signup("testuser", "notapassword"));
     }
 
     @Test
