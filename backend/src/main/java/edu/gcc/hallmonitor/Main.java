@@ -1,5 +1,8 @@
 package edu.gcc.hallmonitor;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -29,4 +32,9 @@ public class Main {
         ScheduleController.registerRoutes(app);
     }
 
+    public static String readResource(String path) throws IOException {
+        try (InputStream is = Main.class.getResourceAsStream(path)) {
+            return new String(is.readAllBytes());
+        }
+    }
 }

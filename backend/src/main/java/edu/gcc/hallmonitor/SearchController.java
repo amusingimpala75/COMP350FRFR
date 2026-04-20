@@ -1,7 +1,5 @@
 package edu.gcc.hallmonitor;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 import io.javalin.Javalin;
@@ -11,15 +9,7 @@ public class SearchController {
 
     public static void registerRoutes(Javalin app) {
         // Get the search page
-        app.get("/search", ctx -> ctx.html(
-            Files.readString(
-                Path.of(
-                    SearchController.class
-                            .getResource("/public/index.html")
-                            .toURI()
-                )
-            )
-        ));
+        app.get("/search", ctx -> ctx.html(Main.readResource("/public/index.html")));
 
         //creates and returns results from a new search object based on the user's query and filter selections
         app.post("/search", ctx -> {

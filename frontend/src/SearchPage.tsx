@@ -20,10 +20,12 @@ interface Course {
 }
 
 export default function SearchPage() {
+  const courses_per_page = 10;
   const [query, setQuery] = useState('');
   const [department, setDepartment] = useState('ALL');
   const [professor, setProfessor] = useState('ALL');
   const [courses, setCourses] = useState<Course[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
   const [schedule, setSchedule] = useState<Set<string>>(new Set());
@@ -53,6 +55,7 @@ export default function SearchPage() {
     //remove unwanted ZLOAD courses
     const filtered = items.filter(c => c.subject !== 'ZLOAD');
     setCourses(filtered);
+    setCurrentPage(1);
   };
   // sending course info to backend
   useEffect(() => {
@@ -207,6 +210,7 @@ export default function SearchPage() {
       const res = await fetch("/search/results");
       const items = (await res.json()) as Course[];
       setCourses(items.filter(c => c.subject !== 'ZLOAD'));
+      setCurrentPage(1);
     };
     fetchResults();
 
@@ -269,6 +273,14 @@ export default function SearchPage() {
     fetchSchedule();
   }, []);
 
+  // Keep current page in bounds when filters/search shrink result count.
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(courses.length / courses_per_page));
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [courses.length, currentPage]);
+
 
   const clearAllFilters = async () => {
     isClearing.current = true;
@@ -286,7 +298,20 @@ export default function SearchPage() {
     setQuery('');
 
     setCourses([]);
+    setCurrentPage(1);
 };
+
+  const totalPages = Math.max(1, Math.ceil(courses.length / courses_per_page));
+  const startIndex = (currentPage - 1) * courses_per_page;
+  const visibleCourses = courses.slice(startIndex, startIndex + courses_per_page);
+  const PAGE_WINDOW = 5;
+  const halfWindow = Math.floor(PAGE_WINDOW / 2);
+  const windowStart = Math.max(1, Math.min(currentPage - halfWindow, totalPages - PAGE_WINDOW + 1));
+  const windowEnd = Math.min(totalPages, windowStart + PAGE_WINDOW - 1);
+  const windowPages = Array.from(
+    { length: Math.max(0, windowEnd - windowStart + 1) },
+    (_, i) => windowStart + i
+  );
 
   return (
     <div className="layout">
@@ -366,7 +391,7 @@ export default function SearchPage() {
         <div className="card results-card">
           <h3>Results</h3>
           <ul>
-            {courses.map(course => {
+            {visibleCourses.map(course => {
                 const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
                 let inSchedule = schedule.has(courseId)
 
@@ -399,6 +424,101 @@ export default function SearchPage() {
               );
             })}
           </ul>
+
+          {totalPages > 1 && (
+            <div className="results-pagination" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  textDecoration: 'underline',
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 1 ? 0.5 : 1,
+                  width: 'auto',
+                  display: 'inline-block',
+                }}
+              >
+                Previous
+              </button>
+
+              {windowStart > 1 && (
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  style={{
+                    border: 'none',
+                    background: 'none',
+                    color: currentPage === 1 ? '#0a58ca' : 'inherit',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: currentPage === 1 ? 700 : 400,
+                    width: 'auto',
+                    display: 'inline-block',
+                  }}
+                >
+                  1
+                </button>
+              )}
+
+              {windowStart > 2 && <span>...</span>}
+
+              {windowPages.map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  style={{
+                    border: 'none',
+                    background: 'none',
+                    color: page === currentPage ? '#0a58ca' : 'inherit',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: page === currentPage ? 700 : 400,
+                    width: 'auto',
+                    display: 'inline-block',
+                  }}
+                >
+                  {page}
+                </button>
+              ))}
+
+              {windowEnd < totalPages - 1 && <span>...</span>}
+
+              {windowEnd < totalPages && (
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  style={{
+                    border: 'none',
+                    background: 'none',
+                    color: currentPage === totalPages ? '#0a58ca' : 'inherit',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: currentPage === totalPages ? 700 : 400,
+                    width: 'auto',
+                    display: 'inline-block',
+                  }}
+                >
+                  {totalPages}
+                </button>
+              )}
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  textDecoration: 'underline',
+                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === totalPages ? 0.5 : 1,
+                  width: 'auto',
+                  display: 'inline-block',
+                }}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
