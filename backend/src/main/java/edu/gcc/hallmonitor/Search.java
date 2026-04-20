@@ -25,7 +25,7 @@ public class Search {
     private List<Course> searchResults;
     private List<Course> matchResults;
 
-    private static List<Course> allCourses;
+    public static List<Course> allCourses;
     private static HashMap<String, Course> courseMap;
 
     static {
