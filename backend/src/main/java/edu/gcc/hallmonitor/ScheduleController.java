@@ -202,7 +202,15 @@ public class ScheduleController {
 
         // Get the schedule that is saved
         app.get("/schedule/items", ctx -> {
-            ctx.json(Schedule.loadSchedule().getCourses()); // Return the loaded schedule as a json
+            String term = ctx.queryParam("term"); // Fall, Winter, Spring, Summer
+            Schedule schedule = Schedule.loadSchedule();
+            if (term == null || term.isBlank()) {
+                ctx.json(schedule.getCourses());
+                return;
+            }
+            ctx.json(schedule.getCourses().stream()
+                .filter(course -> course.semester() != null && course.semester().contains(term))
+                .toList());
         });
 
         //returns the byte array of the schedules for the pdf
