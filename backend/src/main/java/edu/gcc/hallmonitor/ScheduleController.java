@@ -162,15 +162,7 @@ public class ScheduleController {
 
     public static void registerRoutes(Javalin app) {
         //Defines a /schedule route that reads from index.html
-        app.get("/schedule", ctx -> ctx.html(
-            Files.readString(
-                Path.of(
-                    ScheduleController.class
-                            .getResource("/public/index.html")
-                            .toURI()
-                )
-            )
-        ));
+        app.get("/schedule", ctx -> ctx.html(Main.readResource("/public/index.html")));
 
         //adds or removes a course based on the ID
         app.post("/schedule/items", ctx -> {
