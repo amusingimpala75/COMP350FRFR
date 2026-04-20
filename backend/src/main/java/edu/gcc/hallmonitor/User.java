@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -177,6 +178,27 @@ public class User {
         return !isUser();
     }
 
-    public List<Schedule> getUserSchedules() {
+    public List<Schedule> getUserSchedules() throws SQLException, SecurityException {
+        if (!authenticated) {
+            throw new SecurityException("User has not be authenticated");
+        }
+
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "SELECT id FROM public.\"schedules\"" +
+                    "WHERE user_id = ?"
+        );
+        prepStatement.setInt(1, id);
+        ResultSet scheduleIdResultSet = prepStatement.executeQuery();
+
+        List<Integer> scheduleIds = new ArrayList<>();
+        while (scheduleIdResultSet.next()) {
+            int schedule_id = scheduleIdResultSet.getInt(1);
+            scheduleIds.add(schedule_id);
+        }
+
+        // For each scheduleid, get all the courses that link to it and add them to the schedule
+        for (int scheduleId: scheduleIds) {
+            // TODO: Fetch schedules...Have to rethink loadschedule() and maybe rely on that by passing user_id and schedule_id
+        }
     }
 }
