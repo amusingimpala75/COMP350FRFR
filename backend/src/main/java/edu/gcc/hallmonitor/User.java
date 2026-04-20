@@ -11,13 +11,14 @@ import java.sql.SQLException;
 public class User {
     private String username;
     private byte[] passwordHash;
+    private int id;
     private int gradYear;
     private Connection connection;
 
     /**
-     * Basic constructor that sets the username and password hash. NOTE: YOU SHOULD USE THE authenticate() METHOD
+     * Basic constructor that sets the username and password hash. NOTE: YOU SHOULD USE THE login() or signUp() METHOD
      * FOR CREATING NEW USERS WHICH IN TURN CALLS THIS FUNCTION. YOU SHOULD PRIMARILY USE THIS METHOD BY ITSELF
-     * FOR TESTING THE METHODS THAT GO INTO authenticate().
+     * FOR TESTING THE METHODS THAT GO INTO login() and signUp().
      * @param username the username of the user
      * @param password the password of the user
      * @throws IllegalArgumentException if the username or password are empty
@@ -57,27 +58,26 @@ public class User {
         this.gradYear = gradYear;
     }
 
-    /**
-     * Validate that the username and password are in the database. If they are not, validate that the username
-     * is not taken already. If it is not, add the user. The user object is then returned.
-     * @param username the username to authenticate
-     * @param password the password to authenticate
-     * @return an authenticated User object
-     * @throws IllegalArgumentException if the username or password are empty
-     * @throws SecurityException if the user cannot be authenticated
-     * @throws SQLException if there is an error with the database connection
-     */
-    public static User authenticate(String username, String password) throws IllegalArgumentException, SecurityException, SQLException {
+    public static User login(String username, String password) throws SQLException {
         User user = new User(username, password);
 
-        // If they are not a user and they can't successfully be added, throw an error
-        if (!user.isUser() && !user.addUser()) {
-            throw new SecurityException(
-                    String.format("Unable to add user '%s'", username)
-            );
+        if (user.isUser()) {
+            user.id = user.getIdFromDatabase();
+            return user;
+        } else {
+            throw new SecurityException("Username and password not found");
         }
+    }
 
-        return user;
+    public static User signup(String username, String password) throws SQLException {
+        User user = new User(username, password);
+
+        if (user.addUser()) {
+            user.id = user.getIdFromDatabase();
+            return user;
+        } else {
+            throw new SecurityException("Username and password are taken");
+        }
     }
 
     /**
@@ -97,6 +97,19 @@ public class User {
 
         // If the query result is empty, return false
         return rs.next();
+    }
+
+    public int getIdFromDatabase() throws SQLException {
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "SELECT id FROM public.\"users\"" +
+                    "WHERE username = ? AND password_hash = ?"
+        );
+        prepStatement.setString(1, username);
+        prepStatement.setBytes(2, passwordHash);
+        ResultSet rs = prepStatement.executeQuery();
+        rs.next();
+
+        return rs.getInt(1);
     }
 
     /**
