@@ -82,7 +82,7 @@ public class ScheduleController {
             content.newLineAtOffset(margin, yStart);
 
             //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
-            for (Course c : schedule.getCourses()) {
+            for (Course c : schedule.getCourses()) {  //TODO change the PDF to reflect the different semesters
 
                 //lines without indent
                 String first = c.department() + c.code() + c.section() + " " + c.name();
@@ -184,43 +184,21 @@ public class ScheduleController {
             if (schedule.inSchedule(course)) {
                 schedule.removeCourse(course);
                 ret = "Removed";
-            } else {
-                List<Course> courses = schedule.getCourses();
-                for (Course c : courses) {
-                    //if another section of the class is in the schedule, end the loop and return the string explaining the error
-                    if (c.code() == course.code() && Objects.equals(c.name(), course.name()) && c.section() != course.section()) {
-                        ret = "Already scheduled for a different section of this class";
-                        break;
+            }else {
+                if (schedule.hasDifferentSection(course)) {
+                    //check for a different section of the class
+                    ret = "Already scheduled for a different section of this class";
+                } else {
+                    //check for overlap
+                    String overlap = schedule.checkForOverlap(course);
+                    if (!Objects.equals(overlap, "")) {
+                        ret = overlap;
+                    } else {
+                        //doesn't overlap, not scheduled for a different section
+                        schedule.addCourse(Search.getCourseByCode(courseID));
+                        ret = "Added";
                     }
 
-                    //check each class time in schedule to see if the times overlap
-                    for (CourseTime ct : course.times()) {
-                        int ctStartSec = ct.startTime().toSecondOfDay();
-                        int ctEndSec = ct.endTime().toSecondOfDay();
-                        if (ctEndSec <= ctStartSec) { continue; }
-                        for (CourseTime ct2 : c.times()) {
-                            //only perform the check if the classes are on the same day. If not, cancel checking this day and move to the next.
-                            if (!ct.day().equals(ct2.day())) { continue; }
-
-                            int ct2StartSec = ct2.startTime().toSecondOfDay();
-                            int ct2EndSec = ct2.endTime().toSecondOfDay();
-                            if (ct2EndSec <= ct2StartSec) { continue; }
-
-                            if (ctStartSec < ct2EndSec && ctEndSec > ct2StartSec) {
-                                //if there is an overlap in the time blocks, stop checking other days and return the error message.
-                                ret = "Course " + course.department() + course.code() + course.section() + " overlaps with " + c.department() + c.code() + c.section();
-                                break;
-                            }
-                        }
-
-                    }
-
-                }
-
-                //if there is no conflict with the schedule courses
-                if (ret.isEmpty()) {
-                    schedule.addCourse(Search.getCourseByCode(courseID));
-                    ret = "Added";
                 }
             }
 
