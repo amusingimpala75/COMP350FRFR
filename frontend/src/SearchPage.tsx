@@ -2,7 +2,6 @@ import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
 
 
-
 interface CourseTime {
   day: string;
   start_time: string;
