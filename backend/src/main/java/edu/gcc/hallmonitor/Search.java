@@ -73,11 +73,10 @@ public class Search {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        // We only want the fall classes
-        // This is a KLUDGE to make this work
-        // for the MVP only!! Please change
-        // when we have more time.
-        allCourses.removeIf(c -> !c.semester().equals("2023_Fall"));
+
+        //want 2023_Fall, 2023_Winter_Online, 2024_Spring, 2024_Early_Summer (remove 2024_Fall and 2023_Spring)
+        allCourses.removeIf(c -> (c.semester().equals("2023_Spring") ||
+            c.semester().equals("2024_Fall")));
 
         courseMap = new HashMap<>();
         // hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
