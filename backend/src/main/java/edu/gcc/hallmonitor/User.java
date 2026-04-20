@@ -85,7 +85,7 @@ public class User {
      * @return if the username and password match a user in the database
      * @throws SQLException if the connection fails
      */
-    public boolean isUser() throws SQLException {
+    private boolean isUser() throws SQLException {
         // Get all the users that match the current user (should be at max 1)
         PreparedStatement prepStatement = connection.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
@@ -99,7 +99,7 @@ public class User {
         return rs.next();
     }
 
-    public int getIdFromDatabase() throws SQLException {
+    private int getIdFromDatabase() throws SQLException {
         PreparedStatement prepStatement = connection.prepareStatement(
                 "SELECT id FROM public.\"users\"" +
                     "WHERE username = ? AND password_hash = ?"
@@ -117,7 +117,7 @@ public class User {
      * @return if the username is already used
      * @throws SQLException if the connection fails
      */
-    public boolean isUsernameTaken() throws SQLException {
+    private boolean isUsernameTaken() throws SQLException {
         PreparedStatement prepStatement = connection.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
                     "WHERE username = ?"
