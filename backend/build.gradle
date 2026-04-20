@@ -87,7 +87,6 @@ def isCommandAvailable(String command) {
             commandLine command, "--version"
             standardOutput = output
             errorOutput = new ByteArrayOutputStream()
-            ignoreExitValue = true
         }
         return output.toString().toLowerCase().contains(command)
     } catch (Exception ignored) {
