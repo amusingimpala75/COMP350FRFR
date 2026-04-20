@@ -2,6 +2,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
 
 
+
 interface CourseTime {
   day: string;
   start_time: string;
@@ -35,6 +36,8 @@ export default function SearchPage() {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
   const isClearing = useRef(false);
+  const [text, setText] = useState("");
+  const [result, setResult] = useState("");
 
   const getCourseId = (course: Course) =>
     `${course.subject}${course.number}${course.section}${course.semester}`; //
@@ -288,6 +291,23 @@ export default function SearchPage() {
     setCourses([]);
 };
 
+//Chatbot query box
+async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+
+  const response = await fetch("http://127.0.0.1:8000/query", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  });
+
+  const data = await response.json();
+  setResult(data.result);
+}
+
+
   return (
     <div className="layout">
     <div><Toaster/></div>
@@ -347,6 +367,17 @@ export default function SearchPage() {
         <button className="clear-btn" onClick={clearAllFilters}>
           Clear All Filters
         </button>
+
+        <form onSubmit={handleSubmit}>
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Type something..."
+          />
+          <button type="submit">Send</button>
+        </form>
+
+        <p>{result}</p>
 
       </div>
 
