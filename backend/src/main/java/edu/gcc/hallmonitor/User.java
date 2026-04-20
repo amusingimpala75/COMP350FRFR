@@ -11,13 +11,14 @@ import java.sql.SQLException;
 public class User {
     private String username;
     private byte[] passwordHash;
+    private int id;
     private int gradYear;
     private Connection connection;
 
     /**
-     * Basic constructor that sets the username and password hash. NOTE: YOU SHOULD USE THE authenticate() METHOD
+     * Basic constructor that sets the username and password hash. NOTE: YOU SHOULD USE THE login() or signUp() METHOD
      * FOR CREATING NEW USERS WHICH IN TURN CALLS THIS FUNCTION. YOU SHOULD PRIMARILY USE THIS METHOD BY ITSELF
-     * FOR TESTING THE METHODS THAT GO INTO authenticate().
+     * FOR TESTING THE METHODS THAT GO INTO login() and signUp().
      * @param username the username of the user
      * @param password the password of the user
      * @throws IllegalArgumentException if the username or password are empty
@@ -61,6 +62,7 @@ public class User {
         User user = new User(username, password);
 
         if (user.isUser()) {
+            user.id = user.getIdFromDatabase();
             return user;
         } else {
             throw new SecurityException("Username and password not found");
@@ -71,6 +73,7 @@ public class User {
         User user = new User(username, password);
 
         if (user.addUser()) {
+            user.id = user.getIdFromDatabase();
             return user;
         } else {
             throw new SecurityException("Username and password are taken");
@@ -94,6 +97,19 @@ public class User {
 
         // If the query result is empty, return false
         return rs.next();
+    }
+
+    public int getIdFromDatabase() throws SQLException {
+        PreparedStatement prepStatement = connection.prepareStatement(
+                "SELECT id FROM public.\"users\"" +
+                    "WHERE username = ? AND password_hash = ?"
+        );
+        prepStatement.setString(1, username);
+        prepStatement.setBytes(2, passwordHash);
+        ResultSet rs = prepStatement.executeQuery();
+        rs.next();
+
+        return rs.getInt(1);
     }
 
     /**
