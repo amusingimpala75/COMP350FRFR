@@ -20,7 +20,7 @@ interface Course {
 }
 
 export default function SearchPage() {
-  const PAGE_SIZE = 10;
+  const courses_per_page = 10;
   const [query, setQuery] = useState('');
   const [department, setDepartment] = useState('ALL');
   const [professor, setProfessor] = useState('ALL');
@@ -275,7 +275,7 @@ export default function SearchPage() {
 
   // Keep current page in bounds when filters/search shrink result count.
   useEffect(() => {
-    const totalPages = Math.max(1, Math.ceil(courses.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(courses.length / courses_per_page));
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
@@ -301,9 +301,9 @@ export default function SearchPage() {
     setCurrentPage(1);
 };
 
-  const totalPages = Math.max(1, Math.ceil(courses.length / PAGE_SIZE));
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const visibleCourses = courses.slice(startIndex, startIndex + PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(courses.length / courses_per_page));
+  const startIndex = (currentPage - 1) * courses_per_page;
+  const visibleCourses = courses.slice(startIndex, startIndex + courses_per_page);
   const PAGE_WINDOW = 5;
   const halfWindow = Math.floor(PAGE_WINDOW / 2);
   const windowStart = Math.max(1, Math.min(currentPage - halfWindow, totalPages - PAGE_WINDOW + 1));
