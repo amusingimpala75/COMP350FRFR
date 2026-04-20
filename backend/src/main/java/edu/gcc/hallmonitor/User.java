@@ -7,11 +7,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class User {
     private String username;
     private byte[] passwordHash;
     private int id;
+    private boolean authenticated = false;
     private int gradYear;
     private Connection connection;
 
@@ -63,6 +65,7 @@ public class User {
 
         if (user.isUser()) {
             user.id = user.getIdFromDatabase();
+            user.authenticated = true;
             return user;
         } else {
             throw new SecurityException("Username and password not found");
@@ -74,6 +77,7 @@ public class User {
 
         if (user.addUser()) {
             user.id = user.getIdFromDatabase();
+            user.authenticated = true;
             return user;
         } else {
             throw new SecurityException("Username and password are taken");
@@ -171,5 +175,8 @@ public class User {
 
         // Validate that the username and password have been deleted
         return !isUser();
+    }
+
+    public List<Schedule> getUserSchedules() {
     }
 }
