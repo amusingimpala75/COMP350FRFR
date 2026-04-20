@@ -3,6 +3,7 @@ package edu.gcc.hallmonitor;
 import java.util.stream.Collectors;
 
 import io.javalin.Javalin;
+import java.util.List;
 
 public class SearchController {
     private static Search search = new Search();
@@ -61,6 +62,14 @@ public class SearchController {
                 Filter f = Filter.fromJSON(Main.MAPPER.readTree(ctx.body()));
                 search.removeFilter(f);
             }
+        });
+
+        app.get("/search/filter-values/{filter-type}", ctx -> {
+            List<Course> courses = search.getMatchResults();
+            if (courses.isEmpty()) {
+                courses = Search.allCourses;
+            }
+            ctx.json(Filter.possibleValues(ctx.pathParam("filter-type"), courses));
         });
     }
 }
