@@ -381,12 +381,15 @@ export default function SearchPage() {
           Clear All Filters
         </button>
 
+        <div className="logo-container">
+          <img src={pandaLogo} alt="Red Panda Logo" />
+        </div>
+
       </div>
 
       {/* MAIN CONTENT */}
       <div className="main">
         <div className="card search-card">
-          <img src={pandaLogo} alt="Red Panda Logo" style={{ height: '40px' }} />
           <h2>HALL Monitor's Scheduler</h2>
           <input
             placeholder="Search Query"

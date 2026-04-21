@@ -39,6 +39,16 @@ body {
   }
 }
 
+.logo-container {
+  margin-top: 20px;
+}
+
+.logo-container img {
+  height: 220px;
+  display: block;
+  margin-left: -20px; /* tweak this */
+}
+
 /* ---------------- Layout ---------------- */
 .layout {
   display: flex;
