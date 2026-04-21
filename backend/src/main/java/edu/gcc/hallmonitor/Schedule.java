@@ -2,12 +2,16 @@ package edu.gcc.hallmonitor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class Schedule {
 
@@ -17,6 +21,15 @@ public class Schedule {
     private List<Course> winterCourses;
     private static final String SAVED_SCHEDULE = "saved-schedule.json";
     private static final String SAVED_SCHEDULES_FOLDER = "schedules/";
+    private static final Connection CONNECTION;
+
+    static {
+        try {
+            CONNECTION = Database.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Schedule(List<Course> courses) {
         fallCourses = new ArrayList<>();
@@ -57,6 +70,61 @@ public class Schedule {
         JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
 
         return new Schedule(Main.MAPPER.readerForListOf(Course.class).readValue(classesNode));
+    }
+
+    public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
+        PreparedStatement userCheckStatement = CONNECTION.prepareStatement(
+                "SELECT * FROM public.\"schedules\"" +
+                    "WHERE id = ? AND user_id = ?"
+        );
+        userCheckStatement.setInt(1, scheduleId);
+        userCheckStatement.setInt(2, userId);
+        ResultSet userCheckResultSet = userCheckStatement.executeQuery();
+        if (!userCheckResultSet.next()) {
+            throw new SecurityException("User does not own schedule");
+        }
+
+
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "SELECT * FROM public.\"courses\"" +
+                    "WHERE id IN (" +
+                        "SELECT course_id FROM public.\"courses-schedules-junc\"" +
+                        "WHERE schedule_id = ?" +
+                    ")"
+        );
+        prepStatement.setInt(1, scheduleId);
+        ResultSet coursesResultSet = prepStatement.executeQuery();
+        Schedule schedule = new Schedule();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        while (coursesResultSet.next()) {
+            String[] facultyArray = (String[]) coursesResultSet.getArray("faculty").getArray();
+            List<String> facultyList = Arrays.asList(facultyArray);
+
+            String time_json = coursesResultSet.getString("times");
+            List<CourseTime> courseTimes = mapper.readerForListOf(CourseTime.class).readValue(time_json);
+
+            Course c = new Course(
+                    coursesResultSet.getString("name"),
+                    facultyList,
+                    coursesResultSet.getString("subject"),
+                    coursesResultSet.getInt("number"),
+                    coursesResultSet.getString("section").charAt(0),
+                    coursesResultSet.getString("location"),
+                    coursesResultSet.getInt("credits"),
+                    coursesResultSet.getString("semester"),
+                    courseTimes,
+                    coursesResultSet.getBoolean("is_lab"),
+                    coursesResultSet.getBoolean("is_open"),
+                    coursesResultSet.getInt("open_seats"),
+                    coursesResultSet.getInt("total_seats")
+            );
+            schedule.addCourse(c);
+        }
+
+        return schedule;
     }
 
     public static Schedule loadSchedule() throws IOException {
