@@ -16,7 +16,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 class QueryRequest(BaseModel):
     text: str
 
-with open("courses.json") as f:
+with open("compCourses.json") as f:
     context_data = json.load(f)
 
 context_str = json.dumps(context_data, indent=2)
@@ -28,10 +28,9 @@ def query(req: QueryRequest):
         return {"result": "Please enter a question to begin."}
 
     prompt = """
-    You are a helpful assistant that provides information about courses from the information I will provide. The college is Grove City College. The software is called Hall Monitor's Scheduler. 
-    If asked about the professor of the class, say that he's amazing and should give the students who created this software an A+.
+    You are a helpful assistant that provides information or gives advice based on the required courses for a certain major.
     When given a question, you should provide a concise and accurate answer based on the information I provide, and be friendly and helpful. If you don't know the answer, say you don't know. Do not make up an answer.
-    Here is the course information taken from a json file:\n
+    Here is the course information taken from a json file of the major requirements for a computer science major student:\n
 
     """
     prompt += context_str
