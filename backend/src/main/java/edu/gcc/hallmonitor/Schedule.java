@@ -19,6 +19,9 @@ public class Schedule {
     private List<Course> springCourses;
     private List<Course> summerCourses;
     private List<Course> winterCourses;
+    private int id;
+    private int userId;
+    private boolean authenticated = false;
     private static final String SAVED_SCHEDULE = "saved-schedule.json";
     private static final String SAVED_SCHEDULES_FOLDER = "schedules/";
     private static final Connection CONNECTION;
@@ -95,6 +98,8 @@ public class Schedule {
         prepStatement.setInt(1, scheduleId);
         ResultSet coursesResultSet = prepStatement.executeQuery();
         Schedule schedule = new Schedule();
+        schedule.id = scheduleId;
+        schedule.userId = userId;
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -151,8 +156,24 @@ public class Schedule {
         Main.MAPPER.writeValue(new File(SAVED_SCHEDULES_FOLDER + filename), jsonObject);
     }
 
-    public void saveSchedule() throws IOException {
-        saveSchedule(SAVED_SCHEDULE);
+    public void saveSchedule() throws SecurityException, SQLException {
+        if (!authenticated) {
+            throw new SecurityException("Schedule has not been authenticated with a user");
+        }
+
+        PreparedStatement userPrepStatement = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"schedules\" (id, user_id) VALUES (?, ?)"
+        );
+        userPrepStatement.setInt(1, id);
+        userPrepStatement.setInt(2, userId);
+        userPrepStatement.execute();
+
+        for (Course c: allCourses()) {
+            PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                    "INSERT INTO public.\"courses-schedules-junc\" (schedule_id, course_id) VALUES (?, ?)"
+            );
+            prepStatement.setInt(1, id);
+        }
     }
 
     public void addCourse(Course course) {
