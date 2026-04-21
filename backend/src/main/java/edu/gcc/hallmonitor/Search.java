@@ -51,6 +51,7 @@ public class Search {
                 List<CourseTime> courseTimes = mapper.readerForListOf(CourseTime.class).readValue(time_json);
 
                 Course c = new Course(
+                        rs.getInt("id"),
                         rs.getString("name"),
                         facultyList,
                         rs.getString("subject"),

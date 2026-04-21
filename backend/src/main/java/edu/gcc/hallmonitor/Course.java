@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record Course(
+        int id,
         String name,
         @JsonProperty("faculty")
         List<String> professor,
