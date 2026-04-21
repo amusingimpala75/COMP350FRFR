@@ -52,7 +52,7 @@ public record Time(LocalTime start, LocalTime end) implements Filter {
                 .flatMap(List::stream)
                 .map(time -> List.of(time.startTime(), time.endTime()))
                 .flatMap(List::stream)
-                .map(time -> time.format(DateTimeFormatter.ofPattern("HH:MM")))
+                .map(time -> time.format(DateTimeFormatter.ofPattern("HH:mm")))
                 .forEach(times::add);
         return times;
     }

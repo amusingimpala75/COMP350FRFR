@@ -1,25 +1,16 @@
 package edu.gcc.hallmonitor;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 import io.javalin.Javalin;
+import java.util.List;
 
 public class SearchController {
     private static Search search = new Search();
 
     public static void registerRoutes(Javalin app) {
         // Get the search page
-        app.get("/search", ctx -> ctx.html(
-            Files.readString(
-                Path.of(
-                    SearchController.class
-                            .getResource("/public/index.html")
-                            .toURI()
-                )
-            )
-        ));
+        app.get("/search", ctx -> ctx.html(Main.readResource("/public/index.html")));
 
         //creates and returns results from a new search object based on the user's query and filter selections
         app.post("/search", ctx -> {
@@ -71,6 +62,14 @@ public class SearchController {
                 Filter f = Filter.fromJSON(Main.MAPPER.readTree(ctx.body()));
                 search.removeFilter(f);
             }
+        });
+
+        app.get("/search/filter-values/{filter-type}", ctx -> {
+            List<Course> courses = search.getMatchResults();
+            if (courses.isEmpty()) {
+                courses = Search.allCourses;
+            }
+            ctx.json(Filter.possibleValues(ctx.pathParam("filter-type"), courses));
         });
     }
 }

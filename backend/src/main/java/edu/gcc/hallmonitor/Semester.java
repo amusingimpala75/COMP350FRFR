@@ -7,34 +7,33 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public record Department(String department) implements Filter {
+public record Semester(String semester) implements Filter {
 
     @Override
     public boolean filter(Course course) {
-        return course.department().equals(department);
+        return course.semester().equals(semester);
     }
 
     @Override
     public JsonNode toJSON() {
         ObjectNode root = Main.MAPPER.createObjectNode();
-        root.put("type", "department");
-        root.put("value", department);
+        root.put("type", "semester");
+        root.put("value", semester);
         return root;
     }
 
     private static Filter deserialize(JsonNode value) {
-        return new Department(value.asText());
+        return new Semester(value.asText());
     }
 
     private static Set<String> possibleValues(List<Course> courses) {
         return courses.stream()
-                .map(Course::department)
-                // Don't include ZLOAD "courses"
-                .filter(s -> !s.equals("ZLOAD"))
+                .map(Course::semester)
                 .collect(Collectors.toSet());
     }
 
     public static void init() {
-        Filter.registerFilterType("department", Department::deserialize, Department::possibleValues);
+        Filter.registerFilterType("semester", Semester::deserialize, Semester::possibleValues);
     }
 }
+

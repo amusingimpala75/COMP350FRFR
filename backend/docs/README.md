@@ -38,3 +38,6 @@ There are two ways to do this:
 2. Open the project in IntelliJ and execute the `application/run` gradle task from
    the right hand menu.
 3. Navigate to `http://localhost:7070`.
+
+## OCI Containers
+If you have Docker or Podman installed you can create an OCI container image .tar by running `./gradlew containerBuild` in the backend folder
