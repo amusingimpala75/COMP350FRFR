@@ -1,5 +1,4 @@
-
-Suggested four year plan:
+Computer Science B.S. suggested four year plan:
 Freshman Year:
 Fall:
   {"department": "COMP", "number": "141", "name": "Computer Programming I", "credits": 3},

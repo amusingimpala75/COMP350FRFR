@@ -43,6 +43,7 @@ export default function SearchPage() {
   const [text, setText] = useState(""); //for the chatbot query
   const [result, setResult] = useState("Ask a question about your major's required classes!"); // the api call result
   const [isOpen, setIsOpen] = useState(false); // for the modal
+  const [chatbotDept, setCbDept] = useState("Comp");
 
   const getCourseId = (course: Course) =>
     `${course.subject}${course.number}${course.section}${course.semester}`; //
@@ -327,7 +328,10 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({
+            text,
+            chatbotDept
+        }),
       });
 
       const data = await response.json();
@@ -584,6 +588,10 @@ const modalStyle: React.CSSProperties = {
             </button>
             {isOpen && (
                 <div style={modalStyle}>
+                <select value={chatbotDept} onChange={(e) => setCbDept(e.target.value)}>
+                 <option value="Comp">Computer Science B.S.</option>
+                 <option value="Engl">English B.A.</option>
+                </select>
 
                   {/* Close button */}
                   <button

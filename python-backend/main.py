@@ -15,11 +15,9 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class QueryRequest(BaseModel):
     text: str
+    chatbotDept: str
 
-with open("Comp.txt") as f:
-    context_data = f.read()
 
-context_str = json.dumps(context_data, indent=2)
 
 @app.post("/query")
 def query(req: QueryRequest):
@@ -29,12 +27,17 @@ def query(req: QueryRequest):
 
     prompt = """
     You are a helpful assistant that provides information or gives advice based on the required courses and suggested four-year plan for a certain major.
-    When given a question, you should provide an accurate answer based on the information I provide, and be friendly and helpful. If you don't know the answer, say you don't know. Do not make up an answer.
+    When given a question, you should provide an accurate and concise answer based on the information I provide, and be friendly and helpful. If you don't know the answer, say you don't know. Do not make up an answer.
     Don't make anything bold in the answer you return.
     If you're giving a response that includes a list of courses, please format the courses in a clear and organized way, such as using bullet points or numbering. Include newlines. This will make it easier for the user to read and understand the information.
-    Here is the course information and four-year plan taken from the major requirements for a computer science major student:\n
+    Here is the course information and four-year plan taken from the major requirements:\n
 
     """
+
+    with open(req.chatbotDept + ".txt") as f:
+        context_data = f.read()
+
+    context_str = json.dumps(context_data, indent=2)
     prompt += context_str
 
     user_prompt = req.text
