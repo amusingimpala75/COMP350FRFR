@@ -1,5 +1,6 @@
 import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
+import pandaLogo from './assets/Designer.png';
 
 
 interface CourseTime {
@@ -385,6 +386,7 @@ export default function SearchPage() {
       {/* MAIN CONTENT */}
       <div className="main">
         <div className="card search-card">
+          <img src={pandaLogo} alt="Red Panda Logo" style={{ height: '40px' }} />
           <h2>HALL Monitor's Scheduler</h2>
           <input
             placeholder="Search Query"
