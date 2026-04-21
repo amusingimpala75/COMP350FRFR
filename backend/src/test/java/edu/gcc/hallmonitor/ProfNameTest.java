@@ -20,6 +20,7 @@ public class ProfNameTest {
 
     private static Course emptyWithProf(String prof) {
         return new Course(
+                1,
             "",
             List.of(prof),
             "",
