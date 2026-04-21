@@ -18,6 +18,7 @@ class ScheduleTest {
             Course expectedCourse = expectedCourses.get(i);
             Course actualCourse = actualCourses.get(i);
 
+            assertEquals(expectedCourse.id(), actualCourse.id());
             assertEquals(expectedCourse.name(), actualCourse.name());
             assertEquals(expectedCourse.professor().size(), actualCourse.professor().size());
             for (int j = 0; j < actualCourse.professor().size(); j++) {
@@ -41,17 +42,96 @@ class ScheduleTest {
     }
 
     @Test
+    void loadSaveSchedule() {
+        Schedule expectedSchedule = new Schedule(List.of(
+            new Course(
+                    1,
+                "COMP PROGRAMMING I",
+                List.of("Wolfe, Britton D."),
+                "COMP",
+                141,
+                'A',
+                "Science Technology Engineering",
+                3,
+                "2023_Fall",
+                List.of(
+                    new CourseTime(
+                        "M",
+                        LocalTime.of(12, 0, 0),
+                        LocalTime.of(12, 50, 0)
+                    ),
+                    new CourseTime(
+                        "W",
+                        LocalTime.of(12, 0, 0),
+                        LocalTime.of(12, 50, 0)
+                    ),
+                    new CourseTime(
+                        "F",
+                        LocalTime.of(12, 0, 0),
+                        LocalTime.of(12, 50, 0)
+                    )
+                ),
+                false,
+                false,
+                0,
+                32
+            ),
+            new Course(
+                    2,
+                "INTRO TO COMPUTER SCIENCE",
+                List.of("Dickinson, Brian C"),
+                "COMP",
+                155,
+                'A',
+                "STEM 326",
+                3,
+                "2023_Fall",
+                List.of(
+                    new CourseTime(
+                        "T",
+                        LocalTime.of(11, 0, 0),
+                        LocalTime.of(12, 15, 0)
+                    ),
+                    new CourseTime(
+                        "R",
+                        LocalTime.of(11, 0, 0),
+                        LocalTime.of(12, 15, 0)
+                    )
+                ),
+                false,
+                false,
+                0,
+                32
+            )
+        ));
+        try {
+            expectedSchedule.saveSchedule("test.json");
+        } catch (IOException ioe) {
+            fail("Failed to save schedule");
+        }
+
+        Schedule actualSchedule = null;
+        try {
+            actualSchedule = Schedule.loadSchedule("test.json");
+        } catch (IOException ioe) {
+            fail("Unable to load schedule.json");
+        }
+
+        assertSchedulesEqual(expectedSchedule, actualSchedule);
+    }
+
+    @Test
     void checkForOverlap_noOverlap() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                    1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(new CourseTime("M", LocalTime.of(10, 0), LocalTime.of(11, 0))),
                 false, false, 0, 30
             )
         ));
 
         Course newCourse = new Course(
-            2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
+                2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
             List.of(new CourseTime("M", LocalTime.of(11, 0), LocalTime.of(12, 0))),
             false, false, 0, 30
         );
@@ -63,7 +143,7 @@ class ScheduleTest {
     void checkForOverlap_overlapSameDay() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1,"Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(new CourseTime("M", LocalTime.of(10, 0), LocalTime.of(11, 0))),
                 false, false, 0, 30
             )
