@@ -178,47 +178,30 @@ export default function SearchPage() {
     setTimeEnd(end);
   };
 
-
-
-
-
+  // Set the filter options
+  useEffect(() => {
+    const getValues = async (t: string) => {
+      const res = await fetch(`/search/filter-values/${t}`);
+      const list = await res.json();
+      return list.sort();
+    };
+    const updateFilters = async () => {
+      // Update:
+      // Departments
+      setDepartments(await getValues('department'));
+      // Professors
+      setProfessors(await getValues('professor'));
+      // availableTimes
+      setAvailableTimes(await getValues('timeRange'));
+      // availableCredits
+      setAvailableCredits(await getValues('credits'));
+    };
+    updateFilters();
+    // Only whenever the course list changes
+  }, [courses]);
 
   // --- LOAD COURSES FOR FILTERS ---
   useEffect(() => {
-    const fetchCourses = async () => {
-      const res = await fetch('/courses');
-      const items: Course[] = await res.json();
-
-      setSemesters(
-          Array.from(new Set(items.map(c => c.semester))).sort()
-        );
-
-
-      setDepartments(
-        Array.from(new Set(items.map(c => c.subject).filter(d => d && d !== 'ZLOAD'))).sort()
-      );
-
-      setProfessors(
-        Array.from(
-          new Set(
-            items
-              .flatMap(c => c.faculty || [])
-              .filter(p => p && !p.includes('Staff, -') && p !== '-')
-              .map(p => p.replace(/,?\s*PhD\.?/i, '').trim())
-          )
-        ).sort()
-      );
-
-      setAvailableCredits(
-         Array.from(new Set(items.map(c => c.credits).filter(c => c != null))).map(String).sort()
-       );
-
-      const times = items
-        .flatMap(c => c.times?.map(t => t.start_time) || [])
-        .filter(t => t); // remove empty
-      setAvailableTimes(Array.from(new Set(times)).sort());
-    };
-
     const fetchResults = async() => {
       const res = await fetch("/search/results");
       const items = (await res.json()) as Course[];
@@ -235,8 +218,6 @@ export default function SearchPage() {
     }
 
     fetchQuery();
-
-    fetchCourses();
 
     const setFilters = async () => {
       const resp = await fetch('/search/filter');

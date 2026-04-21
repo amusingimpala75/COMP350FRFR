@@ -29,6 +29,8 @@ public record Department(String department) implements Filter {
     private static Set<String> possibleValues(List<Course> courses) {
         return courses.stream()
                 .map(Course::department)
+                // Don't include ZLOAD "courses"
+                .filter(s -> !s.equals("ZLOAD"))
                 .collect(Collectors.toSet());
     }
 

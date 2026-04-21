@@ -30,6 +30,12 @@ public record ProfName(String profName) implements Filter {
         return courses.stream()
                 .map(Course::professor)
                 .flatMap(List::stream)
+                // Remove the staff entries
+                .filter(s -> !s.contains("Staff, -"))
+                // Remove empty entries
+                .filter(s -> !s.isEmpty())
+                // Strip PhD from names
+                .map(s -> s.replace("PhD", "").trim())
                 .collect(Collectors.toSet());
 
     }
