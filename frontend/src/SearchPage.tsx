@@ -187,6 +187,8 @@ export default function SearchPage() {
     };
     const updateFilters = async () => {
       // Update:
+      // Semesters
+      setSemesters(await getValues('semester'));
       // Departments
       setDepartments(await getValues('department'));
       // Professors
