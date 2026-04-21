@@ -16,8 +16,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 class QueryRequest(BaseModel):
     text: str
 
-with open("compCourses.json") as f:
-    context_data = json.load(f)
+with open("Comp.txt") as f:
+    context_data = f.read()
 
 context_str = json.dumps(context_data, indent=2)
 
@@ -28,9 +28,11 @@ def query(req: QueryRequest):
         return {"result": "Please enter a question to begin."}
 
     prompt = """
-    You are a helpful assistant that provides information or gives advice based on the required courses for a certain major.
-    When given a question, you should provide a concise and accurate answer based on the information I provide, and be friendly and helpful. If you don't know the answer, say you don't know. Do not make up an answer.
-    Here is the course information taken from a json file of the major requirements for a computer science major student:\n
+    You are a helpful assistant that provides information or gives advice based on the required courses and suggested four-year plan for a certain major.
+    When given a question, you should provide an accurate answer based on the information I provide, and be friendly and helpful. If you don't know the answer, say you don't know. Do not make up an answer.
+    Don't make anything bold in the answer you return.
+    If you're giving a response that includes a list of courses, please format the courses in a clear and organized way, such as using bullet points or numbering. Include newlines. This will make it easier for the user to read and understand the information.
+    Here is the course information and four-year plan taken from the major requirements for a computer science major student:\n
 
     """
     prompt += context_str
@@ -39,7 +41,7 @@ def query(req: QueryRequest):
 
 
     response = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="gpt-5.4-nano",
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": user_prompt}

@@ -6,35 +6,34 @@
   {"department": "MATH", "number": "161", "name": "Calculus I", "credits": 4},
   {"department": "MATH", "number": "162", "name": "Calculus II", "credits": 4},
 
-  {"department": "HUMA", "number": "303", "name": "Christianity and Civilization", "credits": 3},
-  {"department": "HUMA", "number": "202", "name": "Civ/Literature", "credits": 3},
-  {"department": "HUMA", "number": "200", "name": "Western Civ: Foundations", "credits": 3},
-  {"department": "HUMA", "number": "301", "name": "Civ/The Arts", "credits": 3},
-
+  {"department": "WRIT", "number": "101", "name": "Foundations of Academic Discourse", "credits": 3},
+  {"department": "HUMA", "number": "102", "name": "Civ and the Biblical Revelation", "credits": 3},
+  {"department": "PHYE", "number": "100", "name": "Healthful Living", "credits": 1},
 
   {"department": "COMP", "number": "222", "name": "Introduction to Data Structures & Algorithms", "credits": 3},
   {"department": "COMP", "number": "244", "name": "Database Management", "credits": 3},
   {"department": "COMP", "number": "205", "name": "Ethics, Faith, and the Conscious Mind", "credits": 3},
-  {"department": "COMP", "number": "230", "name": "Advanced Programming Parallel Computing", "credits": 3},
+  {"department": "COMP", "number": "233", "name": "Parallel Computing", "credits": 3},
   {"department": "COMP", "number": "342", "name": "Data Communication & Networking", "credits": 3},
 
   {"department": "MATH", "number": "213", "name": "Discrete Mathematics for Comp. Science", "credits": 4},
   {"department": "MATH", "number": "214", "name": "Applied Probability & Linear Algebra", "credits": 4},
 
+  {"department": "HUMA", "number": "200", "name": "Western Civilization", "credits": 3},
+  {"department": "HUMA", "number": "202", "name": "Civilization and Literature", "credits": 3},
+
   {"department": "COMP", "number": "325", "name": "Computer Architecture & Organization", "credits": 3},
   {"department": "COMP", "number": "314", "name": "Automata Theory", "credits": 3},
-  {"department": "COMP", "number": "422", "name": "Theory of Algorithms", "credits": 3},
+  {"department": "COMP", "number": "422", "name": "Introduction to Algorithms", "credits": 3},
   {"department": "COMP", "number": "340", "name": "Operating Systems", "credits": 3},
   {"department": "COMP", "number": "350", "name": "Software Engineering", "credits": 3},
 
-  {"department": "COMP", "number": "448", "name": "Computer Security", "credits": 3},
-  {"department": "COMP", "number": "424", "name": "Parallel and Distributed Computing", "credits": 3},
-  {"department": "COMP", "number": "451", "name": "Senior Project I", "credits": 3},
-  {"department": "COMP", "number": "452", "name": "Senior Project II", "credits": 4},
+  {"department": "HUMA", "number": "301", "name": "Civilization and the Arts", "credits": 3},
 
-  {"name": "Science Elective", "credits": 4},
-  {"name": "Writing Requirement", "credits": 3},
-  {"name": "Foundations of Social Science Course", "credits": 3},
-  {"name": "General Electives", "credits": 11},
-  {"name": "General Computer Science Elective", "credits": 3}
+  {"department": "COMP", "number": "448", "name": "Computer Security", "credits": 3},
+  {"department": "COMP", "number": "443", "name": "Programming Languages", "credits": 3},
+  {"department": "COMP", "number": "451", "name": "Senior Project I", "credits": 2},
+  {"department": "COMP", "number": "452", "name": "Senior Project II", "credits": 3},
+
+  {"department": "HUMA", "number": "303", "name": "Christianity and Civilization", "credits": 3}
 ]

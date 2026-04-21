@@ -41,7 +41,7 @@ export default function SearchPage() {
   const didMount = useRef(false);
   const isClearing = useRef(false);
   const [text, setText] = useState(""); //for the chatbot query
-  const [result, setResult] = useState("Enter a question to get started!"); // the api call result
+  const [result, setResult] = useState("Ask a question about your major's required classes!"); // the api call result
   const [isOpen, setIsOpen] = useState(false); // for the modal
 
   const getCourseId = (course: Course) =>
