@@ -112,6 +112,7 @@ public class Schedule {
             List<CourseTime> courseTimes = mapper.readerForListOf(CourseTime.class).readValue(time_json);
 
             Course c = new Course(
+                    coursesResultSet.getInt("id"),
                     coursesResultSet.getString("name"),
                     facultyList,
                     coursesResultSet.getString("subject"),
