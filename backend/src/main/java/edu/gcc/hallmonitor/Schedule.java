@@ -46,11 +46,11 @@ public class Schedule {
         winterCourses = new ArrayList<>();
 
         for(Course c : courses){ //Example semester: 2023_Fall
-            getCoursesForTerm(c).add(c);
+            addCourseInMemory(c);
         }
     }
 
-    public Schedule() throws SQLException {
+    public Schedule() {
         this(new ArrayList<Course>());
     }
 
