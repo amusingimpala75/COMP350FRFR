@@ -1,6 +1,7 @@
 import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
 import pandaLogo from './assets/Designer.png';
+import Select, { type SingleValue } from 'react-select';
 
 
 interface CourseTime {
@@ -18,6 +19,11 @@ interface Course {
   times: CourseTime[];
   semester:string;
   credits: number;
+}
+
+interface SelectOption {
+  value: string;
+  label: string;
 }
 
 export default function SearchPage() {
@@ -140,20 +146,20 @@ export default function SearchPage() {
 
   // updating all the filters
 
-  const updateSem = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const updated = event.target.value;
+  const updateSem = async (selected: SingleValue<SelectOption>) => {
+      const updated = selected?.value ?? 'ALL';
       await updateFilter('semester', semester, updated);
       setSemester(updated);
     };
 
-  const updateDept = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const updated = event.target.value;
+  const updateDept = async (selected: SingleValue<SelectOption>) => {
+    const updated = selected?.value ?? 'ALL';
     await updateFilter('department', department, updated);
     setDepartment(updated);
   };
 
-  const updateProfessor = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const updated = event.target.value;
+  const updateProfessor = async (selected: SingleValue<SelectOption>) => {
+    const updated = selected?.value ?? 'ALL';
     await updateFilter('professor', professor, updated);
     setProfessor(updated);
   };
@@ -314,6 +320,34 @@ export default function SearchPage() {
     (_, i) => windowStart + i
   );
 
+  const semesterOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Semesters' },
+    ...semesters.map(sem => ({ value: sem, label: sem }))
+  ];
+  const departmentOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Departments' },
+    ...departments.map(dept => ({ value: dept, label: dept }))
+  ];
+  const professorOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Professors' },
+    ...professors.map(prof => ({ value: prof, label: prof }))
+  ];
+  const startTimeOptions: SelectOption[] = [
+    { value: '00:01', label: 'Start' },
+    ...availableTimes.map(t => ({ value: t, label: t }))
+  ];
+  const endTimeOptions: SelectOption[] = [
+    { value: '23:59', label: 'End' },
+    ...availableTimes.map(t => ({ value: t, label: t }))
+  ];
+  const creditOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All' },
+    ...availableCredits
+      .slice()
+      .sort((a, b) => Number(a) - Number(b))
+      .map(c => ({ value: c, label: c }))
+  ];
+
   return (
     <div className="layout">
     <div><Toaster/></div>
@@ -323,21 +357,33 @@ export default function SearchPage() {
 
         <h4> Semester </h4>
 
-        <select value={semester} onChange={updateSem}>
-          <option value="ALL">All Semesters</option>
-          {semesters.map(sem => <option key={sem} value={sem}>{sem}</option>)}
-        </select>
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={semesterOptions}
+          value={semesterOptions.find(option => option.value === semester) ?? semesterOptions[0]}
+          onChange={updateSem}
+        />
 
         <h4> Department & Professor</h4>
 
-        <select value={department} onChange={updateDept}>
-          <option value="ALL">All Departments</option>
-          {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-        </select>
-        <select value={professor} onChange={updateProfessor}>
-          <option value="ALL">All Professors</option>
-          {professors.map(prof => <option key={prof} value={prof}>{prof}</option>)}
-        </select>
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={departmentOptions}
+          value={departmentOptions.find(option => option.value === department) ?? departmentOptions[0]}
+          onChange={updateDept}
+        />
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={professorOptions}
+          value={professorOptions.find(option => option.value === professor) ?? professorOptions[0]}
+          onChange={updateProfessor}
+        />
 
         <h4>Days and Time Range</h4>
 
@@ -354,27 +400,35 @@ export default function SearchPage() {
         </div>
 
         <div className="time-range">
-          <select value={timeStart} onChange={e => updateTimeStart(e.target.value)}>
-            <option value="00:01">Start</option>
-              {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <Select
+            className="filter-select-container"
+            classNamePrefix="filter-select"
+            isSearchable
+            options={startTimeOptions}
+            value={startTimeOptions.find(option => option.value === timeStart) ?? startTimeOptions[0]}
+            onChange={(selected) => updateTimeStart(selected?.value ?? '00:01')}
+          />
           <span> to </span>
-          <select value={timeEnd} onChange={e => updateTimeEnd(e.target.value)}>
-            <option value="23:59">End</option>
-              {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <Select
+            className="filter-select-container"
+            classNamePrefix="filter-select"
+            isSearchable
+            options={endTimeOptions}
+            value={endTimeOptions.find(option => option.value === timeEnd) ?? endTimeOptions[0]}
+            onChange={(selected) => updateTimeEnd(selected?.value ?? '23:59')}
+          />
         </div>
 
         <h4>Credits</h4>
 
-        <select value={credits} onChange={e => updateCredits(e.target.value)}>
-          <option value="ALL">All</option>
-          {availableCredits
-            .slice()                       // copy the array so we don’t mutate the original
-            .sort((a, b) => Number(a) - Number(b))  // numeric sort
-            .map(c => <option key={c} value={c}>{c}</option>)
-          }
-        </select>
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={creditOptions}
+          value={creditOptions.find(option => option.value === credits) ?? creditOptions[0]}
+          onChange={(selected) => updateCredits(selected?.value ?? 'ALL')}
+        />
 
         <h5></h5>
         <button className="clear-btn" onClick={clearAllFilters}>

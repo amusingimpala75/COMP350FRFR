@@ -158,6 +158,76 @@ body {
   transition: all 0.2s;
 }
 
+.filter-select-container {
+  width: 92%;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.filter-select__control {
+  border-radius: 8px !important;
+  border-color: #ccc !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  box-shadow: none !important;
+}
+
+.filter-select__value-container {
+  padding: 0 10px !important;
+}
+
+.filter-select__single-value,
+.filter-select__placeholder,
+.filter-select__input-container,
+.filter-select__option,
+.filter-select__menu {
+  font-size: 13px !important;
+}
+
+.filter-select__indicator {
+  padding: 4px !important;
+}
+
+.filter-select__indicators {
+  height: 32px !important;
+}
+
+.filter-select__control--is-focused {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 6px rgba(198, 14, 48, 0.3) !important;
+}
+
+.filter-select__menu {
+  z-index: 20;
+}
+
+.filter-select__option--is-focused {
+  background-color: rgba(198, 14, 48, 0.1) !important;
+}
+
+.filter-select__option--is-selected {
+  background-color: var(--primary) !important;
+}
+
+.time-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.time-range .filter-select-container {
+  width: auto;
+  margin: 0;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.time-range span {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
 .card input:focus,
 .card select:focus {
   outline: none;
