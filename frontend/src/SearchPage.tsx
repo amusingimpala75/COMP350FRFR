@@ -3,6 +3,9 @@ import { useEffect, useState, useRef } from 'react';
 import pandaLogo from './assets/Designer.png';
 import Select, { type SingleValue } from 'react-select';
 
+const userId = 154;
+const scheduleId = 1;
+
 
 interface CourseTime {
   day: string;
@@ -11,6 +14,7 @@ interface CourseTime {
 }
 
 interface Course {
+  id: number;
   subject: string;
   number: string;
   section: string;
@@ -37,7 +41,7 @@ export default function SearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<Set<string>>(new Set());
+  const [schedule, setSchedule] = useState<Set<number>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<string>('ALL');
   const [timeStart, setTimeStart] = useState<string>('00:01');
@@ -46,9 +50,6 @@ export default function SearchPage() {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
   const isClearing = useRef(false);
-
-  const getCourseId = (course: Course) =>
-    `${course.subject}${course.number}${course.section}${course.semester}`; //
 
   // --- SEARCH ---
   const search = async () => {
@@ -86,21 +87,19 @@ export default function SearchPage() {
   //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
     const newSchedule = new Set(schedule);
-    const courseId = getCourseId(course)
 
     //send the course identifier to the backend
-    const result = await fetch('/schedule/items', {
+    const result = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}&courseId=${course.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: courseId,
     });
     const text = await result.text();
 
 
     if(text == "Added"){
-        newSchedule.add(courseId);
+        newSchedule.add(course.id);
     }else if(text == "Removed"){
-        newSchedule.delete(courseId);
+        newSchedule.delete(course.id);
     }else{
         toast(text)
     }
@@ -267,9 +266,9 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const res = await fetch('/schedule/items');
+        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`);
         const items: Course[] = await res.json();
-        const ids = new Set(items.map(c => getCourseId(c)));
+        const ids = new Set(items.map(c => c.id));
         setSchedule(ids);
       } catch (err) {
         console.error('Failed to load schedule', err);
@@ -461,11 +460,10 @@ export default function SearchPage() {
           <h3>Results</h3>
           <ul>
             {visibleCourses.map(course => {
-                const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
-                let inSchedule = schedule.has(courseId)
+                let inSchedule = schedule.has(course.id)
 
               return (
-                <li key={courseId} className="course-row">
+                <li key={course.id} className="course-row">
                   <button
                     className="course-btn"
                     onClick={() => toggleCourse(course)}

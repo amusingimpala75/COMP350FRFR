@@ -1,9 +1,6 @@
 package edu.gcc.hallmonitor;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,9 +23,15 @@ public class Search {
     private List<Course> matchResults;
 
     public static List<Course> allCourses;
-    private static HashMap<String, Course> courseMap;
+    private static HashMap<Integer, Course> courseMap;
+    private static final Connection CONNECTION;
 
     static {
+        try {
+            CONNECTION = Database.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         loadCourses();
     }
 
@@ -36,8 +39,7 @@ public class Search {
         allCourses = new ArrayList<>();
         //if this is the first search, initialize the allCourses list
         try {
-            Connection conn = Database.getConnection();
-            Statement statement = conn.createStatement();
+            Statement statement = CONNECTION.createStatement();
             ResultSet rs = statement.executeQuery("SELECT * FROM public.\"courses\"");
 
             ObjectMapper mapper = new ObjectMapper();
@@ -82,13 +84,13 @@ public class Search {
         courseMap = new HashMap<>();
         // hashMap with course subject+number+section pointing to the course to easily identify the courses in the schedule
         for (Course course : allCourses) {
-            courseMap.put(course.department() + course.code() + course.section() + course.semester(), course);
+            courseMap.put(course.id(), course);
         }
 
     }
 
-    public static Course getCourseByCode(String code) {
-        return courseMap.get(code); // TODO: handle problems with this
+    public static Course getCourseById(int id) {
+        return courseMap.get(id);
     }
 
     public void applyFilter(Filter filter) {

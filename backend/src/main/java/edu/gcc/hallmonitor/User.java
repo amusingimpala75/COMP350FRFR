@@ -1,19 +1,22 @@
 package edu.gcc.hallmonitor;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class User {
     private String username;
     private byte[] passwordHash;
     private int id;
+    private boolean authenticated = false;
     private int gradYear;
-    private static Connection CONNECTION;
+    private List<Schedule> schedules;
+    private static final Connection CONNECTION;
 
     static {
         try {
@@ -32,7 +35,7 @@ public class User {
      * @throws IllegalArgumentException if the username or password are empty
      * @throws SQLException if the connection can't be established.
      */
-    public User(String username, String password) throws IllegalArgumentException, SQLException {
+    public User(String username, String password) throws IllegalArgumentException, SQLException, JsonProcessingException {
         if (password.isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
         } else if (username.isEmpty()) {
@@ -46,7 +49,6 @@ public class User {
         } catch (NoSuchAlgorithmException ignored) {
             throw new IllegalArgumentException("sha256 not found");
         } // won't fail since sha256 is hardcoded
-
     }
 
     public String getUsername() {
@@ -65,22 +67,26 @@ public class User {
         this.gradYear = gradYear;
     }
 
-    public static User login(String username, String password) throws SQLException {
+    public static User login(String username, String password) throws SQLException, JsonProcessingException {
         User user = new User(username, password);
 
         if (user.isUser()) {
             user.id = user.getIdFromDatabase();
+            user.authenticated = true;
+            user.schedules = user.getUserSchedules();
             return user;
         } else {
             throw new SecurityException("Username and password not found");
         }
     }
 
-    public static User signup(String username, String password) throws SQLException {
+    public static User signup(String username, String password) throws SQLException, JsonProcessingException {
         User user = new User(username, password);
 
         if (user.addUser()) {
             user.id = user.getIdFromDatabase();
+            user.authenticated = true;
+            user.schedules = user.getUserSchedules();
             return user;
         } else {
             throw new SecurityException("Username and password are taken");
@@ -95,7 +101,7 @@ public class User {
     public boolean isUser() throws SQLException {
         // Get all the users that match the current user (should be at max 1)
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT * FROM public.\"users\"" +
+                "SELECT * FROM public.\"users\" " +
                     "WHERE username = ? AND password_hash = ?"
         );
         prepStatement.setString(1, username);
@@ -106,9 +112,9 @@ public class User {
         return rs.next();
     }
 
-    public int getIdFromDatabase() throws SQLException {
+    private int getIdFromDatabase() throws SQLException {
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT id FROM public.\"users\"" +
+                "SELECT id FROM public.\"users\" " +
                     "WHERE username = ? AND password_hash = ?"
         );
         prepStatement.setString(1, username);
@@ -126,7 +132,7 @@ public class User {
      */
     public boolean isUsernameTaken() throws SQLException {
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT * FROM public.\"users\"" +
+                "SELECT * FROM public.\"users\" " +
                     "WHERE username = ?"
         );
         prepStatement.setString(1, username);
@@ -148,7 +154,7 @@ public class User {
         }
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "INSERT INTO public.\"users\" (username, password_hash, grad_year)" +
+                "INSERT INTO public.\"users\" (username, password_hash, grad_year) " +
                     "VALUES (?, ?, ?)"
         );
         prepStatement.setString(1, username);
@@ -178,5 +184,57 @@ public class User {
 
         // Validate that the username and password have been deleted
         return !isUser();
+    }
+
+    public List<Schedule> getUserSchedules() throws SQLException, SecurityException, JsonProcessingException {
+        if (!authenticated) {
+            throw new SecurityException("User has not be authenticated");
+        }
+
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "SELECT id FROM public.\"schedules\" " +
+                    "WHERE user_id = ?"
+        );
+        prepStatement.setInt(1, id);
+        ResultSet scheduleIdResultSet = prepStatement.executeQuery();
+
+        List<Integer> scheduleIds = new ArrayList<>();
+        while (scheduleIdResultSet.next()) {
+            int schedule_id = scheduleIdResultSet.getInt(1);
+            scheduleIds.add(schedule_id);
+        }
+
+        List<Schedule> schedules = new ArrayList<>();
+        for (int scheduleId: scheduleIds) {
+            Schedule schedule = Schedule.loadSchedule(id, scheduleId);
+            schedules.add(schedule);
+        }
+
+        return schedules;
+    }
+
+    public void addSchedule() throws SQLException, JsonProcessingException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"schedules\" (user_id) VALUES (?)",
+                Statement.RETURN_GENERATED_KEYS
+        );
+        prepStatement.setInt(1, id);
+        prepStatement.execute();
+        ResultSet generatedKey = prepStatement.getGeneratedKeys();
+        if (generatedKey.next()) {
+            int scheduleId = generatedKey.getInt(1);
+
+            schedules.add(Schedule.loadSchedule(id, scheduleId));
+        }
+    }
+
+    public void removeSchedule(int scheduleId) throws SQLException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "DELETE FROM public.\"schedules\" WHERE id = ?"
+        );
+        prepStatement.setInt(1, scheduleId);
+        prepStatement.execute();
+
+        schedules.removeIf((schedule) -> schedule.getId() == scheduleId);
     }
 }
