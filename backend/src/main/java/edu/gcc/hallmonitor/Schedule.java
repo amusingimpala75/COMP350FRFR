@@ -155,6 +155,18 @@ public class Schedule {
 
     public static Schedule newSchedule(int userId, String name) throws SQLException {
         Schedule schedule = new Schedule(name);
+
+        // Ensure that the name isn't already taken for the user
+        PreparedStatement nameCheckStatement = CONNECTION.prepareStatement(
+                "SELECT name FROM public.\"schedules\" WHERE user_id = ? AND name = ?"
+        );
+        nameCheckStatement.setInt(1, userId);
+        nameCheckStatement.setString(2, name.trim().toLowerCase());
+        ResultSet rs = nameCheckStatement.executeQuery();
+        if (rs.next()) {
+            throw new SecurityException("User cannot have two schedules with the same name");
+        }
+
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)"
         );
