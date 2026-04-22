@@ -12,6 +12,7 @@ interface CourseTime {
 }
 
 interface Course {
+  id: number,
   subject: string;
   number: string;
   section: string;
