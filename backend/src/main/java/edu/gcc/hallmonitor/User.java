@@ -98,7 +98,7 @@ public class User {
      * @return if the username and password match a user in the database
      * @throws SQLException if the connection fails
      */
-    private boolean isUser() throws SQLException {
+    public boolean isUser() throws SQLException {
         // Get all the users that match the current user (should be at max 1)
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
@@ -130,7 +130,7 @@ public class User {
      * @return if the username is already used
      * @throws SQLException if the connection fails
      */
-    private boolean isUsernameTaken() throws SQLException {
+    public boolean isUsernameTaken() throws SQLException {
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
                     "WHERE username = ?"
@@ -147,7 +147,7 @@ public class User {
      * @return if the user was successfully added
      * @throws SQLException if the connection fails
      */
-    private boolean addUser() throws SQLException {
+    public boolean addUser() throws SQLException {
         // Two users should not share a username
         if (isUsernameTaken()) {
             return false;
