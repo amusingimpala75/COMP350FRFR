@@ -42,9 +42,6 @@ export default function SearchPage() {
   const [userId, setUserId] = useState(null);
   const [scheduleId, setScheduleId] = useState(null);
 
-  const getCourseId = (course: Course) =>
-    `${course.subject}${course.number}${course.section}${course.semester}`; //
-
   // --- SEARCH ---
   const search = async () => {
     setCourses([]);
@@ -262,7 +259,7 @@ export default function SearchPage() {
       try {
         const res = await fetch('/schedule/items?userId=${userId}&scheduleId=${scheduleId}');
         const items: Course[] = await res.json();
-        const ids = new Set(items.map(c => getCourseId(c)));
+        const ids = new Set(items.map(c => c.id));
         setSchedule(ids);
       } catch (err) {
         console.error('Failed to load schedule', err);
