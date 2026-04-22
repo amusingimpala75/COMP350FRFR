@@ -64,7 +64,21 @@ public class Schedule {
     }
 
     public boolean inSchedule(Course course){
-        return getCoursesForTerm(course).contains(course);
+        for (Course c: getCoursesForTerm(course)) {
+            if (c.id() == course.id()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean inSchedule(int courseId) {
+        for (Course c: allCourses()) {
+            if (c.id() == courseId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
