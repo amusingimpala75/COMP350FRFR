@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { useRef } from 'react'
+const [userId, setUserId] = useState(null);
+const [scheduleId, setScheduleId] = useState(null);
 
 
 //for sending into the /schedule/items endpoint
@@ -32,7 +34,7 @@ export default function SchedulePage() {
 
 
   const loadCourses = async (term: Term) => {
-    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}`);
+    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
     setCourses(items);
 
@@ -59,7 +61,7 @@ export default function SchedulePage() {
   };
 
   const removeCourse = async (courseId: string) => {
-    await fetch('/schedule/items', { method: 'POST', body: courseId });
+    await fetch('/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}', { method: 'POST', body: courseId });
     //remove from calendar
     removeEvents(courseId);
     loadCourses(activeTerm);
