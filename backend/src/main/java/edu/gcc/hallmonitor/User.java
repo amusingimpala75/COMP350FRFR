@@ -1,5 +1,7 @@
 package edu.gcc.hallmonitor;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -185,7 +187,7 @@ public class User {
         return !isUser();
     }
 
-    public List<Schedule> getUserSchedules() throws SQLException, SecurityException {
+    public List<Schedule> getUserSchedules() throws SQLException, SecurityException, JsonProcessingException {
         if (!authenticated) {
             throw new SecurityException("User has not be authenticated");
         }
@@ -203,9 +205,12 @@ public class User {
             scheduleIds.add(schedule_id);
         }
 
-        // For each scheduleid, get all the courses that link to it and add them to the schedule
+        List<Schedule> schedules = new ArrayList<>();
         for (int scheduleId: scheduleIds) {
-            // TODO: Fetch schedules...Have to rethink loadschedule() and maybe rely on that by passing user_id and schedule_id
+            Schedule schedule = Schedule.loadSchedule(id, scheduleId);
+            schedules.add(schedule);
         }
+
+        return schedules;
     }
 }
