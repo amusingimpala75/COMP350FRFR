@@ -16,7 +16,7 @@ public class User {
     private boolean authenticated = false;
     private int gradYear;
     private List<Schedule> schedules;
-    private static Connection CONNECTION;
+    private static final Connection CONNECTION;
 
     static {
         try {
@@ -49,8 +49,6 @@ public class User {
         } catch (NoSuchAlgorithmException ignored) {
             throw new IllegalArgumentException("sha256 not found");
         } // won't fail since sha256 is hardcoded
-
-        schedules = getUserSchedules(); // fetch schedules from db
     }
 
     public String getUsername() {
@@ -75,6 +73,7 @@ public class User {
         if (user.isUser()) {
             user.id = user.getIdFromDatabase();
             user.authenticated = true;
+            user.schedules = user.getUserSchedules();
             return user;
         } else {
             throw new SecurityException("Username and password not found");
@@ -87,6 +86,7 @@ public class User {
         if (user.addUser()) {
             user.id = user.getIdFromDatabase();
             user.authenticated = true;
+            user.schedules = user.getUserSchedules();
             return user;
         } else {
             throw new SecurityException("Username and password are taken");
@@ -154,7 +154,7 @@ public class User {
         }
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "INSERT INTO public.\"users\" (username, password_hash, grad_year)" +
+                "INSERT INTO public.\"users\" (username, password_hash, grad_year) " +
                     "VALUES (?, ?, ?)"
         );
         prepStatement.setString(1, username);
