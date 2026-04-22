@@ -51,6 +51,23 @@ public class User {
         } // won't fail since sha256 is hardcoded
     }
 
+    public User(int userId) throws SQLException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "SELECT * FROM public.\"users\" WHERE id = ?"
+        );
+        prepStatement.setInt(1, userId);
+        ResultSet rs = prepStatement.executeQuery();
+
+        if (rs.next()) {
+            id = userId;
+            username = rs.getString("username");
+            passwordHash = rs.getBytes("password_hash");
+            authenticated = true;
+        } else {
+            throw new SecurityException("Unknown user");
+        }
+    }
+
     public String getUsername() {
         return username;
     }
