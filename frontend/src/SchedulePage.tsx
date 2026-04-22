@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { useRef } from 'react'
-const [userId, setUserId] = useState(null);
-const [scheduleId, setScheduleId] = useState(null);
 
 
 //for sending into the /schedule/items endpoint
