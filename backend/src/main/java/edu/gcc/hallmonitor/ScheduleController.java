@@ -24,9 +24,9 @@ public class ScheduleController {
 
         //adds or removes a course based on the ID
         app.post("/schedule/items", ctx -> {
-            int courseId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("course-id")));
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("user-id")));
-            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("schedule-id")));
+            int courseId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("courseId")));
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
 
             Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
             Course course = Search.getCourseById(courseId);
@@ -59,8 +59,8 @@ public class ScheduleController {
         // Get the schedule that is saved
         app.get("/schedule/items", ctx -> {
             String term = ctx.queryParam("term"); // Fall, Winter, Spring, Summer
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("user-id")));
-            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("schedule-id")));
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
 
             Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
             if (term == null || term.isBlank()) {
