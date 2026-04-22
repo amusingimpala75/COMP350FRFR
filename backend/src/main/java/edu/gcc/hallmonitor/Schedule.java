@@ -162,6 +162,7 @@ public class Schedule {
         );
         prepStatement.setInt(1, id);
         prepStatement.setInt(2, course.id());
+        prepStatement.execute();
 
         getCoursesForTerm(course).add(course);
     }
