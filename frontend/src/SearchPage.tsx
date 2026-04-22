@@ -682,7 +682,7 @@ const modalStyle: React.CSSProperties = {
 
                     {/* scrollable content */}
                      <div style={{ flex: 1, overflowY: "auto", marginTop: "20px" }}>
-                     <p style={{ overflowWrap: "break-word" }}F{result}</p>
+                     <p style={{ overflowWrap: "break-word" }}{result}</p>
                      </div>
 
 
