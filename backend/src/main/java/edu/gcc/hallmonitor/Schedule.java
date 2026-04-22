@@ -28,6 +28,7 @@ public class Schedule {
     private List<Course> winterCourses;
     private int id;
     private int userId;
+    private String name;
     private boolean authenticated = false;
     private static final Connection CONNECTION;
 
@@ -87,6 +88,8 @@ public class Schedule {
     }
 
     public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
+        Schedule schedule = new Schedule();
+
         PreparedStatement userCheckStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"schedules\" " +
                     "WHERE id = ? AND user_id = ?"
@@ -96,6 +99,8 @@ public class Schedule {
         ResultSet userCheckResultSet = userCheckStatement.executeQuery();
         if (!userCheckResultSet.next()) {
             throw new SecurityException("User does not own schedule");
+        } else {
+            schedule.name = userCheckResultSet.getString("name");
         }
 
 
@@ -108,7 +113,7 @@ public class Schedule {
         );
         prepStatement.setInt(1, scheduleId);
         ResultSet coursesResultSet = prepStatement.executeQuery();
-        Schedule schedule = new Schedule();
+
         schedule.id = scheduleId;
         schedule.userId = userId;
         schedule.authenticated = true;
