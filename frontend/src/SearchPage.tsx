@@ -1,6 +1,9 @@
 import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
 
+const userId = 154;
+const scheduleId = 1;
+
 
 interface CourseTime {
   day: string;
@@ -39,8 +42,6 @@ export default function SearchPage() {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
   const isClearing = useRef(false);
-  const [userId, setUserId] = useState(null);
-  const [scheduleId, setScheduleId] = useState(null);
 
   // --- SEARCH ---
   const search = async () => {
@@ -80,7 +81,7 @@ export default function SearchPage() {
     const newSchedule = new Set(schedule);
 
     //send the course identifier to the backend
-    const result = await fetch('/schedule/items?userId=${userId}&scheduleId=${scheduleId}&courseId=${course.id}', {
+    const result = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}&courseId=${course.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
     });
@@ -257,7 +258,7 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const res = await fetch('/schedule/items?userId=${userId}&scheduleId=${scheduleId}');
+        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`);
         const items: Course[] = await res.json();
         const ids = new Set(items.map(c => c.id));
         setSchedule(ids);

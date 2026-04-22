@@ -8,6 +8,9 @@ import { useRef } from 'react'
 type Term = 'Fall' | 'Winter' | 'Spring' | 'Summer';
 const TERMS: Term[] = ['Fall', 'Winter', 'Spring', 'Summer'];
 
+const userId = 154;
+const scheduleId = 1;
+
 
 
 interface CourseTime {
