@@ -34,7 +34,7 @@ export default function SearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<Set<string>>(new Set());
+  const [schedule, setSchedule] = useState<Set<number>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<string>('ALL');
   const [timeStart, setTimeStart] = useState<string>('00:01');
@@ -90,9 +90,9 @@ export default function SearchPage() {
 
 
     if(text == "Added"){
-        newSchedule.add(courseId);
+        newSchedule.add(course.id);
     }else if(text == "Removed"){
-        newSchedule.delete(courseId);
+        newSchedule.delete(course.id);
     }else{
         toast(text)
     }
@@ -398,11 +398,10 @@ export default function SearchPage() {
           <h3>Results</h3>
           <ul>
             {visibleCourses.map(course => {
-                const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
-                let inSchedule = schedule.has(courseId)
+                let inSchedule = schedule.has(course.id)
 
               return (
-                <li key={courseId} className="course-row">
+                <li key={course.id} className="course-row">
                   <button
                     className="course-btn"
                     onClick={() => toggleCourse(course)}
