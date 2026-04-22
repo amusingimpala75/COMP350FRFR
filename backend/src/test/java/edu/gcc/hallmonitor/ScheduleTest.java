@@ -18,6 +18,7 @@ class ScheduleTest {
             Course expectedCourse = expectedCourses.get(i);
             Course actualCourse = actualCourses.get(i);
 
+            assertEquals(expectedCourse.id(), actualCourse.id());
             assertEquals(expectedCourse.name(), actualCourse.name());
             assertEquals(expectedCourse.professor().size(), actualCourse.professor().size());
             for (int j = 0; j < actualCourse.professor().size(); j++) {
@@ -44,6 +45,7 @@ class ScheduleTest {
     void loadSaveSchedule() {
         Schedule expectedSchedule = new Schedule(List.of(
             new Course(
+                    1,
                 "COMP PROGRAMMING I",
                 List.of("Wolfe, Britton D."),
                 "COMP",
@@ -75,6 +77,7 @@ class ScheduleTest {
                 32
             ),
             new Course(
+                    2,
                 "INTRO TO COMPUTER SCIENCE",
                 List.of("Dickinson, Brian C"),
                 "COMP",
@@ -121,14 +124,14 @@ class ScheduleTest {
     void checkForOverlap_noOverlap() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                    1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(new CourseTime("M", LocalTime.of(10, 0), LocalTime.of(11, 0))),
                 false, false, 0, 30
             )
         ));
 
         Course newCourse = new Course(
-            "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
+                2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
             List.of(new CourseTime("M", LocalTime.of(11, 0), LocalTime.of(12, 0))),
             false, false, 0, 30
         );
@@ -140,14 +143,14 @@ class ScheduleTest {
     void checkForOverlap_overlapSameDay() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1,"Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(new CourseTime("M", LocalTime.of(10, 0), LocalTime.of(11, 0))),
                 false, false, 0, 30
             )
         ));
 
         Course newCourse = new Course(
-            "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
+            2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
             List.of(new CourseTime("M", LocalTime.of(10, 30), LocalTime.of(11, 30))),
             false, false, 0, 30
         );
@@ -158,14 +161,14 @@ class ScheduleTest {
     void checkForOverlap_differentDays() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(new CourseTime("M", LocalTime.of(10,0), LocalTime.of(11,0))),
                 false,false,0,30
             )
         ));
 
         Course newCourse = new Course(
-            "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
+            2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
             List.of(new CourseTime("T", LocalTime.of(10,30), LocalTime.of(11,30))),
             false,false,0,30
         );
@@ -176,14 +179,14 @@ class ScheduleTest {
     void checkForOverlap_touchingTimesNotOverlap() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(new CourseTime("M", LocalTime.of(10,0), LocalTime.of(11,0))),
                 false,false,0,30
             )
         ));
 
         Course newCourse = new Course(
-            "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
+            2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
             List.of(new CourseTime("M", LocalTime.of(11,0), LocalTime.of(12,0))),
             false,false,0,30
         );
@@ -194,7 +197,7 @@ class ScheduleTest {
     void checkForOverlap_invalidTimeIgnored() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(new CourseTime("M", LocalTime.of(10,0), LocalTime.of(11,0))),
                 false,false,0,30
             )
@@ -202,7 +205,7 @@ class ScheduleTest {
 
         // end before start → ignored
         Course newCourse = new Course(
-            "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
+            2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
             List.of(new CourseTime("M", LocalTime.of(12,0), LocalTime.of(11,0))),
             false,false,0,30
         );
@@ -215,13 +218,13 @@ class ScheduleTest {
     void hasDifferentSection_trueWhenDifferentSection() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(), false,false,0,30
             )
         ));
 
         Course newCourse = new Course(
-            "Course1", List.of("Prof"), "COMP", 101, 'B', "Room", 3, "2023_Fall",
+            1, "Course1", List.of("Prof"), "COMP", 101, 'B', "Room", 3, "2023_Fall",
             List.of(), false,false,0,30
         );
 
@@ -232,13 +235,13 @@ class ScheduleTest {
     void hasDifferentSection_falseSameSection() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(), false,false,0,30
             )
         ));
 
         Course newCourse = new Course(
-            "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+            1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
             List.of(), false,false,0,30
         );
 
@@ -249,13 +252,13 @@ class ScheduleTest {
     void hasDifferentSection_falseDifferentCourse() {
         Schedule schedule = new Schedule(List.of(
             new Course(
-                "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
+                1, "Course1", List.of("Prof"), "COMP", 101, 'A', "Room", 3, "2023_Fall",
                 List.of(), false,false,0,30
             )
         ));
 
         Course newCourse = new Course(
-            "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
+            2, "Course2", List.of("Prof"), "COMP", 102, 'A', "Room", 3, "2023_Fall",
             List.of(), false,false,0,30
         );
 

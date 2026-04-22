@@ -13,7 +13,15 @@ public class User {
     private byte[] passwordHash;
     private int id;
     private int gradYear;
-    private Connection connection;
+    private static Connection CONNECTION;
+
+    static {
+        try {
+            CONNECTION = Database.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Basic constructor that sets the username and password hash. NOTE: YOU SHOULD USE THE login() or signUp() METHOD
@@ -39,7 +47,6 @@ public class User {
             throw new IllegalArgumentException("sha256 not found");
         } // won't fail since sha256 is hardcoded
 
-        connection = Database.getConnection();
     }
 
     public String getUsername() {
@@ -87,7 +94,7 @@ public class User {
      */
     public boolean isUser() throws SQLException {
         // Get all the users that match the current user (should be at max 1)
-        PreparedStatement prepStatement = connection.prepareStatement(
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
                     "WHERE username = ? AND password_hash = ?"
         );
@@ -100,7 +107,7 @@ public class User {
     }
 
     public int getIdFromDatabase() throws SQLException {
-        PreparedStatement prepStatement = connection.prepareStatement(
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT id FROM public.\"users\"" +
                     "WHERE username = ? AND password_hash = ?"
         );
@@ -118,7 +125,7 @@ public class User {
      * @throws SQLException if the connection fails
      */
     public boolean isUsernameTaken() throws SQLException {
-        PreparedStatement prepStatement = connection.prepareStatement(
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"users\"" +
                     "WHERE username = ?"
         );
@@ -140,7 +147,7 @@ public class User {
             return false;
         }
 
-        PreparedStatement prepStatement = connection.prepareStatement(
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "INSERT INTO public.\"users\" (username, password_hash, grad_year)" +
                     "VALUES (?, ?, ?)"
         );
@@ -162,7 +169,7 @@ public class User {
         if (!isUser()) {
             return false;
         }
-        PreparedStatement prepStatement = connection.prepareStatement(
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "DELETE FROM public.\"users\" WHERE username = ? AND password_hash = ?"
         );
         prepStatement.setString(1, username);

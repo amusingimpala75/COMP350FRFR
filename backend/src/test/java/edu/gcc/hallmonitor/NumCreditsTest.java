@@ -20,6 +20,7 @@ public class NumCreditsTest {
 
     private static Course emptyWithCredits(int credits) {
         return new Course(
+                1,
             "",
             List.of(""),
             "",

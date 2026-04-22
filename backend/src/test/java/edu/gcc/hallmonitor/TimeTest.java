@@ -21,6 +21,7 @@ public class TimeTest {
 
     private static Course emptyAtTimes(List<LocalTime> times) {
         return new Course(
+                1,
             "",
             List.of(""),
             "",

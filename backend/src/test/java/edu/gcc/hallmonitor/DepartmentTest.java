@@ -20,6 +20,7 @@ public class DepartmentTest {
 
     private static Course emptyWithDepartment(String department) {
         return new Course(
+                1,
             "",
             List.of(""),
             department,

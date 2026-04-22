@@ -36,6 +36,7 @@ public class DaysTest {
 
     public Course emptyOnDays(List<String> days) {
         return new Course(
+                1,
             "",
             List.of(""),
             "",
