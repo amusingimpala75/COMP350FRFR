@@ -21,6 +21,7 @@ public class SemesterTest {
 
     private static Course emptyWithSemester(String semester) {
         return new Course(
+                1,
             "",
             List.of(""),
             "",

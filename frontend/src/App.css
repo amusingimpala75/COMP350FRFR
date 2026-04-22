@@ -1,4 +1,16 @@
 /* ---------------- Global Reset ---------------- */
+
+:root {
+  --primary: #C60E30;
+  --primary-dark: #9e0b26;
+  --surface-page: #dcdcdc;
+  --surface-main: #e6e6e6;
+  --surface-panel: #e0e0e0;
+  --surface-card: #f2f2f2;
+  --text-main: #111;
+  --nav-hover: #c7c7c7;
+}
+
 * {
   box-sizing: border-box; /* include padding/border in width */
 }
@@ -21,11 +33,11 @@ body {
 }
 
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em #c60e30aa);
 }
 
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em #9e0b26aa);
 }
 
 @keyframes logo-spin {
@@ -39,18 +51,30 @@ body {
   }
 }
 
+.logo-container {
+  margin-top: 20px;
+}
+
+.logo-container img {
+  height: 220px;
+  display: block;
+  margin-left: -20px; /* tweak this */
+}
+
 /* ---------------- Layout ---------------- */
 .layout {
   display: flex;
   min-height: 100vh;
   width: 100vw; /* ensures layout spans full viewport */
+  background-color: var(--surface-page);
 }
 
 .sidebar {
-  width: 220px;
-  padding: 20px;
-  background-color: #f4f4f4;
+  width: 236px;
+  padding: 10px 20px 20px 20px;
+  background-color: var(--surface-panel);
   border-right: 1px solid #ddd;
+  color: var(--text-main);
 }
 
 .main {
@@ -58,6 +82,8 @@ body {
   padding: 12px 12px 0 12px;     /* tighter top/bottom padding */
   display: flex;     /* allow cards to grow */
   flex-direction: column;
+  background-color: var(--surface-main);
+  color: var(--text-main);
 }
 
 /* ---------------- Cards ---------------- */
@@ -67,13 +93,26 @@ body {
   max-width: none;
   margin: 0 0 12px 0;
   padding: 1.5rem;
-  background-color: #fff;
+  background-color: var(--surface-card);
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.sidebar h3,
+.sidebar h4,
+.sidebar h5,
+.main h1,
+.results-card h3,
+.course-text {
+  color: var(--text-main);
+}
+
+.sidebar h3 {
+  margin-top: 0;
 }
 
 .search-card {
@@ -123,11 +162,97 @@ body {
   transition: all 0.2s;
 }
 
+.filter-select-container {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+
+.filter-select__control {
+  border-radius: 8px !important;
+  border-color: #ccc !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  box-shadow: none !important;
+}
+
+.filter-select__value-container {
+  padding: 0 10px !important;
+}
+
+.filter-select__single-value,
+.filter-select__placeholder,
+.filter-select__input-container,
+.filter-select__option,
+.filter-select__menu {
+  font-size: 13px !important;
+}
+
+.filter-select__indicator {
+  padding: 4px !important;
+}
+
+.filter-select__indicators {
+  height: 32px !important;
+}
+
+.filter-select__control--is-focused {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 6px rgba(198, 14, 48, 0.3) !important;
+}
+
+.filter-select__menu {
+  z-index: 20;
+}
+
+.filter-select__option--is-focused {
+  background-color: rgba(198, 14, 48, 0.1) !important;
+}
+
+.filter-select__option--is-selected {
+  background-color: var(--primary) !important;
+}
+
+.time-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.time-range .filter-select-container {
+  width: auto;
+  margin: 0;
+  flex: 1 1 0;
+  min-width: 90px;
+}
+
+.time-range .filter-select__control {
+  min-height: 36px !important;
+  height: 36px !important;
+}
+
+.time-range .filter-select__value-container {
+  padding: 0 6px !important;
+}
+
+.time-range .filter-select__single-value,
+.time-range .filter-select__placeholder {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.time-range span {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
 .card input:focus,
 .card select:focus {
   outline: none;
-  border-color: #4a90e2;
-  box-shadow: 0 0 6px rgba(74, 144, 226, 0.3);
+  border-color: var(--primary);
+  box-shadow: 0 0 6px rgba(198, 14, 48, 0.3);
 }
 
 .card select {
@@ -148,7 +273,7 @@ body {
   padding: 12px 0;
   border-radius: 8px;
   border: none;
-  background-color: #4a90e2;
+  background-color: var(--primary);
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -156,7 +281,7 @@ body {
 }
 
 .card button:hover {
-  background-color: #357ab7;
+  background-color: var(--primary-dark);
 }
 
 /* ---------------- Lists ---------------- */
@@ -212,12 +337,12 @@ body {
 /* Hover effect */
 .top-bar .nav-link:hover {
   text-decoration: underline;
-  color: #ffcc00;             /* optional highlight color */
+  color: var(--nav-hover);
 }
 
 /* Optional: highlight the active page */
 .top-bar .nav-link.active {
-  border-bottom: 2px solid #ffcc00;
+  border-bottom: 2px solid var(--primary-dark);
 }
 
 /* Top bar container */
@@ -238,12 +363,12 @@ body {
 
 /* Highlight active link */
 .nav-link.active {
-  border-bottom: 2px solid #ffcc00;
+  border-bottom: 2px solid var(--primary-dark);
 }
 
 /* Hover effect */
 .nav-link:hover {
-  color: #ffcc00;
+  color: var(--nav-hover);
   text-decoration: underline;
 }
 
@@ -251,6 +376,14 @@ body {
   display: flex;
   gap: 6px;
   margin-top: 6px;
+}
+
+.sidebar .filter-select-container,
+.sidebar .day-selector,
+.sidebar .time-range {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .day-btn {
@@ -267,13 +400,27 @@ body {
 }
 
 .day-btn.selected {
-  background: #007bff;
+  background: var(--primary);
   color: white;
-  border-color: #007bff;
+  border-color: var(--primary);
 }
 
 .fc-day-today {
   background-color: transparent !important;
+}
+
+/* FullCalendar red theme overrides */
+.Schedule .fc {
+  --fc-event-bg-color: var(--primary);
+  --fc-event-border-color: var(--primary);
+  --fc-event-text-color: #fff;
+  --fc-button-bg-color: var(--primary);
+  --fc-button-border-color: var(--primary);
+  --fc-button-hover-bg-color: var(--primary-dark);
+  --fc-button-hover-border-color: var(--primary-dark);
+  --fc-button-active-bg-color: var(--primary-dark);
+  --fc-button-active-border-color: var(--primary-dark);
+  --fc-today-bg-color: rgba(198, 14, 48, 0.08);
 }
 
 .results-card ul {

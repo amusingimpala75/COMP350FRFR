@@ -1,5 +1,10 @@
 import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
+import pandaLogo from './assets/Designer.png';
+import Select, { type SingleValue } from 'react-select';
+
+const userId = 154;
+const scheduleId = 1;
 
 
 
@@ -10,6 +15,7 @@ interface CourseTime {
 }
 
 interface Course {
+  id: number;
   subject: string;
   number: string;
   section: string;
@@ -18,6 +24,11 @@ interface Course {
   times: CourseTime[];
   semester:string;
   credits: number;
+}
+
+interface SelectOption {
+  value: string;
+  label: string;
 }
 
 export default function SearchPage() {
@@ -31,7 +42,7 @@ export default function SearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [departments, setDepartments] = useState<string[]>([]);
   const [professors, setProfessors] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<Set<string>>(new Set());
+  const [schedule, setSchedule] = useState<Set<number>>(new Set());
   const [days, setDays] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<string>('ALL');
   const [timeStart, setTimeStart] = useState<string>('00:01');
@@ -44,9 +55,6 @@ export default function SearchPage() {
   const [result, setResult] = useState("Ask a question about your major's required classes!"); // the api call result
   const [isOpen, setIsOpen] = useState(false); // for the modal
   const [chatbotDept, setCbDept] = useState("Comp");
-
-  const getCourseId = (course: Course) =>
-    `${course.subject}${course.number}${course.section}${course.semester}`; //
 
   // --- SEARCH ---
   const search = async () => {
@@ -84,21 +92,19 @@ export default function SearchPage() {
   //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
     const newSchedule = new Set(schedule);
-    const courseId = getCourseId(course)
 
     //send the course identifier to the backend
-    const result = await fetch('/schedule/items', {
+    const result = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}&courseId=${course.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: courseId,
     });
     const text = await result.text();
 
 
     if(text == "Added"){
-        newSchedule.add(courseId);
+        newSchedule.add(course.id);
     }else if(text == "Removed"){
-        newSchedule.delete(courseId);
+        newSchedule.delete(course.id);
     }else{
         toast(text)
     }
@@ -144,20 +150,20 @@ export default function SearchPage() {
 
   // updating all the filters
 
-  const updateSem = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const updated = event.target.value;
+  const updateSem = async (selected: SingleValue<SelectOption>) => {
+      const updated = selected?.value ?? 'ALL';
       await updateFilter('semester', semester, updated);
       setSemester(updated);
     };
 
-  const updateDept = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const updated = event.target.value;
+  const updateDept = async (selected: SingleValue<SelectOption>) => {
+    const updated = selected?.value ?? 'ALL';
     await updateFilter('department', department, updated);
     setDepartment(updated);
   };
 
-  const updateProfessor = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const updated = event.target.value;
+  const updateProfessor = async (selected: SingleValue<SelectOption>) => {
+    const updated = selected?.value ?? 'ALL';
     await updateFilter('professor', professor, updated);
     setProfessor(updated);
   };
@@ -265,9 +271,9 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const res = await fetch('/schedule/items');
+        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`);
         const items: Course[] = await res.json();
-        const ids = new Set(items.map(c => getCourseId(c)));
+        const ids = new Set(items.map(c => c.id));
         setSchedule(ids);
       } catch (err) {
         console.error('Failed to load schedule', err);
@@ -318,6 +324,7 @@ export default function SearchPage() {
     (_, i) => windowStart + i
   );
 
+
 //Chatbot query box
 async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
@@ -354,6 +361,35 @@ const modalStyle: React.CSSProperties = {
 };
 
 
+  const semesterOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Semesters' },
+    ...semesters.map(sem => ({ value: sem, label: sem }))
+  ];
+  const departmentOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Departments' },
+    ...departments.map(dept => ({ value: dept, label: dept }))
+  ];
+  const professorOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Professors' },
+    ...professors.map(prof => ({ value: prof, label: prof }))
+  ];
+  const startTimeOptions: SelectOption[] = [
+    { value: '00:01', label: 'Start' },
+    ...availableTimes.map(t => ({ value: t, label: t }))
+  ];
+  const endTimeOptions: SelectOption[] = [
+    { value: '23:59', label: 'End' },
+    ...availableTimes.map(t => ({ value: t, label: t }))
+  ];
+  const creditOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All' },
+    ...availableCredits
+      .slice()
+      .sort((a, b) => Number(a) - Number(b))
+      .map(c => ({ value: c, label: c }))
+  ];
+
+
   return (
     <div className="layout">
     <div><Toaster/></div>
@@ -364,21 +400,34 @@ const modalStyle: React.CSSProperties = {
 
         <h4> Semester </h4>
 
-        <select value={semester} onChange={updateSem}>
-          <option value="ALL">All Semesters</option>
-          {semesters.map(sem => <option key={sem} value={sem}>{sem}</option>)}
-        </select>
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={semesterOptions}
+          value={semesterOptions.find(option => option.value === semester) ?? semesterOptions[0]}
+          onChange={updateSem}
+        />
 
         <h4> Department & Professor</h4>
 
-        <select value={department} onChange={updateDept}>
-          <option value="ALL">All Departments</option>
-          {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-        </select>
-        <select value={professor} onChange={updateProfessor}>
-          <option value="ALL">All Professors</option>
-          {professors.map(prof => <option key={prof} value={prof}>{prof}</option>)}
-        </select>
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={departmentOptions}
+          value={departmentOptions.find(option => option.value === department) ?? departmentOptions[0]}
+          onChange={updateDept}
+        />
+        <h5></h5>
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={professorOptions}
+          value={professorOptions.find(option => option.value === professor) ?? professorOptions[0]}
+          onChange={updateProfessor}
+        />
 
         <h4>Days and Time Range</h4>
 
@@ -394,33 +443,47 @@ const modalStyle: React.CSSProperties = {
           ))}
         </div>
 
+        <h5></h5>
+
         <div className="time-range">
-          <select value={timeStart} onChange={e => updateTimeStart(e.target.value)}>
-            <option value="00:01">Start</option>
-              {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <span>to</span>
-          <select value={timeEnd} onChange={e => updateTimeEnd(e.target.value)}>
-            <option value="23:59">End</option>
-              {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <Select
+            className="filter-select-container"
+            classNamePrefix="filter-select"
+            isSearchable
+            options={startTimeOptions}
+            value={startTimeOptions.find(option => option.value === timeStart) ?? startTimeOptions[0]}
+            onChange={(selected) => updateTimeStart(selected?.value ?? '00:01')}
+          />
+          <span> to </span>
+          <Select
+            className="filter-select-container"
+            classNamePrefix="filter-select"
+            isSearchable
+            options={endTimeOptions}
+            value={endTimeOptions.find(option => option.value === timeEnd) ?? endTimeOptions[0]}
+            onChange={(selected) => updateTimeEnd(selected?.value ?? '23:59')}
+          />
         </div>
 
         <h4>Credits</h4>
 
-        <select value={credits} onChange={e => updateCredits(e.target.value)}>
-          <option value="ALL">All</option>
-          {availableCredits
-            .slice()                       // copy the array so we don’t mutate the original
-            .sort((a, b) => Number(a) - Number(b))  // numeric sort
-            .map(c => <option key={c} value={c}>{c}</option>)
-          }
-        </select>
+        <Select
+          className="filter-select-container"
+          classNamePrefix="filter-select"
+          isSearchable
+          options={creditOptions}
+          value={creditOptions.find(option => option.value === credits) ?? creditOptions[0]}
+          onChange={(selected) => updateCredits(selected?.value ?? 'ALL')}
+        />
 
         <h5></h5>
         <button className="clear-btn" onClick={clearAllFilters}>
           Clear All Filters
         </button>
+
+        <div className="logo-container">
+          <img src={pandaLogo} alt="Red Panda Logo" />
+        </div>
 
       </div>
 
@@ -442,11 +505,10 @@ const modalStyle: React.CSSProperties = {
           <h3>Results</h3>
           <ul>
             {visibleCourses.map(course => {
-                const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
-                let inSchedule = schedule.has(courseId)
+                let inSchedule = schedule.has(course.id)
 
               return (
-                <li key={courseId} className="course-row">
+                <li key={course.id} className="course-row">
                   <button
                     className="course-btn"
                     onClick={() => toggleCourse(course)}
@@ -499,7 +561,7 @@ const modalStyle: React.CSSProperties = {
                   style={{
                     border: 'none',
                     background: 'none',
-                    color: currentPage === 1 ? '#0a58ca' : 'inherit',
+                    color: currentPage === 1 ? '#c60e30' : 'inherit',
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     fontWeight: currentPage === 1 ? 700 : 400,
@@ -520,7 +582,7 @@ const modalStyle: React.CSSProperties = {
                   style={{
                     border: 'none',
                     background: 'none',
-                    color: page === currentPage ? '#0a58ca' : 'inherit',
+                    color: page === currentPage ? '#c60e30' : 'inherit',
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     fontWeight: page === currentPage ? 700 : 400,
@@ -540,7 +602,7 @@ const modalStyle: React.CSSProperties = {
                   style={{
                     border: 'none',
                     background: 'none',
-                    color: currentPage === totalPages ? '#0a58ca' : 'inherit',
+                    color: currentPage === totalPages ? '#c60e30' : 'inherit',
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     fontWeight: currentPage === totalPages ? 700 : 400,
@@ -620,7 +682,7 @@ const modalStyle: React.CSSProperties = {
 
                     {/* scrollable content */}
                      <div style={{ flex: 1, overflowY: "auto", marginTop: "20px" }}>
-                     <p style={{ overflowWrap: "break-word" }}>{result}</p>
+                     <p style={{ overflowWrap: "break-word" }}F{result}</p>
                      </div>
 
 
