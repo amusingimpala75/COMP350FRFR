@@ -102,7 +102,7 @@ export default function SchedulePage() {
 
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
-      const res = await fetch('/download-pdf');
+      const res = await fetch('/download-pdf?userId=${userId}&scheduleId=${scheduleId}');
       if (!res.ok) {
           throw new Error('Download failed');
       }

@@ -39,6 +39,8 @@ export default function SearchPage() {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
   const isClearing = useRef(false);
+  const [userId, setUserId] = useState(null);
+  const [scheduleId, setScheduleId] = useState(null);
 
   const getCourseId = (course: Course) =>
     `${course.subject}${course.number}${course.section}${course.semester}`; //
@@ -79,13 +81,11 @@ export default function SearchPage() {
   //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
     const newSchedule = new Set(schedule);
-    const courseId = getCourseId(course)
 
     //send the course identifier to the backend
-    const result = await fetch('/schedule/items', {
+    const result = await fetch('/schedule/items?userId=${userId}&scheduleId=${scheduleId}&courseId=${course.id}', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: courseId,
     });
     const text = await result.text();
 
@@ -260,7 +260,7 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const res = await fetch('/schedule/items');
+        const res = await fetch('/schedule/items?userId=${userId}&scheduleId=${scheduleId}');
         const items: Course[] = await res.json();
         const ids = new Set(items.map(c => getCourseId(c)));
         setSchedule(ids);
