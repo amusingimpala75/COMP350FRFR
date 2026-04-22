@@ -190,7 +190,7 @@ public class User {
             throw new SecurityException("User has not be authenticated");
         }
 
-        PreparedStatement prepStatement = connection.prepareStatement(
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT id FROM public.\"schedules\"" +
                     "WHERE user_id = ?"
         );
