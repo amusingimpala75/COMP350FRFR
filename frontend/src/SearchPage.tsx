@@ -358,7 +358,7 @@ export default function SearchPage() {
             <option value="00:01">Start</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <span>to</span>
+          <span> to </span>
           <select value={timeEnd} onChange={e => updateTimeEnd(e.target.value)}>
             <option value="23:59">End</option>
               {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
