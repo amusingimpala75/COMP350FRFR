@@ -1,6 +1,10 @@
 package edu.gcc.hallmonitor;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -8,6 +12,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ScheduleTest {
+
+    static Connection CONNECTION;
+
+    static {
+        try {
+            CONNECTION = Database.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     void assertSchedulesEqual(Schedule expected, Schedule actual) {
         List<Course> expectedCourses = expected.getCourses();
@@ -39,85 +53,6 @@ class ScheduleTest {
             assertEquals(expectedCourse.numOpenSeats(), actualCourse.numOpenSeats());
             assertEquals(expectedCourse.totalSeats(), actualCourse.totalSeats());
         }
-    }
-
-    @Test
-    void loadSaveSchedule() {
-        Schedule expectedSchedule = new Schedule(List.of(
-            new Course(
-                    1,
-                "COMP PROGRAMMING I",
-                List.of("Wolfe, Britton D."),
-                "COMP",
-                141,
-                'A',
-                "Science Technology Engineering",
-                3,
-                "2023_Fall",
-                List.of(
-                    new CourseTime(
-                        "M",
-                        LocalTime.of(12, 0, 0),
-                        LocalTime.of(12, 50, 0)
-                    ),
-                    new CourseTime(
-                        "W",
-                        LocalTime.of(12, 0, 0),
-                        LocalTime.of(12, 50, 0)
-                    ),
-                    new CourseTime(
-                        "F",
-                        LocalTime.of(12, 0, 0),
-                        LocalTime.of(12, 50, 0)
-                    )
-                ),
-                false,
-                false,
-                0,
-                32
-            ),
-            new Course(
-                    2,
-                "INTRO TO COMPUTER SCIENCE",
-                List.of("Dickinson, Brian C"),
-                "COMP",
-                155,
-                'A',
-                "STEM 326",
-                3,
-                "2023_Fall",
-                List.of(
-                    new CourseTime(
-                        "T",
-                        LocalTime.of(11, 0, 0),
-                        LocalTime.of(12, 15, 0)
-                    ),
-                    new CourseTime(
-                        "R",
-                        LocalTime.of(11, 0, 0),
-                        LocalTime.of(12, 15, 0)
-                    )
-                ),
-                false,
-                false,
-                0,
-                32
-            )
-        ));
-        try {
-            expectedSchedule.saveSchedule("test.json");
-        } catch (IOException ioe) {
-            fail("Failed to save schedule");
-        }
-
-        Schedule actualSchedule = null;
-        try {
-            actualSchedule = Schedule.loadSchedule("test.json");
-        } catch (IOException ioe) {
-            fail("Unable to load schedule.json");
-        }
-
-        assertSchedulesEqual(expectedSchedule, actualSchedule);
     }
 
     @Test
