@@ -22,6 +22,8 @@ interface Course {
 export default function SearchPage() {
   const courses_per_page = 10;
   const [query, setQuery] = useState('');
+  const [semester, setSemester] = useState('ALL');
+  const [semesters, setSemesters] = useState<string[]>([]);
   const [department, setDepartment] = useState('ALL');
   const [professor, setProfessor] = useState('ALL');
   const [courses, setCourses] = useState<Course[]>([]);
@@ -70,7 +72,7 @@ export default function SearchPage() {
     }
 
     search();
-  }, [department, professor, days, credits, timeStart, timeEnd]);
+  }, [semester, department, professor, days, credits, timeStart, timeEnd]);
 
 
   //Toggles a course in the user's schedule and syncs with the backend.
@@ -137,6 +139,12 @@ export default function SearchPage() {
 
   // updating all the filters
 
+  const updateSem = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const updated = event.target.value;
+      await updateFilter('semester', semester, updated);
+      setSemester(updated);
+    };
+
   const updateDept = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const updated = event.target.value;
     await updateFilter('department', department, updated);
@@ -179,6 +187,8 @@ export default function SearchPage() {
     };
     const updateFilters = async () => {
       // Update:
+      // Semesters
+      setSemesters(await getValues('semester'));
       // Departments
       setDepartments(await getValues('department'));
       // Professors
@@ -215,6 +225,9 @@ export default function SearchPage() {
       const resp = await fetch('/search/filter');
       for (const filter of await resp.json()) {
         switch (filter.type) {
+          case "semester":
+            setSemester(filter.value);
+            break;
           case "department":
             setDepartment(filter.value);
             break;
@@ -276,6 +289,7 @@ export default function SearchPage() {
     });
 
     setDepartment('ALL');
+    setSemester('ALL');
     setProfessor('ALL');
     setDays(new Set());
     setCredits('ALL');
@@ -305,6 +319,13 @@ export default function SearchPage() {
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
         <h3>Filters</h3>
+
+        <h4> Semester </h4>
+
+        <select value={semester} onChange={updateSem}>
+          <option value="ALL">All Semesters</option>
+          {semesters.map(sem => <option key={sem} value={sem}>{sem}</option>)}
+        </select>
 
         <h4> Department & Professor</h4>
 

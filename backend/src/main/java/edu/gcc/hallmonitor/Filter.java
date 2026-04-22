@@ -43,6 +43,7 @@ public interface Filter extends Predicate<Course> {
     static void init() {
         Days.init();
         Department.init();
+        Semester.init();
         NumCredits.init();
         ProfName.init();
         Time.init();

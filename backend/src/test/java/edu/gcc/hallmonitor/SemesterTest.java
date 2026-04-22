@@ -4,21 +4,22 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-public class NumCreditsTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class SemesterTest {
     @Test
-    public void testNumCreditsFilter() {
-        Course two = emptyWithCredits(2);
-        Course four = emptyWithCredits(4);
+    public void testSemesterFilter() {
+        Course fall = emptyWithSemester("2023_Fall");
+        Course spring = emptyWithSemester("2024_Spring");
 
-        NumCredits filter = new NumCredits(4);
+        Semester filter = new Semester("2023_Fall");
 
-        assertEquals(true, filter.filter(four));
-        assertEquals(false, filter.filter(two));
+        assertEquals(true, filter.filter(fall));
+        assertEquals(false, filter.filter(spring));
     }
 
-    private static Course emptyWithCredits(int credits) {
+    private static Course emptyWithSemester(String semester) {
         return new Course(
                 1,
             "",
@@ -27,8 +28,8 @@ public class NumCreditsTest {
             0,
             ' ',
             "",
-            credits,
-            "",
+            0,
+            semester,
             List.of(new CourseTime(
                 "M",
                 LocalTime.of(0, 0),
@@ -41,3 +42,4 @@ public class NumCreditsTest {
         );
     }
 }
+

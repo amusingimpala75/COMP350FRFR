@@ -237,6 +237,7 @@ public class Schedule {
             }
 
             Course copyCourse = new Course(
+                    c.id(),
                     c.name(),
                     new ArrayList<>(c.professor()),
                     c.department(),
