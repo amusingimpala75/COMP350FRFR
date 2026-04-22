@@ -1,17 +1,24 @@
 package edu.gcc.hallmonitor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 public class Schedule {
 
@@ -244,4 +251,143 @@ public class Schedule {
         return copyCourses;
     }
 
+    /**
+     * allows line wrapping in a pdf based on the length of a line and the width of the page
+     * @param text the line
+     * @param font the font used
+     * @param fontSize
+     * @param maxWidth the width of the page
+     * @return a list of the lines, each one fitting the page width
+     * @throws IOException
+     */
+    private List<String> wrapText(String text, PDType1Font font, float fontSize, float maxWidth) throws IOException {
+        List<String> lines = new ArrayList<>();
+        text = text.replace("\n", " ");
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+            //for each word, make sure it fits on its current line
+            String testLine = line.isEmpty() ? word : line + " " + word;
+            float size = font.getStringWidth(testLine) / 1000 * fontSize;
+
+            //if the word doesn't fit on the line, create a new line and continue the words
+            if (size > maxWidth) {
+                lines.add(line.toString());
+                line = new StringBuilder(word);
+            } else {
+                line = new StringBuilder(testLine);
+            }
+        }
+
+        if (!line.isEmpty()) {
+            lines.add(line.toString());
+        }
+
+        return lines;
+    }
+
+    public byte[] createPdf() throws IOException {
+        try (PDDocument document = new PDDocument();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            PDPage page = new PDPage();
+            document.addPage(page);
+
+            //get courses from current schedule
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            //define how the page should be styled
+            PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            float fontSize = 12;
+            float margin = 50;
+            float yStart = 700;
+            float y = yStart;
+            float leading = 18;
+            float maxWidth = page.getMediaBox().getWidth() - 2 * margin;
+
+            //begin adding text
+            PDPageContentStream content = new PDPageContentStream(document, page);
+            content.beginText();
+            content.setFont(font, fontSize);
+            content.newLineAtOffset(margin, yStart);
+
+            //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
+            for (Course c : getCourses()) {  //TODO change the PDF to reflect the different semesters
+
+                //lines without indent
+                String first = c.department() + c.code() + c.section() + " " + c.name();
+                for (String line : wrapText(first, font, fontSize, maxWidth)) {
+
+                    //add a new page if necessary
+                    if (y < margin) {
+                        content.endText();
+                        content.close();
+
+                        page = new PDPage();
+                        document.addPage(page);
+
+                        content = new PDPageContentStream(document, page);
+                        content.beginText();
+                        content.setFont(font, fontSize);
+                        content.newLineAtOffset(margin, yStart);
+
+                        y = yStart;
+                    }
+
+                    //add the line content to the page
+                    content.showText(line);
+                    content.newLineAtOffset(0, -leading);
+                    y -= leading;
+                }
+
+                //lines with indent
+                List<String> lowerLines = new ArrayList<>();
+                String second = String.join(" ", c.professor()) + " " + c.location();
+                StringBuilder third = new StringBuilder();
+                if (c.times() != null) {
+                    for (CourseTime ct : c.times()) {
+                        third.append(ct.day()).append(" ").append(ct.startTime().format(formatter)).append(" - ").append(ct.endTime().format(formatter)).append("   ");
+                    }
+                }
+                lowerLines.addAll(wrapText(second, font, fontSize, maxWidth));
+                lowerLines.addAll(wrapText(third.toString(), font, fontSize, maxWidth));
+
+                //separate loop needed for indented lines
+                for (String line : lowerLines) {
+                    //add a new page if necessary
+                    if (y < margin) {
+                        content.endText();
+                        content.close();
+
+                        page = new PDPage();
+                        document.addPage(page);
+
+                        content = new PDPageContentStream(document, page);
+                        content.beginText();
+                        content.setFont(font, fontSize);
+                        content.newLineAtOffset(margin, yStart);
+
+                        y = yStart;
+                    }
+
+                    content.newLineAtOffset(20, 0);
+                    content.showText(line);
+                    content.newLineAtOffset(-20, 0);
+                    content.newLineAtOffset(0, -leading);
+                    y -= leading;
+                    //add a newline if last line
+                    if (line.equals(lowerLines.get(lowerLines.size() - 1))) {
+                        content.newLineAtOffset(0, -leading);
+                        y -= leading;
+                    }
+                }
+            }
+            content.endText();
+            content.close();
+
+            document.save(out);
+            return out.toByteArray();
+        }
+    }
 }
