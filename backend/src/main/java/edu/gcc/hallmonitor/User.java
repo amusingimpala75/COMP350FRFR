@@ -227,4 +227,14 @@ public class User {
             schedules.add(Schedule.loadSchedule(id, scheduleId));
         }
     }
+
+    public void removeSchedule(int scheduleId) throws SQLException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "DELETE FROM public.\"schedules\" WHERE id = ?"
+        );
+        prepStatement.setInt(1, scheduleId);
+        prepStatement.execute();
+
+        schedules.removeIf((schedule) -> schedule.getId() == scheduleId);
+    }
 }
