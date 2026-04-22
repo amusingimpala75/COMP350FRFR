@@ -173,6 +173,7 @@ public class Schedule {
         );
         prepStatement.setInt(1, id);
         prepStatement.setInt(2, course.id());
+        prepStatement.execute();
 
         return getCoursesForTerm(course).remove(course);
     }
