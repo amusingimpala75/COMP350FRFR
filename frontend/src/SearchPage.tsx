@@ -1,5 +1,6 @@
 import { Toaster, toast } from "react-hot-toast";
 import { useEffect, useState, useRef } from 'react';
+import pandaLogo from './assets/Designer.png';
 
 const userId = 154;
 const scheduleId = 1;
@@ -379,6 +380,10 @@ export default function SearchPage() {
           Clear All Filters
         </button>
 
+        <div className="logo-container">
+          <img src={pandaLogo} alt="Red Panda Logo" />
+        </div>
+
       </div>
 
       {/* MAIN CONTENT */}
@@ -454,7 +459,7 @@ export default function SearchPage() {
                   style={{
                     border: 'none',
                     background: 'none',
-                    color: currentPage === 1 ? '#0a58ca' : 'inherit',
+                    color: currentPage === 1 ? '#c60e30' : 'inherit',
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     fontWeight: currentPage === 1 ? 700 : 400,
@@ -475,7 +480,7 @@ export default function SearchPage() {
                   style={{
                     border: 'none',
                     background: 'none',
-                    color: page === currentPage ? '#0a58ca' : 'inherit',
+                    color: page === currentPage ? '#c60e30' : 'inherit',
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     fontWeight: page === currentPage ? 700 : 400,
@@ -495,7 +500,7 @@ export default function SearchPage() {
                   style={{
                     border: 'none',
                     background: 'none',
-                    color: currentPage === totalPages ? '#0a58ca' : 'inherit',
+                    color: currentPage === totalPages ? '#c60e30' : 'inherit',
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     fontWeight: currentPage === totalPages ? 700 : 400,
