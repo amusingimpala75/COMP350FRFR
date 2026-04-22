@@ -5,10 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +15,7 @@ public class User {
     private int id;
     private boolean authenticated = false;
     private int gradYear;
+    private List<Schedule> schedules;
     private static Connection CONNECTION;
 
     static {
@@ -37,7 +35,7 @@ public class User {
      * @throws IllegalArgumentException if the username or password are empty
      * @throws SQLException if the connection can't be established.
      */
-    public User(String username, String password) throws IllegalArgumentException, SQLException {
+    public User(String username, String password) throws IllegalArgumentException, SQLException, JsonProcessingException {
         if (password.isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
         } else if (username.isEmpty()) {
@@ -52,6 +50,7 @@ public class User {
             throw new IllegalArgumentException("sha256 not found");
         } // won't fail since sha256 is hardcoded
 
+        schedules = getUserSchedules(); // fetch schedules from db
     }
 
     public String getUsername() {
@@ -70,7 +69,7 @@ public class User {
         this.gradYear = gradYear;
     }
 
-    public static User login(String username, String password) throws SQLException {
+    public static User login(String username, String password) throws SQLException, JsonProcessingException {
         User user = new User(username, password);
 
         if (user.isUser()) {
@@ -82,7 +81,7 @@ public class User {
         }
     }
 
-    public static User signup(String username, String password) throws SQLException {
+    public static User signup(String username, String password) throws SQLException, JsonProcessingException {
         User user = new User(username, password);
 
         if (user.addUser()) {
@@ -148,7 +147,7 @@ public class User {
      * @return if the user was successfully added
      * @throws SQLException if the connection fails
      */
-    public boolean addUser() throws SQLException {
+    private boolean addUser() throws SQLException {
         // Two users should not share a username
         if (isUsernameTaken()) {
             return false;
@@ -212,5 +211,20 @@ public class User {
         }
 
         return schedules;
+    }
+
+    public void addSchedule() throws SQLException, JsonProcessingException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"schedules\" (user_id) VALUES (?)",
+                Statement.RETURN_GENERATED_KEYS
+        );
+        prepStatement.setInt(1, id);
+        prepStatement.execute();
+        ResultSet generatedKey = prepStatement.getGeneratedKeys();
+        if (generatedKey.next()) {
+            int scheduleId = generatedKey.getInt(1);
+
+            schedules.add(Schedule.loadSchedule(id, scheduleId));
+        }
     }
 }
