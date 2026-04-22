@@ -60,6 +60,8 @@ public class Schedule {
         return id;
     }
 
+    public String getName() { return name; }
+
     //helper method to prevent duplicate code
     public List<Course> getCoursesForTerm(Course course) {
         String semester = course.semester();
