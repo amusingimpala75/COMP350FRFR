@@ -166,17 +166,17 @@ public class ScheduleController {
 
         //adds or removes a course based on the ID
         app.post("/schedule/items", ctx -> {
-            Schedule schedule = Schedule.loadSchedule();
-            String courseID = ctx.body();
+            int courseId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("course-id")));
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("user-id")));
+            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("schedule-id")));
 
-            Course course = Search.getCourseByCode(courseID);
+            Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
+            Course course = Search.getCourseById(courseId);
             String ret = "";
-
-            // remove the course if it's already present in the schedule
             if (schedule.inSchedule(course)) {
                 schedule.removeCourse(course);
                 ret = "Removed";
-            }else {
+            } else {
                 if (schedule.hasDifferentSection(course)) {
                     //check for a different section of the class
                     ret = "Already scheduled for a different section of this class";
@@ -187,14 +187,12 @@ public class ScheduleController {
                         ret = overlap;
                     } else {
                         //doesn't overlap, not scheduled for a different section
-                        schedule.addCourse(Search.getCourseByCode(courseID));
+                        schedule.addCourse(course);
                         ret = "Added";
                     }
 
                 }
             }
-
-            schedule.saveSchedule();
 
             ctx.result(ret);
 
