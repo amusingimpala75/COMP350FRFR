@@ -27,12 +27,12 @@ public class Search {
     private static final Connection CONNECTION;
 
     static {
-        loadCourses();
         try {
             CONNECTION = Database.getConnection();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        loadCourses();
     }
 
     private static void loadCourses() {
