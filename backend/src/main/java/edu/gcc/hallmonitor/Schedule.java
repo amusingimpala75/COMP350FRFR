@@ -41,12 +41,16 @@ public class Schedule {
         winterCourses = new ArrayList<>();
 
         for(Course c : courses){ //Example semester: 2023_Fall
-            addCourse(c);
+            getCoursesForTerm(c).add(c);
         }
     }
 
-    public Schedule() {
+    public Schedule() throws SQLException {
         this(new ArrayList<Course>());
+    }
+
+    public int getId() {
+        return id;
     }
 
     //helper method to prevent duplicate code
@@ -61,18 +65,6 @@ public class Schedule {
 
     public boolean inSchedule(Course course){
         return getCoursesForTerm(course).contains(course);
-    }
-
-    public static Schedule loadSchedule(String filename) throws IOException {
-        File f = new File(SAVED_SCHEDULES_FOLDER + filename);
-        if (!f.exists()) {
-            return new Schedule();
-        }
-
-        JsonNode root = Main.MAPPER.readTree(new File(SAVED_SCHEDULES_FOLDER + filename));
-        JsonNode classesNode = root.get("classes"); // Grab the courses array inside the json
-
-        return new Schedule(Main.MAPPER.readerForListOf(Course.class).readValue(classesNode));
     }
 
     public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
@@ -133,10 +125,6 @@ public class Schedule {
         return schedule;
     }
 
-    public static Schedule loadSchedule() throws IOException {
-        return loadSchedule(SAVED_SCHEDULE);
-    }
-
     private List<Course> allCourses(){
         //condense all courses to one list
         List<Course> courses = new ArrayList<>();
@@ -147,42 +135,23 @@ public class Schedule {
         return courses;
     }
 
-    public void saveSchedule(String filename) throws IOException {
-        File savedDir = new File(SAVED_SCHEDULES_FOLDER);
-        if (!savedDir.exists()) {
-            savedDir.mkdirs();
-        }
-
-        Map<String, List<Course>> jsonObject = Map.of("classes", allCourses());
-        Main.MAPPER.writeValue(new File(SAVED_SCHEDULES_FOLDER + filename), jsonObject);
-    }
-
-    public void saveSchedule() throws SecurityException, SQLException {
-        if (!authenticated) {
-            throw new SecurityException("Schedule has not been authenticated with a user");
-        }
-
-        PreparedStatement userPrepStatement = CONNECTION.prepareStatement(
-                "INSERT INTO public.\"schedules\" (id, user_id) VALUES (?, ?)"
+    public void addCourse(Course course) throws SQLException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"courses-schedules-junc\" (schedule_id, course_id) VALUES (?, ?)"
         );
-        userPrepStatement.setInt(1, id);
-        userPrepStatement.setInt(2, userId);
-        userPrepStatement.execute();
+        prepStatement.setInt(1, id);
+        prepStatement.setInt(2, course.id());
 
-        for (Course c: allCourses()) {
-            PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                    "INSERT INTO public.\"courses-schedules-junc\" (schedule_id, course_id) VALUES (?, ?)"
-            );
-            prepStatement.setInt(1, id);
-            prepStatement.setInt(2, c.id());
-        }
-    }
-
-    public void addCourse(Course course) {
         getCoursesForTerm(course).add(course);
     }
 
-    public boolean removeCourse(Course course) {
+    public boolean removeCourse(Course course) throws SQLException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "DELETE FROM public.\"courses-schedules-junc\" WHERE schedule_id = ? AND course_id = ?"
+        );
+        prepStatement.setInt(1, id);
+        prepStatement.setInt(2, course.id());
+
         return getCoursesForTerm(course).remove(course);
     }
 
