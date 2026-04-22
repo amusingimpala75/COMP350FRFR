@@ -20,6 +20,7 @@ interface CourseTime {
 }
 
 interface Course {
+  id: number;
   subject: string;
   number: string;
   section: string;
@@ -37,6 +38,7 @@ export default function SchedulePage() {
   const loadCourses = async (term: Term) => {
     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
+    console.log('loaded courses:', items)
     setCourses(items);
 
     //adding events to fullcalendar
@@ -56,13 +58,13 @@ export default function SchedulePage() {
             };
             const day = dayMap[time.day];
             //add each class day as an event; remove based on the course code. Can't add just one event for the class since it could have multiple days with different times.
-            addEvent(course.subject+course.number+course.section+time.day, course.name, [day], time.start_time, time.end_time);
+            addEvent(course.id, course.name, [day], time.start_time, time.end_time);
         }
     }
   };
 
-  const removeCourse = async (courseId: string) => {
-    await fetch('/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}', { method: 'POST', body: courseId });
+  const removeCourse = async (courseId: number) => {
+    await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}`, { method: 'POST' });
     //remove from calendar
     removeEvents(courseId);
     loadCourses(activeTerm);
@@ -76,10 +78,10 @@ export default function SchedulePage() {
   const calendarRef = useRef<FullCalendar>(null)
 
 
-  const addEvent = (code:string, name:string, daysArray:number[], start:string, end:string) => {
+  const addEvent = (id:number, name:string, daysArray:number[], start:string, end:string) => {
     const calendarApi = calendarRef.current?.getApi()
     calendarApi?.addEvent({
-      id: code,
+      id: String(id),
       title: name,
       daysOfWeek: daysArray,
       startTime: start,
@@ -88,12 +90,12 @@ export default function SchedulePage() {
   }
 
   //removing the course from the visual display
-  const removeEvents = (courseCode: string) => {  //remove all events with the course code (ACCT101A)
+  const removeEvents = (courseId: number) => {  //remove all events with the course code (ACCT101A)
     const calendarApi = calendarRef.current?.getApi()
     if (!calendarApi) return
     const events = [...calendarApi.getEvents()];
     for(const event of events){
-        if (event.id && event.id.includes(courseCode)) {
+        if (event.id && event.id === String(courseId)) {
               event.remove();
         }
     }
@@ -103,7 +105,7 @@ export default function SchedulePage() {
 
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
-      const res = await fetch('/download-pdf?userId=${userId}&scheduleId=${scheduleId}');
+      const res = await fetch(`/download-pdf?userId=${userId}&scheduleId=${scheduleId}`);
       if (!res.ok) {
           throw new Error('Download failed');
       }
@@ -176,11 +178,10 @@ export default function SchedulePage() {
                 )}
         <ul>
           {courses.map(course => {
-            const courseId = `${course.subject}${course.number}${course.section}${course.semester}`;
             return (
-              <li key={courseId}>
+              <li key={course.id}>
                 {course.semester} {course.subject}{course.number} {course.section} — {course.name}
-                <button onClick={() => removeCourse(courseId)}>Remove Course</button>
+                <button onClick={() => removeCourse(course.id)}>Remove Course</button>
               </li>
             );
           })}
