@@ -174,6 +174,7 @@ public class Schedule {
                     "INSERT INTO public.\"courses-schedules-junc\" (schedule_id, course_id) VALUES (?, ?)"
             );
             prepStatement.setInt(1, id);
+            prepStatement.setInt(2, c.id());
         }
     }
 
