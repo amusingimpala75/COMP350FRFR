@@ -111,6 +111,7 @@ public class Schedule {
         Schedule schedule = new Schedule();
         schedule.id = scheduleId;
         schedule.userId = userId;
+        schedule.authenticated = true;
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
