@@ -376,6 +376,7 @@ export default function SearchPage() {
           value={departmentOptions.find(option => option.value === department) ?? departmentOptions[0]}
           onChange={updateDept}
         />
+        <h5></h5>
         <Select
           className="filter-select-container"
           classNamePrefix="filter-select"
@@ -398,6 +399,8 @@ export default function SearchPage() {
             </button>
           ))}
         </div>
+
+        <h5></h5>
 
         <div className="time-range">
           <Select
