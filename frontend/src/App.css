@@ -70,8 +70,8 @@ body {
 }
 
 .sidebar {
-  width: 220px;
-  padding: 20px;
+  width: 236px;
+  padding: 10px 20px 20px 20px;
   background-color: var(--surface-panel);
   border-right: 1px solid #ddd;
   color: var(--text-main);
@@ -109,6 +109,10 @@ body {
 .results-card h3,
 .course-text {
   color: var(--text-main);
+}
+
+.sidebar h3 {
+  margin-top: 0;
 }
 
 .search-card {
@@ -159,8 +163,8 @@ body {
 }
 
 .filter-select-container {
-  width: 92%;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   text-align: left;
 }
 
@@ -212,7 +216,7 @@ body {
 .time-range {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: nowrap;
 }
 
@@ -220,7 +224,23 @@ body {
   width: auto;
   margin: 0;
   flex: 1 1 0;
-  min-width: 0;
+  min-width: 90px;
+}
+
+.time-range .filter-select__control {
+  min-height: 36px !important;
+  height: 36px !important;
+}
+
+.time-range .filter-select__value-container {
+  padding: 0 6px !important;
+}
+
+.time-range .filter-select__single-value,
+.time-range .filter-select__placeholder {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .time-range span {
@@ -356,6 +376,14 @@ body {
   display: flex;
   gap: 6px;
   margin-top: 6px;
+}
+
+.sidebar .filter-select-container,
+.sidebar .day-selector,
+.sidebar .time-range {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .day-btn {
