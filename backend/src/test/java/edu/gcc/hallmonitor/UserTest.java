@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,7 +22,7 @@ public class UserTest {
     public static Connection connection;
 
     @BeforeAll
-    public static void setup() throws SQLException {
+    public static void setup() throws SQLException, JsonProcessingException {
         connection = Database.getConnection();
 
         // Validate the test user is present in the database
@@ -46,7 +47,7 @@ public class UserTest {
     }
 
     @Test
-    public void isUserTest() {
+    public void isUserTest() throws JsonProcessingException {
         User user = null;
         try {
             user = new User("testuser", "password");
@@ -74,7 +75,7 @@ public class UserTest {
     }
 
     @Test
-    public void isUsernameTakenTest() {
+    public void isUsernameTakenTest() throws JsonProcessingException {
         User user = null;
         try {
             user = new User("testuser", "notpassword");
@@ -92,7 +93,7 @@ public class UserTest {
     }
 
     @Test
-    public void addUserWithSameNameTest() {
+    public void addUserWithSameNameTest() throws JsonProcessingException {
         User user = null;
         try {
             user = new User("testuser", "notpassword");
@@ -110,7 +111,7 @@ public class UserTest {
     }
 
     @Test
-    public void addUserTest() {
+    public void addUserTest() throws JsonProcessingException {
         // Delete the test user
         User user = null;
         try {
@@ -137,7 +138,7 @@ public class UserTest {
     }
 
     @Test
-    public void deleteUserTest() {
+    public void deleteUserTest() throws JsonProcessingException {
         // Delete the test user
         User user;
         try {
@@ -159,7 +160,7 @@ public class UserTest {
     }
 
     @Test
-    public void loginUserInDatabase() throws SQLException {
+    public void loginUserInDatabase() throws SQLException, JsonProcessingException {
         User.login("testuser", "password");
     }
 
@@ -169,7 +170,7 @@ public class UserTest {
     }
 
     @Test
-    public void signUpUserNotInDatabase() throws SQLException {
+    public void signUpUserNotInDatabase() throws SQLException, JsonProcessingException {
         User user = User.signup(getUnusedUsername(), "password");
 
         assertTrue(user.isUser());
@@ -188,7 +189,7 @@ public class UserTest {
     }
 
     @Test
-    public void getAndSetGradYearTest() throws SQLException {
+    public void getAndSetGradYearTest() throws SQLException, JsonProcessingException {
         User user = new User("testuser", "password");
         user.setGradYear(2023);
         assertEquals(2023, user.getGradYear());
@@ -204,7 +205,7 @@ public class UserTest {
         return rs.getString(1);
     }
 
-    public String getUnusedUsername() throws SQLException {
+    public String getUnusedUsername() throws SQLException, JsonProcessingException {
         StringBuilder usernameBuilder = new StringBuilder(getUsedUsername());
 
         User user = null;
