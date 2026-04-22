@@ -38,7 +38,6 @@ export default function SchedulePage() {
   const loadCourses = async (term: Term) => {
     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
-    console.log('loaded courses:', items)
     setCourses(items);
 
     //adding events to fullcalendar
