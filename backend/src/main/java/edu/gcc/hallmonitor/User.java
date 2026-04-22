@@ -101,7 +101,7 @@ public class User {
     public boolean isUser() throws SQLException {
         // Get all the users that match the current user (should be at max 1)
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT * FROM public.\"users\"" +
+                "SELECT * FROM public.\"users\" " +
                     "WHERE username = ? AND password_hash = ?"
         );
         prepStatement.setString(1, username);
@@ -114,7 +114,7 @@ public class User {
 
     private int getIdFromDatabase() throws SQLException {
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT id FROM public.\"users\"" +
+                "SELECT id FROM public.\"users\" " +
                     "WHERE username = ? AND password_hash = ?"
         );
         prepStatement.setString(1, username);
@@ -132,7 +132,7 @@ public class User {
      */
     public boolean isUsernameTaken() throws SQLException {
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT * FROM public.\"users\"" +
+                "SELECT * FROM public.\"users\" " +
                     "WHERE username = ?"
         );
         prepStatement.setString(1, username);
@@ -192,7 +192,7 @@ public class User {
         }
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT id FROM public.\"schedules\"" +
+                "SELECT id FROM public.\"schedules\" " +
                     "WHERE user_id = ?"
         );
         prepStatement.setInt(1, id);

@@ -29,8 +29,6 @@ public class Schedule {
     private int id;
     private int userId;
     private boolean authenticated = false;
-    private static final String SAVED_SCHEDULE = "saved-schedule.json";
-    private static final String SAVED_SCHEDULES_FOLDER = "schedules/";
     private static final Connection CONNECTION;
 
     static {
@@ -90,7 +88,7 @@ public class Schedule {
 
     public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
         PreparedStatement userCheckStatement = CONNECTION.prepareStatement(
-                "SELECT * FROM public.\"schedules\"" +
+                "SELECT * FROM public.\"schedules\" " +
                     "WHERE id = ? AND user_id = ?"
         );
         userCheckStatement.setInt(1, scheduleId);
@@ -102,9 +100,9 @@ public class Schedule {
 
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "SELECT * FROM public.\"courses\"" +
+                "SELECT * FROM public.\"courses\" " +
                     "WHERE id IN (" +
-                        "SELECT course_id FROM public.\"courses-schedules-junc\"" +
+                        "SELECT course_id FROM public.\"courses-schedules-junc\" " +
                         "WHERE schedule_id = ?" +
                     ")"
         );
@@ -140,7 +138,7 @@ public class Schedule {
                     coursesResultSet.getInt("open_seats"),
                     coursesResultSet.getInt("total_seats")
             );
-            schedule.addCourse(c);
+            schedule.addCourseInMemory(c);
         }
 
         return schedule;
@@ -157,6 +155,10 @@ public class Schedule {
     }
 
     public void addCourse(Course course) throws SQLException {
+        if (!authenticated) {
+            throw new SecurityException("Unauthenticated user");
+        }
+
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "INSERT INTO public.\"courses-schedules-junc\" (schedule_id, course_id) VALUES (?, ?)"
         );
@@ -164,10 +166,18 @@ public class Schedule {
         prepStatement.setInt(2, course.id());
         prepStatement.execute();
 
+        addCourseInMemory(course);
+    }
+
+    public void addCourseInMemory(Course course) {
         getCoursesForTerm(course).add(course);
     }
 
     public boolean removeCourse(Course course) throws SQLException {
+        if (!authenticated) {
+            throw new SecurityException("Unauthenticated user");
+        }
+
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "DELETE FROM public.\"courses-schedules-junc\" WHERE schedule_id = ? AND course_id = ?"
         );
