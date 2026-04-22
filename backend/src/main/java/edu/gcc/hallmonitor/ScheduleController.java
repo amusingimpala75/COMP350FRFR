@@ -74,8 +74,8 @@ public class ScheduleController {
 
         //returns the byte array of the schedules for the pdf
         app.get("/download-pdf", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("user-id")));
-            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("schedule-id")));
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
             Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
             byte[] pdfBytes = schedule.createPdf();
             ctx.contentType("application/pdf");
