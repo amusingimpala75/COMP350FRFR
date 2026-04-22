@@ -51,8 +51,9 @@ public class Schedule {
         }
     }
 
-    public Schedule() {
+    public Schedule(String name) {
         this(new ArrayList<Course>());
+        this.name = name;
     }
 
     public int getId() {
@@ -88,8 +89,7 @@ public class Schedule {
     }
 
     public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
-        Schedule schedule = new Schedule();
-
+        Schedule schedule;
         PreparedStatement userCheckStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"schedules\" " +
                     "WHERE id = ? AND user_id = ?"
@@ -100,9 +100,10 @@ public class Schedule {
         if (!userCheckResultSet.next()) {
             throw new SecurityException("User does not own schedule");
         } else {
-            schedule.name = userCheckResultSet.getString("name");
+            schedule = new Schedule(
+                userCheckResultSet.getString("name")
+            );
         }
-
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"courses\" " +
@@ -146,6 +147,18 @@ public class Schedule {
             );
             schedule.addCourseInMemory(c);
         }
+
+        return schedule;
+    }
+
+    public static Schedule newSchedule(int userId, String name) throws SQLException {
+        Schedule schedule = new Schedule(name);
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)"
+        );
+        prepStatement.setInt(1, userId);
+        prepStatement.setString(2, name);
+        prepStatement.execute();
 
         return schedule;
     }
