@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 
 public class AuthController {
     private static final String AUTH_COOKIE = "auth_token";
@@ -61,6 +62,28 @@ public class AuthController {
 
     private static void setUnauthorized(io.javalin.http.Context ctx) {
         ctx.status(401).json(Main.MAPPER.createObjectNode().put("error", "Unauthorized"));
+    }
+
+    private static AuthSession getValidSession(Context ctx) {
+        cleanupExpiredSessions();
+        String token = ctx.cookie(AUTH_COOKIE);
+        if (token == null) {
+            return null;
+        }
+
+        AuthSession session = SESSIONS.get(token);
+        if (session == null || session.expiresAt() <= System.currentTimeMillis()) {
+            SESSIONS.remove(token);
+            clearAuthCookie(ctx);
+            return null;
+        }
+
+        return session;
+    }
+
+    static Integer getAuthenticatedUserId(Context ctx) {
+        AuthSession session = getValidSession(ctx);
+        return session == null ? null : session.id();
     }
 
     public static void registerRoutes(Javalin app) {
@@ -127,17 +150,8 @@ public class AuthController {
         });
 
         app.get("/auth/me", ctx -> {
-            cleanupExpiredSessions();
-            String token = ctx.cookie(AUTH_COOKIE);
-            if (token == null) {
-                setUnauthorized(ctx);
-                return;
-            }
-
-            AuthSession session = SESSIONS.get(token);
-            if (session == null || session.expiresAt() <= System.currentTimeMillis()) {
-                SESSIONS.remove(token);
-                clearAuthCookie(ctx);
+            AuthSession session = getValidSession(ctx);
+            if (session == null) {
                 setUnauthorized(ctx);
                 return;
             }
@@ -154,6 +168,8 @@ public class AuthController {
             }
             ctx.status(204);
         });
+
+        app.get("/login", ctx -> ctx.html(Main.readResource("/public/index.html")));
     }
 }
 

@@ -8,6 +8,10 @@ import java.util.List;
 public class SearchController {
     private static Search search = new Search();
 
+    private static void resetSearchState() {
+        search = new Search("");
+    }
+
     public static void registerRoutes(Javalin app) {
         // Get the search page
         app.get("/search", ctx -> ctx.html(Main.readResource("/public/index.html")));
@@ -62,6 +66,12 @@ public class SearchController {
                 Filter f = Filter.fromJSON(Main.MAPPER.readTree(ctx.body()));
                 search.removeFilter(f);
             }
+        });
+
+        // Reset all search state (query, filters, and results)
+        app.post("/search/reset", ctx -> {
+            resetSearchState();
+            ctx.status(204);
         });
 
         app.get("/search/filter-values/{filter-type}", ctx -> {

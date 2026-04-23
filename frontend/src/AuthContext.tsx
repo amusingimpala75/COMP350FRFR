@@ -25,6 +25,18 @@ async function parseError(res: Response): Promise<string> {
   }
 }
 
+async function clearSearchState() {
+  try {
+    await fetch('/search/reset', {
+      method: 'POST',
+      credentials: 'include',
+    });
+  } catch (err) {
+    // Keep auth flow resilient even if reset fails.
+    console.warn('Failed to clear search state', err);
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const loggedIn = (await res.json()) as AuthUser;
     setUser(loggedIn);
+    await clearSearchState();
   };
 
   const signup = async (username: string, password: string) => {
@@ -77,6 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signedUp = (await res.json()) as AuthUser;
     setUser(signedUp);
+    await clearSearchState();
   };
 
   const logout = async () => {
@@ -84,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       credentials: 'include',
     });
+    await clearSearchState();
     setUser(null);
   };
 

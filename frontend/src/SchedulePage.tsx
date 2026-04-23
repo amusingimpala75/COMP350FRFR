@@ -8,9 +8,6 @@ import { useRef } from 'react'
 type Term = 'Fall' | 'Winter' | 'Spring' | 'Summer';
 const TERMS: Term[] = ['Fall', 'Winter', 'Spring', 'Summer'];
 
-const userId = 154;
-const scheduleId = 1;
-
 
 
 interface CourseTime {
@@ -36,7 +33,7 @@ export default function SchedulePage() {
 
 
   const loadCourses = async (term: Term) => {
-    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
+    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}`);
     const items: Course[] = await res.json();
     setCourses(items);
 
@@ -63,7 +60,7 @@ export default function SchedulePage() {
   };
 
   const removeCourse = async (courseId: number) => {
-    await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}`, { method: 'POST' });
+    await fetch(`/schedule/items?courseId=${courseId}`, { method: 'POST' });
     //remove from calendar
     removeEvents(courseId);
     loadCourses(activeTerm);
@@ -104,7 +101,7 @@ export default function SchedulePage() {
 
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
-      const res = await fetch(`/download-pdf?userId=${userId}&scheduleId=${scheduleId}`);
+      const res = await fetch('/download-pdf');
       if (!res.ok) {
           throw new Error('Download failed');
       }
