@@ -28,6 +28,7 @@ public class Schedule {
     private List<Course> winterCourses;
     private int id;
     private int userId;
+    private String name;
     private boolean authenticated = false;
     private static final Connection CONNECTION;
 
@@ -50,13 +51,16 @@ public class Schedule {
         }
     }
 
-    public Schedule() {
+    public Schedule(String name) {
         this(new ArrayList<Course>());
+        this.name = name;
     }
 
     public int getId() {
         return id;
     }
+
+    public String getName() { return name; }
 
     //helper method to prevent duplicate code
     public List<Course> getCoursesForTerm(Course course) {
@@ -87,6 +91,7 @@ public class Schedule {
     }
 
     public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
+        Schedule schedule;
         PreparedStatement userCheckStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"schedules\" " +
                     "WHERE id = ? AND user_id = ?"
@@ -96,8 +101,11 @@ public class Schedule {
         ResultSet userCheckResultSet = userCheckStatement.executeQuery();
         if (!userCheckResultSet.next()) {
             throw new SecurityException("User does not own schedule");
+        } else {
+            schedule = new Schedule(
+                userCheckResultSet.getString("name")
+            );
         }
-
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"courses\" " +
@@ -108,7 +116,7 @@ public class Schedule {
         );
         prepStatement.setInt(1, scheduleId);
         ResultSet coursesResultSet = prepStatement.executeQuery();
-        Schedule schedule = new Schedule();
+
         schedule.id = scheduleId;
         schedule.userId = userId;
         schedule.authenticated = true;
@@ -141,6 +149,30 @@ public class Schedule {
             );
             schedule.addCourseInMemory(c);
         }
+
+        return schedule;
+    }
+
+    public static Schedule newSchedule(int userId, String name) throws SQLException {
+        Schedule schedule = new Schedule(name);
+
+        // Ensure that the name isn't already taken for the user
+        PreparedStatement nameCheckStatement = CONNECTION.prepareStatement(
+                "SELECT name FROM public.\"schedules\" WHERE user_id = ? AND name = ?"
+        );
+        nameCheckStatement.setInt(1, userId);
+        nameCheckStatement.setString(2, name.trim().toLowerCase());
+        ResultSet rs = nameCheckStatement.executeQuery();
+        if (rs.next()) {
+            throw new SecurityException("User cannot have two schedules with the same name");
+        }
+
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)"
+        );
+        prepStatement.setInt(1, userId);
+        prepStatement.setString(2, name);
+        prepStatement.execute();
 
         return schedule;
     }

@@ -1,21 +1,9 @@
 package edu.gcc.hallmonitor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import io.javalin.Javalin;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 public class ScheduleController {
     public static void registerRoutes(Javalin app) {
@@ -54,6 +42,18 @@ public class ScheduleController {
 
             ctx.result(ret);
 
+        });
+
+        // get schedules for user
+        app.get("/schedules", ctx -> {
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            User user = new User(userId);
+            List<Schedule> schedules = user.getUserSchedules();
+            List<ScheduleDTO> scheduleDTOs = schedules.stream().map(
+                    schedule -> new ScheduleDTO(schedule.getId(), schedule.getName())
+            ).toList();
+
+            ctx.json(scheduleDTOs);
         });
 
         // Get the schedule that is saved

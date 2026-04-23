@@ -4,8 +4,6 @@ import pandaLogo from './assets/Designer.png';
 import Select, { type SingleValue } from 'react-select';
 
 const userId = 154;
-const scheduleId = 1;
-
 
 
 interface CourseTime {
@@ -31,7 +29,11 @@ interface SelectOption {
   label: string;
 }
 
-export default function SearchPage() {
+type SearchPageProps = {
+  scheduleId: number | null;
+};
+
+export default function SearchPage({ scheduleId }: SearchPageProps) {
   const courses_per_page = 10;
   const [query, setQuery] = useState('');
   const [semester, setSemester] = useState('ALL');
@@ -91,6 +93,10 @@ export default function SearchPage() {
   //Toggles a course in the user's schedule and syncs with the backend.
   //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
+    if (scheduleId == null) {
+      toast("No schedule selected");
+      return;
+    }
     const newSchedule = new Set(schedule);
 
     //send the course identifier to the backend
@@ -269,9 +275,11 @@ export default function SearchPage() {
 
   // --- LOAD CURRENT SCHEDULE ---
   useEffect(() => {
+    if (scheduleId == null) return;
+
     const fetchSchedule = async () => {
       try {
-        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`);
+        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`); // scheduleId is null here
         const items: Course[] = await res.json();
         const ids = new Set(items.map(c => c.id));
         setSchedule(ids);
@@ -281,7 +289,7 @@ export default function SearchPage() {
     };
 
     fetchSchedule();
-  }, []);
+  }, [scheduleId]);
 
   // Keep current page in bounds when filters/search shrink result count.
   useEffect(() => {
