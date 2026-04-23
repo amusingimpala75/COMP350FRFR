@@ -52,7 +52,7 @@ export default function SchedulePage({
   };
 
   const loadCourses = async (term: Term) => {
-    if (!scheduleId) return;
+    if (scheduleId == null) return;
     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
     setCourses(items);
@@ -80,7 +80,7 @@ export default function SchedulePage({
   };
 
   const removeCourse = async (courseId: number) => {
-    if (!scheduleId) return;
+    if (scheduleId == null) return;
     await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}`, { method: 'POST' });
     //remove from calendar
     removeEvents(courseId);
