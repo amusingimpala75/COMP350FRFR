@@ -1,0 +1,68 @@
+Computer Science B.S. suggested four year plan:
+Freshman Year:
+Fall:
+  {"department": "COMP", "number": "141", "name": "Computer Programming I", "credits": 3},
+  {"department": "COMP", "number": "155", "name": "Introduction to Computer Science", "credits": 3},
+  {"department": "MATH", "number": "161", "name": "Calculus I", "credits": 4},
+    one science elective (each are four credits, either PHYS 101; PHYS 102; CHEM 105 or both CHEM 111 and 113; CHEM
+    112 and 114; BIOL 101; or BIOL 102),
+  {"department": "HUMA", "number": "102", "name": "Civ and the Biblical Revelation", "credits": 3},
+
+Spring:
+  {"department": "COMP", "number": "220", "name": "Computer Programming II", "credits": 3},
+  {"department": "MATH", "number": "162", "name": "Calculus II", "credits": 4},
+    one science elective (from previous list)
+  {"department": "WRIT", "number": "101", "name": "Foundations of Academic Discourse", "credits": 3},
+  {"department": "PHYE", "number": "100", "name": "Healthful Living", "credits": 1},
+
+
+Sophomore year:
+Fall:
+  {"department": "COMP", "number": "222", "name": "Introduction to Data Structures & Algorithms", "credits": 3},
+  {"department": "COMP", "number": "244", "name": "Database Management", "credits": 3},
+  {"department": "MATH", "number": "213", "name": "Discrete Mathematics for Comp. Science", "credits": 4},
+  {"department": "HUMA", "number": "200", "name": "Western Civilization", "credits": 3},
+    Foundations of social science course (3 credits, either ECON 120 Foundations of Economics, PSYC 101 Foundations of Psychology, HIST 120 Foundations of History, PSYC 200 Cross-Cultural Psychology, HIST 141 World Geography, SOCI 101 Foundations of Sociology, HIST 204 Hist/Phil Foundations of Education, SOCI 103 Found. of Cultural Anthr., POLS 101 Foundations of Political Science, or SOCW 101 Found. of Social Work)
+    one credit of a general elective (any non-CS class)
+    
+Spring:
+  {"department": "COMP", "number": "205", "name": "Ethics, Faith, and the Conscious Mind", "credits": 3},
+  {"department": "COMP", "number": "233", "name": "Parallel Computing", "credits": 3},
+  {"department": "COMP", "number": "342", "name": "Data Communication & Networking", "credits": 3},
+  {"department": "MATH", "number": "214", "name": "Applied Probability & Linear Algebra", "credits": 4},
+  {"department": "HUMA", "number": "202", "name": "Civilization and Literature", "credits": 3},
+
+
+
+Junior Year:
+Fall:
+  {"department": "COMP", "number": "325", "name": "Computer Architecture & Organization", "credits": 3},
+  {"department": "COMP", "number": "422", "name": "Introduction to Algorithms", "credits": 3},
+    two three-credit computer science electives (from COMP 390 Topics in Computer Science, COMP 401 Principles of iOS Programming, COMP 402
+    3 Principles of Android Programming, COMP 435 Intro to Machine Learning, COMP 441 2D Game
+    Design/Development, COMP 442 Web Programming Technologies, COMP 445 Intro to Artificial Intelligence, COMP 446 3D Game Design/Development, COMP 447 Networked Game Design and Development, COMP 475 Advanced Security, DSCI 431 Intro to Big Data , DSCI 450 Applied
+    Modeling and Visualization, or ROBO 302 Mobile Robotics.)
+  {"department": "HUMA", "number": "301", "name": "Civilization and the Arts", "credits": 3},
+  two general elective credits
+
+Spring:
+  {"department": "COMP", "number": "314", "name": "Automata Theory", "credits": 3},
+  {"department": "COMP", "number": "340", "name": "Operating Systems", "credits": 3},
+  {"department": "COMP", "number": "350", "name": "Software Engineering", "credits": 3},
+    one three-credit computer science elective (from the list above)
+    four credits of general electives
+
+
+Senior Year:
+Fall:
+  {"department": "COMP", "number": "448", "name": "Computer Security", "credits": 3},
+  {"department": "COMP", "number": "451", "name": "Senior Project I", "credits": 2},
+    three credits of a computer science elective
+  {"department": "HUMA", "number": "303", "name": "Christianity and Civilization", "credits": 3}
+    four credits of general electives
+
+Spring:
+  {"department": "COMP", "number": "443", "name": "Programming Languages", "credits": 3},
+  {"department": "COMP", "number": "452", "name": "Senior Project II", "credits": 3},
+    one three-credit computer science elective
+    six credits of general electives
