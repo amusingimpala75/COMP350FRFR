@@ -56,7 +56,16 @@ public class ScheduleController {
             ctx.json(scheduleDTOs);
         });
 
-        // Get the schedule that is saved
+        // add a new schedule
+        app.post("/schedule", ctx -> {
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            String name = Objects.requireNonNull(ctx.queryParam("scheduleName"));
+            int scheduleId = Schedule.newSchedule(userId, name);
+
+            ctx.result(String.valueOf(scheduleId));
+        });
+
+        // Get the schedule for the uesrid and scheduleid given
         app.get("/schedule/items", ctx -> {
             String term = ctx.queryParam("term"); // Fall, Winter, Spring, Summer
             int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
