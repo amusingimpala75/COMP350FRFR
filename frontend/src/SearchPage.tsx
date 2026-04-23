@@ -57,6 +57,7 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
   const [result, setResult] = useState("Ask a question about your major's required classes!"); // the api call result
   const [isOpen, setIsOpen] = useState(false); // for the modal
   const [chatbotDept, setCbDept] = useState("Comp");
+  const [onlyOpenClasses, setOnlyOpenClasses] = useState(false);
 
   // --- SEARCH ---
   const search = async () => {
@@ -87,7 +88,7 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
     }
 
     search();
-  }, [semester, department, professor, days, credits, timeStart, timeEnd]);
+  }, [semester, department, professor, days, credits, timeStart, timeEnd, onlyOpenClasses]);
 
 
   //Toggles a course in the user's schedule and syncs with the backend.
@@ -131,7 +132,8 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
   const isDefaultValue = (value: any) => {
     return value === 'ALL'
       || (Array.isArray(value) && value.length === 0)
-      || (value.start === '00:01' && value.end === '23:59');
+      || (value.start === '00:01' && value.end === '23:59')
+      || value === false;
   };
 
   const updateFilter = async (type: string, oldValue: any, newValue: any) => {
@@ -177,6 +179,11 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
   const updateCredits = async (value: string) => {
     await updateFilter('credits', credits, value);
     setCredits(value);
+  };
+
+  const updateOnlyOpenClasses = async (value: boolean) => {
+    await updateFilter('open', onlyOpenClasses, value);
+    setOnlyOpenClasses(value);
   };
 
   const updateTimeStart = async (start: string) => {
@@ -266,6 +273,8 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
               setTimeEnd(filter.value.end + ':00');
             }
             break;
+          case "open":
+            setOnlyOpenClasses(true);
         }
       }
     };
@@ -315,6 +324,7 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
     setTimeStart('00:01');
     setTimeEnd('23:59');
     setQuery('');
+    setOnlyOpenClasses(false);
 
     setCourses([]);
     setCurrentPage(1);
@@ -484,6 +494,14 @@ const modalStyle: React.CSSProperties = {
           onChange={(selected) => updateCredits(selected?.value ?? 'ALL')}
         />
 
+        <h5></h5>
+        <label>
+          <input
+            type="checkbox"
+            onChange={(selected) => updateOnlyOpenClasses(selected?.target.checked)}
+            checked={onlyOpenClasses}
+          /> Only show open classes
+        </label>
         <h5></h5>
         <button className="clear-btn" onClick={clearAllFilters}>
           Clear All Filters
