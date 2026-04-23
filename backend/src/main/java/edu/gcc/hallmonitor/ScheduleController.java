@@ -58,9 +58,11 @@ public class ScheduleController {
             int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
             User user = new User(userId);
             List<Schedule> schedules = user.getUserSchedules();
-            List<String> names = schedules.stream().map(Schedule::getName).toList();
+            List<ScheduleDTO> scheduleDTOs = schedules.stream().map(
+                    schedule -> new ScheduleDTO(schedule.getId(), schedule.getName())
+            ).toList();
 
-            ctx.json(names);
+            ctx.json(scheduleDTOs);
         });
 
         // Get the schedule that is saved
