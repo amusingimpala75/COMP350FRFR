@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import { Toaster, toast } from "react-hot-toast";
 import { useRef } from 'react'
 
 
@@ -142,7 +143,11 @@ export default function SchedulePage({
     );
 
     if (!res.ok) {
-      console.error('Failed to create schedule');
+      const error = await res.json();
+
+      if (res.status === 409) {
+        toast(error.error);
+      }
       return;
     }
 
@@ -179,6 +184,7 @@ export default function SchedulePage({
 
   return (
     <div className="layout">
+      <div><Toaster/></div>
       <div className="main">
         <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: '8px', alignItems: 'center' }}>
 
