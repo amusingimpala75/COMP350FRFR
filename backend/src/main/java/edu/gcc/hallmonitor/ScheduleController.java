@@ -44,15 +44,6 @@ public class ScheduleController {
 
         });
 
-        // add a new schedule
-        app.post("/schedule/new", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
-            String name = ctx.queryParam("name");
-
-            Schedule schedule = Schedule.newSchedule(userId, name);
-            ctx.result(String.valueOf(schedule.getId()));
-        });
-
         // get schedules for user
         app.get("/schedules", ctx -> {
             int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
