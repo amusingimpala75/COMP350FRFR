@@ -28,6 +28,7 @@ public class Main {
         Javalin app = Javalin.create(cfg -> { cfg.staticFiles.add("/public"); })
                 .start(port);
 
+        AuthController.registerRoutes(app);
         SearchController.registerRoutes(app);
         ScheduleController.registerRoutes(app);
     }

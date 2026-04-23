@@ -55,6 +55,10 @@ public class User {
         return username;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public byte[] getPasswordHash() {
         return passwordHash;
     }
