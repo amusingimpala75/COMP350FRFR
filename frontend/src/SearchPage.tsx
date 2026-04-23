@@ -5,6 +5,7 @@ import Select, { type SingleValue } from 'react-select';
 
 const userId = 154;
 
+
 interface CourseTime {
   day: string;
   start_time: string;
@@ -52,6 +53,10 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
   const isClearing = useRef(false);
+  const [text, setText] = useState(""); //for the chatbot query
+  const [result, setResult] = useState("Ask a question about your major's required classes!"); // the api call result
+  const [isOpen, setIsOpen] = useState(false); // for the modal
+  const [chatbotDept, setCbDept] = useState("Comp");
 
   // --- SEARCH ---
   const search = async () => {
@@ -327,6 +332,43 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
     (_, i) => windowStart + i
   );
 
+
+//Chatbot query box
+async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+
+  if(text != ""){
+      const response = await fetch("http://127.0.0.1:8000/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            text,
+            chatbotDept
+        }),
+      });
+
+      const data = await response.json();
+      setResult(data.result);
+  }
+}
+
+//modal styling
+const modalStyle: React.CSSProperties = {
+  position: "fixed",
+  top: "0",
+  right: "0",
+  height: "100vh",
+  width: "350px",
+  background: "white",
+  padding: "20px",
+  boxShadow: "-2px 0 10px rgba(0,0,0,0.2)",
+  zIndex: 1000,
+  overflowY: "auto",
+};
+
+
   const semesterOptions: SelectOption[] = [
     { value: 'ALL', label: 'All Semesters' },
     ...semesters.map(sem => ({ value: sem, label: sem }))
@@ -355,9 +397,11 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
       .map(c => ({ value: c, label: c }))
   ];
 
+
   return (
     <div className="layout">
     <div><Toaster/></div>
+
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
         <h3>Filters</h3>
@@ -460,6 +504,7 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && search()}
+            maxLength={1200}
           />
           <button onClick={search}>Search</button>
         </div>
@@ -596,6 +641,65 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
           )}
         </div>
       </div>
+      {/*Floating Chatbot Button*/}
+      <button
+              onClick={() => setIsOpen(true)}
+              style={{
+                position: "fixed",
+                bottom: "20px",
+                right: "20px",
+                padding: "12px 16px",
+                borderRadius: "50%",
+                fontSize: "18px",
+                cursor: "pointer",
+              }}
+            >
+              chat!
+            </button>
+            {isOpen && (
+                <div style={modalStyle}>
+                <select value={chatbotDept} onChange={(e) => setCbDept(e.target.value)}>
+                 <option value="Comp">Computer Science B.S.</option>
+                 <option value="Engl">English B.A.</option>
+                </select>
+
+                  {/* Close button */}
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    style={{ float: "right" }}
+                  >
+                    X
+                  </button>
+
+                  {/* Content layout */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+
+
+
+                    {/* Left: textbox */}
+                    <form onSubmit={handleSubmit}>
+                      <input
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Type..."
+                        maxLength={1200}
+                      />
+                      <button type="submit">Send</button>
+                    </form>
+
+
+                    {/* scrollable content */}
+                     <div style={{ flex: 1, overflowY: "auto", marginTop: "20px" }}>
+                     <p style={{ overflowWrap: "break-word" }}>{result}</p>
+                     </div>
+
+
+
+
+                  </div>
+                </div>
+
+            )}
     </div>
   );
 }

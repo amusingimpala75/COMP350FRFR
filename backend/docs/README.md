@@ -30,6 +30,10 @@ To install the latest stable version of Vite, run ```npm install -D vite```.
 A java JDK installation of version at least 21 is required to build and run this project.
 You can install one with ```winget install EclipseAdoptium.Temurin.21.JDK```.
 
+### Python
+A python version of 3.10 or higher is required to run this project.
+
+
 ## Running
 
 Currently, we do not have a prebuilt executable. You can run the project by executing the `run` gradle task.
@@ -37,7 +41,12 @@ There are two ways to do this:
 1. Change directories to the backend folder and run `./gradlew run`
 2. Open the project in IntelliJ and execute the `application/run` gradle task from
    the right hand menu.
-3. Navigate to `http://localhost:7070`.
+3. From a terminal inside the python-backend folder, run `python -m venv venv` to create the virtual environment.
+4. Activate the Venv by running `venv\Scripts\activate` if using Windows, or `source venv/bin/activate` for Mac/Linux.
+5. Run `pip install -r requirements.txt` to download the python backend dependencies. 
+6. Run `uvicorn main:app --reload` to start the application.
+7. Navigate to `http://localhost:7070`.
+
 
 ## OCI Containers
 If you have Docker or Podman installed you can create an OCI container image .tar by running `./gradlew containerBuild` in the backend folder
