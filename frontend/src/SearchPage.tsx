@@ -88,6 +88,10 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
   //Toggles a course in the user's schedule and syncs with the backend.
   //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
+    if (scheduleId == null) {
+      toast("No schedule selected");
+      return;
+    }
     const newSchedule = new Set(schedule);
 
     //send the course identifier to the backend
@@ -266,9 +270,11 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
 
   // --- LOAD CURRENT SCHEDULE ---
   useEffect(() => {
+    if (scheduleId == null) return;
+
     const fetchSchedule = async () => {
       try {
-        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`);
+        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`); // scheduleId is null here
         const items: Course[] = await res.json();
         const ids = new Set(items.map(c => c.id));
         setSchedule(ids);
