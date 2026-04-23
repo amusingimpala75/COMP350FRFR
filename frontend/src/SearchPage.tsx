@@ -284,7 +284,7 @@ export default function SearchPage({ scheduleId }: SearchPageProps) {
     };
 
     fetchSchedule();
-  }, []);
+  }, [scheduleId]);
 
   // Keep current page in bounds when filters/search shrink result count.
   useEffect(() => {
