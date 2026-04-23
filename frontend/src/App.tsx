@@ -5,7 +5,7 @@ import SchedulePage from './SchedulePage';
 import './App.css';
 
 function App() {
-  const [scheduleId, setScheduleId] = useState<number | "">("");
+  const [scheduleId, setScheduleId] = useState<number | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("scheduleId");
@@ -13,7 +13,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (scheduleId !== "") {
+    if (scheduleId !== null) {
       localStorage.setItem("scheduleId", String(scheduleId));
     }
   }, [scheduleId]);

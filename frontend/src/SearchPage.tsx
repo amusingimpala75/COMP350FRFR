@@ -29,7 +29,7 @@ interface SelectOption {
 }
 
 type SearchPageProps = {
-  scheduleId: number | "";
+  scheduleId: number | null;
 };
 
 export default function SearchPage({ scheduleId }: SearchPageProps) {

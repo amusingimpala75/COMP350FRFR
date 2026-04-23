@@ -32,8 +32,8 @@ interface Course {
 }
 
 type SchedulePageProps = {
-  scheduleId: number | "";
-  setScheduleId: (id: number | "") => void;
+  scheduleId: number | null;
+  setScheduleId: (id: number | null) => void;
 };
 
 export default function SchedulePage({
@@ -52,6 +52,7 @@ export default function SchedulePage({
   };
 
   const loadCourses = async (term: Term) => {
+    if (!scheduleId) return;
     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
     setCourses(items);
@@ -79,6 +80,7 @@ export default function SchedulePage({
   };
 
   const removeCourse = async (courseId: number) => {
+    if (!scheduleId) return;
     await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}`, { method: 'POST' });
     //remove from calendar
     removeEvents(courseId);
@@ -86,7 +88,7 @@ export default function SchedulePage({
   };
 
   useEffect(() => {
-    if (scheduleId !== "") {
+    if (scheduleId !== null) {
       loadCourses(activeTerm);
     }
   }, [activeTerm, scheduleId]);
@@ -96,10 +98,11 @@ export default function SchedulePage({
   }, []);
 
   useEffect(() => {
-    if (schedules.length > 0 && scheduleId === "") {
-      setScheduleId(schedules[0].id);
-    }
-  }, [schedules]);
+    if (schedules.length === 0) return;
+    if (scheduleId != null) return;
+
+    setScheduleId(schedules[0].id);
+  }, [schedules, scheduleId]);
 
 
   const calendarRef = useRef<FullCalendar>(null)
@@ -132,6 +135,7 @@ export default function SchedulePage({
 
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
+      if (!scheduleId) return;
       const res = await fetch(`/download-pdf?userId=${userId}&scheduleId=${scheduleId}`);
       if (!res.ok) {
           throw new Error('Download failed');
@@ -156,14 +160,15 @@ export default function SchedulePage({
   return (
     <div className="layout">
       <div className="main">
-        <div style={{ position: 'absolute', top: 10, right: 10 }}>
-          <select
-            value={scheduleId}
-            onChange={(e) => setScheduleId(Number(e.target.value))}
-            style={{ padding: '6px 10px' }}
-          >
-            <option value="">Select Schedule</option>
+        <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: '8px', alignItems: 'center' }}>
 
+          <span style={{ color: 'white' }}>Schedule:</span>
+
+          <select
+            value={scheduleId ?? schedules[0]?.id ?? ""}
+            onChange={(e) => setScheduleId(Number(e.target.value))}
+            style={{ padding: '6px 10px', width: '180px' }}
+          >
             {schedules.map((sched) => (
               <option key={sched.id} value={sched.id}>
                 {sched.name}
