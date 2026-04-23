@@ -166,7 +166,8 @@ public class Schedule {
         }
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)"
+                "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)",
+                PreparedStatement.RETURN_GENERATED_KEYS
         );
         prepStatement.setInt(1, userId);
         prepStatement.setString(2, name);
