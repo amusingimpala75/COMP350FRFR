@@ -62,7 +62,7 @@ public class ScheduleController {
             String name = Objects.requireNonNull(ctx.queryParam("scheduleName"));
             int scheduleId = Schedule.newSchedule(userId, name);
 
-            ctx.result(String.valueOf(scheduleId));
+            ctx.json(new ScheduleDTO(scheduleId, name));
         });
 
         // Get the schedule for the uesrid and scheduleid given
