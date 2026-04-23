@@ -4,8 +4,6 @@ import pandaLogo from './assets/Designer.png';
 import Select, { type SingleValue } from 'react-select';
 
 const userId = 154;
-const scheduleId = 1;
-
 
 interface CourseTime {
   day: string;
@@ -30,7 +28,11 @@ interface SelectOption {
   label: string;
 }
 
-export default function SearchPage() {
+type SearchPageProps = {
+  scheduleId: number | "";
+};
+
+export default function SearchPage({ scheduleId }: SearchPageProps) {
   const courses_per_page = 10;
   const [query, setQuery] = useState('');
   const [semester, setSemester] = useState('ALL');

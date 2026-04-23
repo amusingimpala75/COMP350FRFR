@@ -31,11 +31,18 @@ interface Course {
   semester: string;
 }
 
-export default function SchedulePage() {
+type SchedulePageProps = {
+  scheduleId: number | "";
+  setScheduleId: (id: number | "") => void;
+};
+
+export default function SchedulePage({
+    scheduleId,
+    setScheduleId
+  }: SchedulePageProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [activeTerm, setActiveTerm] = useState<Term>('Fall');
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [selectedScheduleId, setSelectedScheduleId] = useState<number | "">("");
   //const calendarRef = useRef<FullCalendar>(null);
 
   const loadSchedules = async () => {
@@ -45,7 +52,7 @@ export default function SchedulePage() {
   };
 
   const loadCourses = async (term: Term) => {
-    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${selectedScheduleId}`);
+    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
     setCourses(items);
 
@@ -72,25 +79,25 @@ export default function SchedulePage() {
   };
 
   const removeCourse = async (courseId: number) => {
-    await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${selectedScheduleId}`, { method: 'POST' });
+    await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}`, { method: 'POST' });
     //remove from calendar
     removeEvents(courseId);
     loadCourses(activeTerm);
   };
 
   useEffect(() => {
-    if (selectedScheduleId !== "") {
+    if (scheduleId !== "") {
       loadCourses(activeTerm);
     }
-  }, [activeTerm, selectedScheduleId]);
+  }, [activeTerm, scheduleId]);
 
   useEffect(() => {
     loadSchedules();
   }, []);
 
   useEffect(() => {
-    if (schedules.length > 0 && selectedScheduleId === "") {
-      setSelectedScheduleId(schedules[0].id);
+    if (schedules.length > 0 && scheduleId === "") {
+      setScheduleId(schedules[0].id);
     }
   }, [schedules]);
 
@@ -125,7 +132,7 @@ export default function SchedulePage() {
 
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
-      const res = await fetch(`/download-pdf?userId=${userId}&scheduleId=${selectedScheduleId}`);
+      const res = await fetch(`/download-pdf?userId=${userId}&scheduleId=${scheduleId}`);
       if (!res.ok) {
           throw new Error('Download failed');
       }
@@ -151,8 +158,8 @@ export default function SchedulePage() {
       <div className="main">
         <div style={{ position: 'absolute', top: 10, right: 10 }}>
           <select
-            value={selectedScheduleId}
-            onChange={(e) => setSelectedScheduleId(Number(e.target.value))}
+            value={scheduleId}
+            onChange={(e) => setScheduleId(Number(e.target.value))}
             style={{ padding: '6px 10px' }}
           >
             <option value="">Select Schedule</option>
