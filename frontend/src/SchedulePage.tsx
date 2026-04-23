@@ -43,6 +43,7 @@ export default function SchedulePage({
   const [courses, setCourses] = useState<Course[]>([]);
   const [activeTerm, setActiveTerm] = useState<Term>('Fall');
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [newScheduleName, setNewScheduleName] = useState('');
   //const calendarRef = useRef<FullCalendar>(null);
 
   const loadSchedules = async () => {
@@ -131,7 +132,26 @@ export default function SchedulePage({
     }
   }
 
+  // For adding a new schedule
+  const createSchedule = async () => {
+    if (newScheduleName.trim() === "") return;
 
+    const res = await fetch(
+      `/schedule?userId=${userId}&scheduleName=${encodeURIComponent(newScheduleName)}`,
+      { method: 'POST' }
+    );
+
+    if (!res.ok) {
+      console.error('Failed to create schedule');
+      return;
+    }
+
+    const schedule: Schedule = await res.json();
+
+    setSchedules(prev => [...prev, schedule]);
+    setScheduleId(schedule.id);
+    setNewScheduleName("");
+  };
 
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
@@ -175,6 +195,28 @@ export default function SchedulePage({
               </option>
             ))}
           </select>
+
+          {/* NEW INPUT */}
+          <input
+            type="text"
+            placeholder="New schedule"
+            value={newScheduleName}
+            onChange={(e) => setNewScheduleName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') createSchedule();
+            }}
+            style={{ padding: '6px', width: '140px' }}
+          />
+
+          {/* NEW BUTTON */}
+          <button
+            onClick={createSchedule}
+            disabled={!newScheduleName.trim()}
+            style={{ padding: '6px 10px', cursor: 'pointer' }}
+          >
+            Add
+          </button>
+
         </div>
         <h1>User Schedule — {activeTerm}</h1>
         <div style={{
