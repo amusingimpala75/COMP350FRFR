@@ -47,5 +47,6 @@ public interface Filter extends Predicate<Course> {
         NumCredits.init();
         ProfName.init();
         Time.init();
+        OpenSeats.init();
     }
 }
