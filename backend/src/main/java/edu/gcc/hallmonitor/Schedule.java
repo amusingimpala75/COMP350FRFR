@@ -156,9 +156,7 @@ public class Schedule {
         return schedule;
     }
 
-    public static Schedule newSchedule(int userId, String name) throws SQLException {
-        Schedule schedule = new Schedule(name);
-
+    public static int newSchedule(int userId, String name) throws SQLException {
         // Ensure that the name isn't already taken for the user
         PreparedStatement nameCheckStatement = CONNECTION.prepareStatement(
                 "SELECT name FROM public.\"schedules\" WHERE user_id = ? AND name = ?"
@@ -171,13 +169,19 @@ public class Schedule {
         }
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
-                "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)"
+                "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)",
+                PreparedStatement.RETURN_GENERATED_KEYS
         );
         prepStatement.setInt(1, userId);
         prepStatement.setString(2, name);
         prepStatement.execute();
 
-        return schedule;
+        ResultSet generatedKeys = prepStatement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            return generatedKeys.getInt(1);
+        } else {
+            throw new SecurityException("Unable to generate new schedule");
+        }
     }
 
     private List<Course> allCourses(){
