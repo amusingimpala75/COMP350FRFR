@@ -72,6 +72,17 @@ public class ScheduleController {
 
         });
 
+        app.delete("/schedule", ctx -> {
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
+
+            try {
+                Schedule.deleteSchedule(userId, scheduleId);
+            } catch (SecurityException se) {
+                ctx.status(404);
+            }
+        });
+
         // Get the schedule for the uesrid and scheduleid given
         app.get("/schedule/items", ctx -> {
             String term = ctx.queryParam("term"); // Fall, Winter, Spring, Summer

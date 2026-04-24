@@ -184,6 +184,19 @@ public class Schedule {
         }
     }
 
+    public static void deleteSchedule(int userId, int scheduleId) throws SQLException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "DELETE FROM public.\"schedules\" WHERE user_id = ? AND id = ?"
+        );
+        prepStatement.setInt(1, userId);
+        prepStatement.setInt(2, scheduleId);
+        int rowsEffected = prepStatement.executeUpdate();
+
+        if (rowsEffected == 0) {
+            throw new SecurityException("User id and schedule id do not match");
+        }
+    }
+
     private List<Course> allCourses(){
         //condense all courses to one list
         List<Course> courses = new ArrayList<>();
