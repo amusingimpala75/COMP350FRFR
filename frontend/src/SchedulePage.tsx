@@ -158,6 +158,34 @@ export default function SchedulePage({
     setNewScheduleName("");
   };
 
+  const deleteSchedule = async () => {
+    if (scheduleId == null) return;
+
+    if (schedules.length == 1) { // ensure that a user has at least 1 schedule
+      toast("You must have at least 1 schedule");
+    }
+
+    const res = await fetch(
+      `/schedule?userId=${userId}&scheduleId=${scheduleId}`,
+      { method: 'DELETE' }
+    );
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        toast.error("Schedule not found");
+      } else {
+        toast.error("Failed to delete schedule");
+      }
+      return;
+    }
+
+    toast.success("Schedule deleted");
+
+    setSchedules(prev => prev.filter(s => s.id !== scheduleId));
+
+    setScheduleId(schedules[0].id); // reset schedule to the first one
+  };
+
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
       if (!scheduleId) return;
