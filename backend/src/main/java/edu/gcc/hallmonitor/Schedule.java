@@ -64,8 +64,10 @@ public class Schedule {
 
     //helper method to prevent duplicate code
     public List<Course> getCoursesForTerm(Course course) {
-        String semester = course.semester();
+        return getCoursesForTerm(course.semester());
+    }
 
+    public List<Course> getCoursesForTerm(String semester) {
         if (semester.contains("Fall")) return fallCourses;
         if (semester.contains("Spring")) return springCourses;
         if (semester.contains("Summer")) return summerCourses;
@@ -357,74 +359,83 @@ public class Schedule {
             content.setFont(font, fontSize);
             content.newLineAtOffset(margin, yStart);
 
-            //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
-            for (Course c : getCourses()) {  //TODO change the PDF to reflect the different semesters
+            for(String term : List.of("Fall","Winter","Spring","Summer")) {
+                List<Course> termCourses = getCoursesForTerm(term);
+                if(termCourses.isEmpty()){ continue; }
+                content.showText(term+" Semester Courses:");
+                content.newLineAtOffset(0, -leading);
+                y -= leading;
+                //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
+                for (Course c : getCoursesForTerm(term)) {
 
-                //lines without indent
-                String first = c.department() + c.code() + c.section() + " " + c.name();
-                for (String line : wrapText(first, font, fontSize, maxWidth)) {
+                    //lines without indent
+                    String first = c.department() + c.code() + c.section() + " " + c.name();
+                    for (String line : wrapText(first, font, fontSize, maxWidth)) {
 
-                    //add a new page if necessary
-                    if (y < margin) {
-                        content.endText();
-                        content.close();
+                        //add a new page if necessary
+                        if (y < margin) {
+                            content.endText();
+                            content.close();
 
-                        page = new PDPage();
-                        document.addPage(page);
+                            page = new PDPage();
+                            document.addPage(page);
 
-                        content = new PDPageContentStream(document, page);
-                        content.beginText();
-                        content.setFont(font, fontSize);
-                        content.newLineAtOffset(margin, yStart);
+                            content = new PDPageContentStream(document, page);
+                            content.beginText();
+                            content.setFont(font, fontSize);
+                            content.newLineAtOffset(margin, yStart);
 
-                        y = yStart;
-                    }
+                            y = yStart;
+                        }
 
-                    //add the line content to the page
-                    content.showText(line);
-                    content.newLineAtOffset(0, -leading);
-                    y -= leading;
-                }
-
-                //lines with indent
-                List<String> lowerLines = new ArrayList<>();
-                String second = String.join(" ", c.professor()) + " " + c.location();
-                StringBuilder third = new StringBuilder();
-                if (c.times() != null) {
-                    for (CourseTime ct : c.times()) {
-                        third.append(ct.day()).append(" ").append(ct.startTime().format(formatter)).append(" - ").append(ct.endTime().format(formatter)).append("   ");
-                    }
-                }
-                lowerLines.addAll(wrapText(second, font, fontSize, maxWidth));
-                lowerLines.addAll(wrapText(third.toString(), font, fontSize, maxWidth));
-
-                //separate loop needed for indented lines
-                for (String line : lowerLines) {
-                    //add a new page if necessary
-                    if (y < margin) {
-                        content.endText();
-                        content.close();
-
-                        page = new PDPage();
-                        document.addPage(page);
-
-                        content = new PDPageContentStream(document, page);
-                        content.beginText();
-                        content.setFont(font, fontSize);
-                        content.newLineAtOffset(margin, yStart);
-
-                        y = yStart;
-                    }
-
-                    content.newLineAtOffset(20, 0);
-                    content.showText(line);
-                    content.newLineAtOffset(-20, 0);
-                    content.newLineAtOffset(0, -leading);
-                    y -= leading;
-                    //add a newline if last line
-                    if (line.equals(lowerLines.get(lowerLines.size() - 1))) {
+                        //add the line content to the page
+                        content.newLineAtOffset(20, 0);
+                        content.showText(line);
+                        content.newLineAtOffset(-20, 0);
                         content.newLineAtOffset(0, -leading);
                         y -= leading;
+                    }
+
+                    //lines with indent
+                    List<String> lowerLines = new ArrayList<>();
+                    String second = String.join(" ", c.professor()) + " " + c.location();
+                    StringBuilder third = new StringBuilder();
+                    if (c.times() != null) {
+                        for (CourseTime ct : c.times()) {
+                            third.append(ct.day()).append(" ").append(ct.startTime().format(formatter)).append(" - ").append(ct.endTime().format(formatter)).append("   ");
+                        }
+                    }
+                    lowerLines.addAll(wrapText(second, font, fontSize, maxWidth));
+                    lowerLines.addAll(wrapText(third.toString(), font, fontSize, maxWidth));
+
+                    //separate loop needed for indented lines
+                    for (String line : lowerLines) {
+                        //add a new page if necessary
+                        if (y < margin) {
+                            content.endText();
+                            content.close();
+
+                            page = new PDPage();
+                            document.addPage(page);
+
+                            content = new PDPageContentStream(document, page);
+                            content.beginText();
+                            content.setFont(font, fontSize);
+                            content.newLineAtOffset(margin, yStart);
+
+                            y = yStart;
+                        }
+
+                        content.newLineAtOffset(40, 0);
+                        content.showText(line);
+                        content.newLineAtOffset(-40, 0);
+                        content.newLineAtOffset(0, -leading);
+                        y -= leading;
+                        //add a newline if last line
+                        if (line.equals(lowerLines.get(lowerLines.size() - 1))) {
+                            content.newLineAtOffset(0, -leading);
+                            y -= leading;
+                        }
                     }
                 }
             }
