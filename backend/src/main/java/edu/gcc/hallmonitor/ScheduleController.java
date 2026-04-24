@@ -1,6 +1,7 @@
 package edu.gcc.hallmonitor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import io.javalin.Javalin;
@@ -56,7 +57,22 @@ public class ScheduleController {
             ctx.json(scheduleDTOs);
         });
 
-        // Get the schedule that is saved
+        // add a new schedule
+        app.post("/schedule", ctx -> {
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            String name = Objects.requireNonNull(ctx.queryParam("scheduleName"));
+
+            try {
+                int scheduleId = Schedule.newSchedule(userId, name);
+                ctx.json(new ScheduleDTO(scheduleId, name));
+            } catch (SecurityException se) {
+                ctx.status(409); // Duplicate resource
+                ctx.json(Map.of("error", "schedule with the same name already exists"));
+            }
+
+        });
+
+        // Get the schedule for the uesrid and scheduleid given
         app.get("/schedule/items", ctx -> {
             String term = ctx.queryParam("term"); // Fall, Winter, Spring, Summer
             int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
