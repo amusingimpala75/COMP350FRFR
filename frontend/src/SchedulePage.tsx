@@ -186,6 +186,30 @@ export default function SchedulePage({
     setScheduleId(schedules[0].id); // reset schedule to the first one
   };
 
+  const confirmDeleteSchedule = () => { // A popup window to confirm deletion of a schedule
+    if (scheduleId == null) return;
+
+    toast((t) => (
+      <div>
+        <p>Delete this schedule?</p>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+          <button
+            onClick={() => {
+              deleteSchedule();
+              toast.dismiss(t.id);
+            }}
+            style={{ background: 'darkred', color: 'white', padding: '4px 8px' }}
+          >
+            Yes
+          </button>
+          <button onClick={() => toast.dismiss(t.id)}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 8000 });
+  };
+
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
       if (!scheduleId) return;
@@ -251,6 +275,19 @@ export default function SchedulePage({
             Add
           </button>
 
+          {/* DELETE BUTTON */}
+          <button
+            onClick={confirmDeleteSchedule}
+            disabled={!scheduleId}
+            style={{
+              padding: '6px 10px',
+              cursor: 'pointer',
+              backgroundColor: 'darkred',
+              color: 'white'
+            }}
+          >
+            Delete
+          </button>
         </div>
         <h1>User Schedule — {activeTerm}</h1>
         <div style={{
