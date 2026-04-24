@@ -271,7 +271,7 @@ export default function SchedulePage({
                                   cursor: 'pointer',
                                 }}
                               >
-                                Clear All
+                                Clear Term
                               </button>
 
               </div>
