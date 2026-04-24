@@ -19,6 +19,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 public class Schedule {
 
@@ -346,6 +347,7 @@ public class Schedule {
 
             //define how the page should be styled
             PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            PDType1Font bold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
             float fontSize = 12;
             float margin = 50;
             float yStart = 700;
@@ -362,7 +364,9 @@ public class Schedule {
             for(String term : List.of("Fall","Winter","Spring","Summer")) {
                 List<Course> termCourses = getCoursesForTerm(term);
                 if(termCourses.isEmpty()){ continue; }
+                content.setFont(bold, fontSize);
                 content.showText(term+" Semester Courses:");
+                content.setFont(font, fontSize);
                 content.newLineAtOffset(0, -leading);
                 y -= leading;
                 //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
