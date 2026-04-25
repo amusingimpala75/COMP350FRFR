@@ -49,7 +49,7 @@ public class ScheduleController {
         app.get("/schedules", ctx -> {
             int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
             User user = new User(userId);
-            List<Schedule> schedules = user.getUserSchedules();
+            List<Schedule> schedules = user.getSchedules();
             List<ScheduleDTO> scheduleDTOs = schedules.stream().map(
                     schedule -> new ScheduleDTO(schedule.getId(), schedule.getName())
             ).toList();
