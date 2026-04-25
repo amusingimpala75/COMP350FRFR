@@ -34,11 +34,13 @@ interface Course {
 type SchedulePageProps = {
   scheduleId: number | null;
   setScheduleId: (id: number | null) => void;
+  userId: number;
 };
 
 export default function SchedulePage({
     scheduleId,
-    setScheduleId
+    setScheduleId,
+    userId
   }: SchedulePageProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [activeTerm, setActiveTerm] = useState<Term>('Fall');

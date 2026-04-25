@@ -63,8 +63,8 @@ function App() {
         <Routes>
           <Route path="/login" element={user ? <Navigate to="/search" replace /> : <LoginPage />} />
           <Route path="/signup" element={user ? <Navigate to="/search" replace /> : <SignupPage />} />
-          <Route path="/search" element={<ProtectedRoute><SearchPage scheduleId={scheduleId}/></ProtectedRoute>} />
-          <Route path="/schedule" element={<ProtectedRoute><SchedulePage scheduleId={scheduleId} setScheduleId={setScheduleId}/></ProtectedRoute>} />
+          <Route path="/search" element={<ProtectedRoute><SearchPage userId={user?.id ?? 0} scheduleId={scheduleId}/></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute><SchedulePage userId={user?.id ?? 0} scheduleId={scheduleId} setScheduleId={setScheduleId}/></ProtectedRoute>} />
           <Route
             path="*"
             element={

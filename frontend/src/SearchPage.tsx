@@ -29,9 +29,10 @@ interface SelectOption {
 
 type SearchPageProps = {
   scheduleId: number | null;
+  userId: number;
 };
 
-export default function SearchPage({ scheduleId }: SearchPageProps) {
+export default function SearchPage({ userId, scheduleId }: SearchPageProps) {
   const courses_per_page = 10;
   const [query, setQuery] = useState('');
   const [semester, setSemester] = useState('ALL');
