@@ -246,6 +246,9 @@ public class User {
     }
 
     public void removeSchedule(int scheduleId) throws SQLException {
+        if (schedules.size() <= 1) {
+            throw new IllegalStateException("A user must have at least 1 schedule");
+        }
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "DELETE FROM public.\"schedules\" WHERE id = ?"
         );
