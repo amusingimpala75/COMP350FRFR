@@ -71,8 +71,19 @@ public class ScheduleController {
         try {
             return Schedule.loadSchedule(userId, scheduleId);
         } catch (SecurityException ex) {
-            ctx.status(404).result("Schedule not found");
-            return null;
+            if (!createIfMissing) {
+                ctx.status(404).result("Schedule not found");
+                return null;
+            }
+
+            // Recover from stale/foreign schedule ids by switching to the user's default schedule.
+            try {
+                int fallbackScheduleId = getOrCreateScheduleId(userId);
+                return Schedule.loadSchedule(userId, fallbackScheduleId);
+            } catch (Exception fallbackEx) {
+                ctx.status(500).result("Database error");
+                return null;
+            }
         } catch (Exception ex) {
             ctx.status(500).result("Database error");
             return null;
