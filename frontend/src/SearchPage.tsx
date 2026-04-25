@@ -697,16 +697,27 @@ const modalStyle: React.CSSProperties = {
       <button
               onClick={() => setIsOpen(true)}
               style={{
-                position: "fixed",
-                bottom: "20px",
-                right: "20px",
-                padding: "12px 16px",
-                borderRadius: "50%",
-                fontSize: "18px",
-                cursor: "pointer",
-              }}
+                  position: "fixed",
+                  bottom: "20px",
+                  right: "20px",
+                  width: "56px",
+                  height: "56px",
+                  borderRadius: "50%",
+                  padding: 0,
+                  overflow: "hidden",
+                  border: "none",
+                  cursor: "pointer",
+                }}
             >
-              chat!
+              <img
+                  src="./dist/assets/chat.png"
+                  alt="Open chat"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
             </button>
             {isOpen && (
                 <div style={modalStyle}>
