@@ -1,10 +1,6 @@
 package edu.gcc.hallmonitor;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,31 +9,6 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 
 public class ScheduleController {
-    private static int getOrCreateScheduleId(int userId) throws SQLException {
-        Connection conn = Database.getConnection();
-        PreparedStatement lookup = conn.prepareStatement(
-            "SELECT id FROM public.\"schedules\" WHERE user_id = ? ORDER BY id LIMIT 1"
-        );
-        lookup.setInt(1, userId);
-        ResultSet rs = lookup.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1);
-        }
-
-        PreparedStatement insert = conn.prepareStatement(
-            "INSERT INTO public.\"schedules\" (user_id) VALUES (?)",
-            Statement.RETURN_GENERATED_KEYS
-        );
-        insert.setInt(1, userId);
-        insert.execute();
-        ResultSet keys = insert.getGeneratedKeys();
-        if (keys.next()) {
-            return keys.getInt(1);
-        }
-
-        throw new SQLException("Failed to create schedule");
-    }
-
     private static Integer requireUserId(io.javalin.http.Context ctx) {
         Integer userId = AuthController.getAuthenticatedUserId(ctx);
         if (userId == null) {
@@ -55,7 +26,7 @@ public class ScheduleController {
             if (scheduleIdParam != null && !scheduleIdParam.isBlank()) {
                 scheduleId = Integer.parseInt(scheduleIdParam);
             } else if (createIfMissing) {
-                scheduleId = getOrCreateScheduleId(userId);
+                scheduleId = Schedule.getOrCreateScheduleId(userId);
             } else {
                 ctx.status(400).result("Missing scheduleId");
                 return null;
@@ -78,7 +49,7 @@ public class ScheduleController {
 
             // Recover from stale/foreign schedule ids by switching to the user's default schedule.
             try {
-                int fallbackScheduleId = getOrCreateScheduleId(userId);
+                int fallbackScheduleId = Schedule.getOrCreateScheduleId(userId);
                 return Schedule.loadSchedule(userId, fallbackScheduleId);
             } catch (Exception fallbackEx) {
                 ctx.status(500).result("Database error");
