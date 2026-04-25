@@ -9,7 +9,6 @@ import { useRef } from 'react'
 type Term = 'Fall' | 'Winter' | 'Spring' | 'Summer';
 const TERMS: Term[] = ['Fall', 'Winter', 'Spring', 'Summer'];
 
-const userId = 154;
 
 interface Schedule {
   id: number;
@@ -35,11 +34,13 @@ interface Course {
 type SchedulePageProps = {
   scheduleId: number | null;
   setScheduleId: (id: number | null) => void;
+  userId: number;
 };
 
 export default function SchedulePage({
     scheduleId,
-    setScheduleId
+    setScheduleId,
+    userId
   }: SchedulePageProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [activeTerm, setActiveTerm] = useState<Term>('Fall');
@@ -101,9 +102,11 @@ export default function SchedulePage({
 
   useEffect(() => {
     if (schedules.length === 0) return;
-    if (scheduleId != null) return;
 
-    setScheduleId(schedules[0].id);
+    const hasSelectedSchedule = scheduleId != null && schedules.some(s => s.id === scheduleId);
+    if (!hasSelectedSchedule) {
+      setScheduleId(schedules[0].id);
+    }
   }, [schedules, scheduleId]);
 
 
@@ -179,9 +182,11 @@ export default function SchedulePage({
 
     toast.success("Schedule deleted");
 
-    setSchedules(prev => prev.filter(s => s.id !== scheduleId));
-
-    setScheduleId(schedules[0].id); // reset schedule to the first one
+    setSchedules(prev => {
+      const remaining = prev.filter(s => s.id !== scheduleId);
+      setScheduleId(remaining.length > 0 ? remaining[0].id : null);
+      return remaining;
+    });
   };
 
   const confirmDeleteSchedule = () => { // A popup window to confirm deletion of a schedule

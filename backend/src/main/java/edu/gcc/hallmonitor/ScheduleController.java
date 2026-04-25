@@ -1,12 +1,66 @@
 package edu.gcc.hallmonitor;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 
 public class ScheduleController {
+    private static Integer requireUserId(io.javalin.http.Context ctx) {
+        Integer userId = AuthController.getAuthenticatedUserId(ctx);
+        if (userId == null) {
+            ctx.status(401).result("Unauthorized");
+            return null;
+        }
+        return userId;
+    }
+
+    private static Schedule resolveSchedule(Context ctx, int userId, boolean createIfMissing) {
+        int scheduleId;
+        String scheduleIdParam = ctx.queryParam("scheduleId");
+
+        try {
+            if (scheduleIdParam != null && !scheduleIdParam.isBlank()) {
+                scheduleId = Integer.parseInt(scheduleIdParam);
+            } else if (createIfMissing) {
+                scheduleId = Schedule.getOrCreateScheduleId(userId);
+            } else {
+                ctx.status(400).result("Missing scheduleId");
+                return null;
+            }
+        } catch (NumberFormatException ex) {
+            ctx.status(400).result("Invalid scheduleId");
+            return null;
+        } catch (SQLException ex) {
+            ctx.status(500).result("Database error");
+            return null;
+        }
+
+        try {
+            return Schedule.loadSchedule(userId, scheduleId);
+        } catch (SecurityException ex) {
+            if (!createIfMissing) {
+                ctx.status(404).result("Schedule not found");
+                return null;
+            }
+
+            // Recover from stale/foreign schedule ids by switching to the user's default schedule.
+            try {
+                int fallbackScheduleId = Schedule.getOrCreateScheduleId(userId);
+                return Schedule.loadSchedule(userId, fallbackScheduleId);
+            } catch (Exception fallbackEx) {
+                ctx.status(500).result("Database error");
+                return null;
+            }
+        } catch (Exception ex) {
+            ctx.status(500).result("Database error");
+            return null;
+        }
+    }
+
     public static void registerRoutes(Javalin app) {
         //Defines a /schedule route that reads from index.html
         app.get("/schedule", ctx -> ctx.html(Main.readResource("/public/index.html")));
@@ -14,12 +68,17 @@ public class ScheduleController {
         //adds or removes a course based on the ID
         app.post("/schedule/items", ctx -> {
             int courseId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("courseId")));
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
-            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
 
-            Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
+            Schedule schedule = resolveSchedule(ctx, userId, true);
+            if (schedule == null) {
+                return;
+            }
             Course course = Search.getCourseById(courseId);
-            String ret = "";
+            String ret;
             if (schedule.inSchedule(course)) {
                 schedule.removeCourse(course);
                 ret = "Removed";
@@ -47,7 +106,10 @@ public class ScheduleController {
 
         // get schedules for user
         app.get("/schedules", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
             User user = new User(userId);
             List<Schedule> schedules = user.getSchedules();
             List<ScheduleDTO> scheduleDTOs = schedules.stream().map(
@@ -59,7 +121,10 @@ public class ScheduleController {
 
         // add a new schedule
         app.post("/schedule", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
             String name = Objects.requireNonNull(ctx.queryParam("scheduleName"));
 
             try {
@@ -73,7 +138,10 @@ public class ScheduleController {
         });
 
         app.delete("/schedule", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
             int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
 
             try {
@@ -89,10 +157,15 @@ public class ScheduleController {
         // Get the schedule for the uesrid and scheduleid given
         app.get("/schedule/items", ctx -> {
             String term = ctx.queryParam("term"); // Fall, Winter, Spring, Summer
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
-            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
 
-            Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
+            Schedule schedule = resolveSchedule(ctx, userId, true);
+            if (schedule == null) {
+                return;
+            }
             if (term == null || term.isBlank()) {
                 ctx.json(schedule.getCourses());
                 return;
@@ -104,9 +177,15 @@ public class ScheduleController {
 
         //returns the byte array of the schedules for the pdf
         app.get("/download-pdf", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
-            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
-            Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
+
+            Schedule schedule = resolveSchedule(ctx, userId, true);
+            if (schedule == null) {
+                return;
+            }
             byte[] pdfBytes = schedule.createPdf();
             ctx.contentType("application/pdf");
             ctx.header("Content-Disposition", "attachment; filename=\"my-file.pdf\"");  //TODO: change filename

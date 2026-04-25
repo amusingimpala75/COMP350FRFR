@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class User {
+    private static final String DEFAULT_SCHEDULE_NAME = "My Schedule";
     private String username;
     private byte[] passwordHash;
     private int id;
@@ -73,6 +74,10 @@ public class User {
         return username;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public byte[] getPasswordHash() {
         return passwordHash;
     }
@@ -103,6 +108,8 @@ public class User {
 
         if (user.addUser()) {
             user.id = user.getIdFromDatabase();
+            // Ensure new users always start with one schedule.
+            Schedule.newSchedule(user.id, DEFAULT_SCHEDULE_NAME);
             user.authenticated = true;
             user.schedules = user.getUserSchedules();
             return user;
