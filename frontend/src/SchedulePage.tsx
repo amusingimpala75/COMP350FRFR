@@ -101,10 +101,7 @@ export default function SchedulePage({
   }, []);
 
   useEffect(() => {
-    if (schedules.length === 0) {
-      setScheduleId(null);
-      return;
-    }
+    if (schedules.length === 0) return;
 
     const hasSelectedSchedule = scheduleId != null && schedules.some(s => s.id === scheduleId);
     if (!hasSelectedSchedule) {
