@@ -161,10 +161,6 @@ export default function SchedulePage({
   const deleteSchedule = async () => {
     if (scheduleId == null) return;
 
-    if (schedules.length == 1) { // ensure that a user has at least 1 schedule
-      toast("You must have at least 1 schedule");
-    }
-
     const res = await fetch(
       `/schedule?userId=${userId}&scheduleId=${scheduleId}`,
       { method: 'DELETE' }
@@ -173,6 +169,8 @@ export default function SchedulePage({
     if (!res.ok) {
       if (res.status === 404) {
         toast.error("Schedule not found");
+      } else if (res.status === 400) {
+        toast.error("You must have at least 1 schedule");
       } else {
         toast.error("Failed to delete schedule");
       }
