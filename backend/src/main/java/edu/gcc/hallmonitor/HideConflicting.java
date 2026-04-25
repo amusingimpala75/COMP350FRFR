@@ -1,8 +1,9 @@
 package edu.gcc.hallmonitor;
 
-import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,7 +15,7 @@ public record HideConflicting(int userId, int scheduleId) implements Filter {
     @Override
     public boolean filter(Course c) {
         try {
-            return Schedule.loadSchedule(userId, scheduleId)
+            return ScheduleCache.getSchedule(this)
                     .checkForOverlap(c)
                     .equals("");
         } catch (SQLException sqle) {
@@ -45,4 +46,18 @@ public record HideConflicting(int userId, int scheduleId) implements Filter {
         Filter.registerFilterType("conflicts", HideConflicting::deserialize, ing -> new HashSet<String>());
     }
 
+    private static class ScheduleCache {
+        private static Map<HideConflicting, Entry> cache = new HashMap<>();
+
+        public static Schedule getSchedule(HideConflicting filter) throws JsonProcessingException, SQLException {
+            if (cache.containsKey(filter) && (cache.get(filter).fetched + 1000) > System.currentTimeMillis()) {
+                return cache.get(filter).value;
+            }
+            var s = Schedule.loadSchedule(filter.userId, filter.scheduleId);
+            cache.put(filter, new Entry(System.currentTimeMillis(), s));
+            return s;
+        }
+
+        private static record Entry(long fetched, Schedule value) { }
+    }
 }
