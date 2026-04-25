@@ -140,7 +140,7 @@ public class ScheduleController {
                 return;
             }
             User user = new User(userId);
-            List<Schedule> schedules = user.getUserSchedules();
+            List<Schedule> schedules = user.getSchedules();
             List<ScheduleDTO> scheduleDTOs = schedules.stream().map(
                     schedule -> new ScheduleDTO(schedule.getId(), schedule.getName())
             ).toList();
@@ -174,9 +174,12 @@ public class ScheduleController {
             int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
 
             try {
-                Schedule.deleteSchedule(userId, scheduleId);
+                User user = new User(userId);
+                user.removeSchedule(scheduleId);
             } catch (SecurityException se) {
-                ctx.status(404);
+                ctx.status(404); // schedule not found for user
+            } catch (IllegalStateException ise) {
+                ctx.status(400); // user only has 1 schedule
             }
         });
 
