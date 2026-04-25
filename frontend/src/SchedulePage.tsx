@@ -164,6 +164,7 @@ export default function SchedulePage({
 
     if (schedules.length == 1) { // ensure that a user has at least 1 schedule
       toast("You must have at least 1 schedule");
+      return;
     }
 
     const res = await fetch(
@@ -182,9 +183,11 @@ export default function SchedulePage({
 
     toast.success("Schedule deleted");
 
-    setSchedules(prev => prev.filter(s => s.id !== scheduleId));
-
-    setScheduleId(schedules[0].id); // reset schedule to the first one
+    setSchedules(prev => {
+      const remaining = prev.filter(s => s.id !== scheduleId);
+      setScheduleId(remaining.length > 0 ? remaining[0].id : null);
+      return remaining;
+    });
   };
 
   const confirmDeleteSchedule = () => { // A popup window to confirm deletion of a schedule

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 
 public class ScheduleController {
     private static int getOrCreateScheduleId(int userId) throws SQLException {
@@ -46,6 +47,38 @@ public class ScheduleController {
         return userId;
     }
 
+    private static Schedule resolveSchedule(Context ctx, int userId, boolean createIfMissing) {
+        int scheduleId;
+        String scheduleIdParam = ctx.queryParam("scheduleId");
+
+        try {
+            if (scheduleIdParam != null && !scheduleIdParam.isBlank()) {
+                scheduleId = Integer.parseInt(scheduleIdParam);
+            } else if (createIfMissing) {
+                scheduleId = getOrCreateScheduleId(userId);
+            } else {
+                ctx.status(400).result("Missing scheduleId");
+                return null;
+            }
+        } catch (NumberFormatException ex) {
+            ctx.status(400).result("Invalid scheduleId");
+            return null;
+        } catch (SQLException ex) {
+            ctx.status(500).result("Database error");
+            return null;
+        }
+
+        try {
+            return Schedule.loadSchedule(userId, scheduleId);
+        } catch (SecurityException ex) {
+            ctx.status(404).result("Schedule not found");
+            return null;
+        } catch (Exception ex) {
+            ctx.status(500).result("Database error");
+            return null;
+        }
+    }
+
     public static void registerRoutes(Javalin app) {
         //Defines a /schedule route that reads from index.html
         app.get("/schedule", ctx -> ctx.html(Main.readResource("/public/index.html")));
@@ -58,15 +91,10 @@ public class ScheduleController {
                 return;
             }
 
-            int scheduleId;
-            try {
-                scheduleId = getOrCreateScheduleId(userId);
-            } catch (SQLException ex) {
-                ctx.status(500).result("Database error");
+            Schedule schedule = resolveSchedule(ctx, userId, true);
+            if (schedule == null) {
                 return;
             }
-
-            Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
             Course course = Search.getCourseById(courseId);
             String ret;
             if (schedule.inSchedule(course)) {
@@ -96,7 +124,10 @@ public class ScheduleController {
 
         // get schedules for user
         app.get("/schedules", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
             User user = new User(userId);
             List<Schedule> schedules = user.getUserSchedules();
             List<ScheduleDTO> scheduleDTOs = schedules.stream().map(
@@ -108,7 +139,10 @@ public class ScheduleController {
 
         // add a new schedule
         app.post("/schedule", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
             String name = Objects.requireNonNull(ctx.queryParam("scheduleName"));
 
             try {
@@ -122,7 +156,10 @@ public class ScheduleController {
         });
 
         app.delete("/schedule", ctx -> {
-            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            Integer userId = requireUserId(ctx);
+            if (userId == null) {
+                return;
+            }
             int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
 
             try {
@@ -140,15 +177,10 @@ public class ScheduleController {
                 return;
             }
 
-            int scheduleId;
-            try {
-                scheduleId = getOrCreateScheduleId(userId);
-            } catch (SQLException ex) {
-                ctx.status(500).result("Database error");
+            Schedule schedule = resolveSchedule(ctx, userId, true);
+            if (schedule == null) {
                 return;
             }
-
-            Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
             if (term == null || term.isBlank()) {
                 ctx.json(schedule.getCourses());
                 return;
@@ -165,14 +197,10 @@ public class ScheduleController {
                 return;
             }
 
-            int scheduleId;
-            try {
-                scheduleId = getOrCreateScheduleId(userId);
-            } catch (SQLException ex) {
-                ctx.status(500).result("Database error");
+            Schedule schedule = resolveSchedule(ctx, userId, true);
+            if (schedule == null) {
                 return;
             }
-            Schedule schedule = Schedule.loadSchedule(userId, scheduleId);
             byte[] pdfBytes = schedule.createPdf();
             ctx.contentType("application/pdf");
             ctx.header("Content-Disposition", "attachment; filename=\"my-file.pdf\"");  //TODO: change filename
