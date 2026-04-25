@@ -710,7 +710,7 @@ const modalStyle: React.CSSProperties = {
                 }}
             >
               <img
-                  src="./dist/assets/chat.png"
+                  src="/chat.jpg"
                   alt="Open chat"
                   style={{
                     width: "100%",
