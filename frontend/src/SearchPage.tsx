@@ -3,8 +3,6 @@ import { useEffect, useState, useRef } from 'react';
 import pandaLogo from './assets/Designer.png';
 import Select, { type SingleValue } from 'react-select';
 
-const userId = 154;
-
 
 interface CourseTime {
   day: string;
@@ -31,9 +29,10 @@ interface SelectOption {
 
 type SearchPageProps = {
   scheduleId: number | null;
+  userId: number;
 };
 
-export default function SearchPage({ scheduleId }: SearchPageProps) {
+export default function SearchPage({ userId, scheduleId }: SearchPageProps) {
   const courses_per_page = 10;
   const [query, setQuery] = useState('');
   const [semester, setSemester] = useState('ALL');
@@ -435,11 +434,9 @@ const modalStyle: React.CSSProperties = {
       .map(c => ({ value: c, label: c }))
   ];
 
-
   return (
     <div className="layout">
     <div><Toaster/></div>
-
       {/* LEFT SIDEBAR */}
       <div className="sidebar">
         <h3>Filters</h3>

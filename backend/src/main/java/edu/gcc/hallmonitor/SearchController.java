@@ -64,6 +64,12 @@ public class SearchController {
             }
         });
 
+        // Reset all search state (query, filters, and results)
+        app.post("/search/reset", ctx -> {
+            search = new Search("");
+            ctx.status(204);
+        });
+
         app.get("/search/filter-values/{filter-type}", ctx -> {
             List<Course> courses = search.getMatchResults();
             if (courses.isEmpty()) {

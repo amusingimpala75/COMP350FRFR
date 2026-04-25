@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -182,6 +183,30 @@ public class Schedule {
         } else {
             throw new SecurityException("Unable to generate new schedule");
         }
+    }
+
+    public static int getOrCreateScheduleId(int userId) throws SQLException {
+        PreparedStatement lookup = CONNECTION.prepareStatement(
+                "SELECT id FROM public.\"schedules\" WHERE user_id = ? ORDER BY id LIMIT 1"
+        );
+        lookup.setInt(1, userId);
+        ResultSet rs = lookup.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+
+        PreparedStatement insert = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"schedules\" (user_id) VALUES (?)",
+                Statement.RETURN_GENERATED_KEYS
+        );
+        insert.setInt(1, userId);
+        insert.execute();
+        ResultSet keys = insert.getGeneratedKeys();
+        if (keys.next()) {
+            return keys.getInt(1);
+        }
+
+        throw new SQLException("Failed to create schedule");
     }
 
     private List<Course> allCourses(){
