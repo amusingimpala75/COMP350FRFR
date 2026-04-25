@@ -57,6 +57,7 @@ export default function SearchPage({ userId, scheduleId }: SearchPageProps) {
   const [isOpen, setIsOpen] = useState(false); // for the modal
   const [chatbotDept, setCbDept] = useState("Comp");
   const [onlyOpenClasses, setOnlyOpenClasses] = useState(false);
+  const [hideConflicting, setHideConflicting] = useState(false);
 
   // --- SEARCH ---
   const search = async () => {
@@ -87,7 +88,7 @@ export default function SearchPage({ userId, scheduleId }: SearchPageProps) {
     }
 
     search();
-  }, [semester, department, professor, days, credits, timeStart, timeEnd, onlyOpenClasses]);
+  }, [semester, department, professor, days, credits, timeStart, timeEnd, onlyOpenClasses, hideConflicting]);
 
 
   //Toggles a course in the user's schedule and syncs with the backend.
@@ -201,6 +202,28 @@ export default function SearchPage({ userId, scheduleId }: SearchPageProps) {
     setTimeEnd(end);
   };
 
+  const updateHideConflicting = async (value: boolean) => {
+    console.log(`${userId} ${scheduleId} settings conflicts from ${hideConflicting} to ${value}`);
+    const type = 'conflicts';
+    // remove old filter
+    if (value && !hideConflicting) {
+      await fetch('/search/filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, value: { userId, scheduleId } }),
+      });
+    } else if (!value && hideConflicting) {
+      await fetch('/search/filter', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, value: { userId, scheduleId } }),
+      });
+    }
+    console.log("reqest done");
+    setHideConflicting(value);
+    console.log("set");
+  };
+
   // Set the filter options
   useEffect(() => {
     const getValues = async (t: string) => {
@@ -274,6 +297,10 @@ export default function SearchPage({ userId, scheduleId }: SearchPageProps) {
             break;
           case "open":
             setOnlyOpenClasses(true);
+            break;
+          case "conclicts":
+            setHideConflicting(true);
+            break;
         }
       }
     };
@@ -324,6 +351,7 @@ export default function SearchPage({ userId, scheduleId }: SearchPageProps) {
     setTimeEnd('23:59');
     setQuery('');
     setOnlyOpenClasses(false);
+    setHideConflicting(false);
 
     setCourses([]);
     setCurrentPage(1);
@@ -498,6 +526,14 @@ const modalStyle: React.CSSProperties = {
             onChange={(selected) => updateOnlyOpenClasses(selected?.target.checked)}
             checked={onlyOpenClasses}
           /> Only show open classes
+        </label>
+        <h5></h5>
+        <label>
+          <input
+            type="checkbox"
+            onChange={(selected) => updateHideConflicting(selected?.target.checked)}
+            checked={hideConflicting}
+          /> Only non-conflicts
         </label>
         <h5></h5>
         <button className="clear-btn" onClick={clearAllFilters}>
