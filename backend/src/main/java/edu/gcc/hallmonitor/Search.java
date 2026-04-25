@@ -171,8 +171,6 @@ public class Search {
                     if (code.startsWith(query)) {
                         ranking += 4000;
                     }
-                    if(ranking > 500 ) { System.out.println(title + " " + prof + " " + dept + ":  " + ranking);}
-
                     //attach the score to the course, sort by the score
                     return new AbstractMap.SimpleEntry<>(ranking, course);
                 })

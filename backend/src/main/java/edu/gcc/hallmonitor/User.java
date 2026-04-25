@@ -51,7 +51,7 @@ public class User {
         } // won't fail since sha256 is hardcoded
     }
 
-    public User(int userId) throws SQLException {
+    public User(int userId) throws SQLException, JsonProcessingException {
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"users\" WHERE id = ?"
         );
@@ -63,6 +63,7 @@ public class User {
             username = rs.getString("username");
             passwordHash = rs.getBytes("password_hash");
             authenticated = true;
+            schedules = getUserSchedules();
         } else {
             throw new SecurityException("Unknown user");
         }
@@ -203,7 +204,11 @@ public class User {
         return !isUser();
     }
 
-    public List<Schedule> getUserSchedules() throws SQLException, SecurityException, JsonProcessingException {
+    public List<Schedule> getSchedules() {
+        return schedules;
+    }
+
+    private List<Schedule> getUserSchedules() throws SQLException, SecurityException, JsonProcessingException {
         if (!authenticated) {
             throw new SecurityException("User has not be authenticated");
         }
@@ -246,6 +251,9 @@ public class User {
     }
 
     public void removeSchedule(int scheduleId) throws SQLException {
+        if (schedules.size() <= 1) {
+            throw new IllegalStateException("A user must have at least 1 schedule");
+        }
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "DELETE FROM public.\"schedules\" WHERE id = ?"
         );
