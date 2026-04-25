@@ -1,12 +1,7 @@
 package edu.gcc.hallmonitor;
 
 import java.sql.*;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -120,8 +115,12 @@ public class Search {
     public Search(String searchQuery, ArrayList<Filter> filters) {
         this.searchQuery = searchQuery;
 
-        //sort all courses based on which match the search query best
-        searchResults = allCourses.stream()
+        if(Objects.equals(searchQuery, "")){
+            //if the user hits the search button without anything in the query, show all courses
+            searchResults = allCourses;
+        }else {
+            //sort all courses based on which match the search query best
+            searchResults = allCourses.stream()
                 .map(course -> {
                     String query = searchQuery.trim().toLowerCase();
                     String title = course.name().toLowerCase();
@@ -139,24 +138,49 @@ public class Search {
                     int ranking = (titleScore * 5) + deptScore + profScore + (codeScore * 2);
 
                     //boost aggressively for exact matches since the fuzzySearch can give high scores to unrelated strings
-                    if (query.equals(title)) { ranking += 20000; }
-                    if (title.contains((" " + query + " "))) { ranking += 8000; } //looking for the query as an isolated word and not a substring
-                    if (title.startsWith(query)) { ranking += 4000; }
-                    if (prof.equals(query)) { ranking += 20000; }
-                    if (prof.contains(query)) { ranking += 8000; }
-                    if (prof.startsWith(query)) { ranking += 4000; }
-                    if (dept.equals(query)) { ranking += 20000; }
-                    if (dept.contains(query)) { ranking += 8000; }
-                    if (dept.startsWith(query)) { ranking += 4000; }
-                    if (code.equals(query)) { ranking += 24000; }
-                    if (code.startsWith(query)) { ranking += 4000; }
+                    if (query.equals(title)) {
+                        ranking += 20000;
+                    }
+                    if (title.contains((" " + query + " "))) {
+                        ranking += 8000;
+                    } //looking for the query as an isolated word and not a substring
+                    if (title.startsWith(query)) {
+                        ranking += 4000;
+                    }
+                    if (prof.equals(query)) {
+                        ranking += 20000;
+                    }
+                    if (prof.contains(query)) {
+                        ranking += 8000;
+                    }
+                    if (prof.startsWith(query)) {
+                        ranking += 4000;
+                    }
+                    if (dept.equals(query)) {
+                        ranking += 20000;
+                    }
+                    if (dept.contains(query)) {
+                        ranking += 8000;
+                    }
+                    if (dept.startsWith(query)) {
+                        ranking += 4000;
+                    }
+                    if (code.equals(query)) {
+                        ranking += 24000;
+                    }
+                    if (code.startsWith(query)) {
+                        ranking += 4000;
+                    }
+                    if(ranking > 500 ) { System.out.println(title + " " + prof + " " + dept + ":  " + ranking);}
 
                     //attach the score to the course, sort by the score
                     return new AbstractMap.SimpleEntry<>(ranking, course);
                 })
+                .filter(e -> e.getKey() >= 500)
                 .sorted((e1, e2) -> Integer.compare(e2.getKey(), e1.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
+        }
 
         //matchResults is the arrayList of all courses sorted based on the query. Filters are applied to this list.
         matchResults = new ArrayList<>(searchResults);
