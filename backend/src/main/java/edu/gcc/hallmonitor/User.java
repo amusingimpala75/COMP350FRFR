@@ -230,8 +230,6 @@ public class User {
         for (int scheduleId: scheduleIds) {
             Schedule schedule = Schedule.loadSchedule(id, scheduleId);
             schedules.add(schedule);
-            System.out.println(scheduleId + " " + schedule.getName());
-
         }
 
         return schedules;
