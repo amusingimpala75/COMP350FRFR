@@ -48,5 +48,6 @@ public interface Filter extends Predicate<Course> {
         ProfName.init();
         Time.init();
         OpenSeats.init();
+        HideConflicting.init();
     }
 }
