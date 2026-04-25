@@ -10,14 +10,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public record HideConflicting(int userId, int scheduleId) implements Filter {
 
-    // Just to indicate that we are filtering by schedule.
-    // We will have to do the calculation elsewhere.
     @Override
     public boolean filter(Course c) {
         try {
-            return ScheduleCache.getSchedule(this)
-                    .checkForOverlap(c)
-                    .equals("");
+            var schedule = ScheduleCache.getSchedule(this);
+            return schedule.inSchedule(c) ||
+                   schedule.checkForOverlap(c)
+                           .equals("");
         } catch (SQLException sqle) {
             return true;
         } catch (JsonProcessingException jpe) {
