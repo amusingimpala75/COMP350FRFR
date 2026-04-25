@@ -529,6 +529,7 @@ const modalStyle: React.CSSProperties = {
 
         <div className="card results-card">
           <h3>Results</h3>
+          {courses.length === 0 && <p>No Results</p>}
           <ul>
             {visibleCourses.map(course => {
                 let inSchedule = schedule.has(course.id)
