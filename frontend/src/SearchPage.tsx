@@ -605,6 +605,7 @@ const modalStyle: React.CSSProperties = {
                 style={{
                   border: 'none',
                   background: 'none',
+                  color: currentPage === 1 ? '#666' : '#c60e30',
                   textDecoration: 'underline',
                   cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
                   opacity: currentPage === 1 ? 0.5 : 1,
@@ -680,6 +681,7 @@ const modalStyle: React.CSSProperties = {
                 style={{
                   border: 'none',
                   background: 'none',
+                  color: currentPage === totalPages ? '#666' : '#c60e30',
                   textDecoration: 'underline',
                   cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
                   opacity: currentPage === totalPages ? 0.5 : 1,
