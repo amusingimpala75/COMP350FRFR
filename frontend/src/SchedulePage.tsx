@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import { Toaster, toast } from "react-hot-toast";
 import { useRef } from 'react'
 
 
@@ -9,6 +10,10 @@ type Term = 'Fall' | 'Winter' | 'Spring' | 'Summer';
 const TERMS: Term[] = ['Fall', 'Winter', 'Spring', 'Summer'];
 
 
+interface Schedule {
+  id: number;
+  name: string;
+}
 
 interface CourseTime {
   day: string
@@ -26,14 +31,30 @@ interface Course {
   semester: string;
 }
 
-export default function SchedulePage() {
+type SchedulePageProps = {
+  scheduleId: number | null;
+  setScheduleId: (id: number | null) => void;
+};
+
+export default function SchedulePage({
+    scheduleId,
+    setScheduleId
+  }: SchedulePageProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [activeTerm, setActiveTerm] = useState<Term>('Fall');
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [newScheduleName, setNewScheduleName] = useState('');
   //const calendarRef = useRef<FullCalendar>(null);
 
+  const loadSchedules = async () => {
+    const res = await fetch(`/schedules?userId=${userId}`);
+    const data: Schedule[] = await res.json();
+    setSchedules(data);
+  };
 
   const loadCourses = async (term: Term) => {
-    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}`);
+    if (scheduleId == null) return;
+    const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
     setCourses(items);
 
@@ -60,15 +81,29 @@ export default function SchedulePage() {
   };
 
   const removeCourse = async (courseId: number) => {
-    await fetch(`/schedule/items?courseId=${courseId}`, { method: 'POST' });
+    if (scheduleId == null) return;
     //remove from calendar
     removeEvents(courseId);
+    await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}`, { method: 'POST' });
     loadCourses(activeTerm);
   };
 
   useEffect(() => {
+    if (scheduleId !== null) {
       loadCourses(activeTerm);
-      }, [activeTerm]);
+    }
+  }, [activeTerm, scheduleId]);
+
+  useEffect(() => {
+    loadSchedules();
+  }, []);
+
+  useEffect(() => {
+    if (schedules.length === 0) return;
+    if (scheduleId != null) return;
+
+    setScheduleId(schedules[0].id);
+  }, [schedules, scheduleId]);
 
 
   const calendarRef = useRef<FullCalendar>(null)
@@ -97,11 +132,87 @@ export default function SchedulePage() {
     }
   }
 
+  // For adding a new schedule
+  const createSchedule = async () => {
+    if (newScheduleName.trim() === "") return;
 
+    const res = await fetch(
+      `/schedule?userId=${userId}&scheduleName=${encodeURIComponent(newScheduleName)}`,
+      { method: 'POST' }
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+
+      if (res.status === 409) {
+        toast(error.error);
+      }
+      return;
+    }
+
+    const schedule: Schedule = await res.json();
+
+    setSchedules(prev => [...prev, schedule]);
+    setScheduleId(schedule.id);
+    setNewScheduleName("");
+  };
+
+  const deleteSchedule = async () => {
+    if (scheduleId == null) return;
+
+    if (schedules.length == 1) { // ensure that a user has at least 1 schedule
+      toast("You must have at least 1 schedule");
+    }
+
+    const res = await fetch(
+      `/schedule?userId=${userId}&scheduleId=${scheduleId}`,
+      { method: 'DELETE' }
+    );
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        toast.error("Schedule not found");
+      } else {
+        toast.error("Failed to delete schedule");
+      }
+      return;
+    }
+
+    toast.success("Schedule deleted");
+
+    setSchedules(prev => prev.filter(s => s.id !== scheduleId));
+
+    setScheduleId(schedules[0].id); // reset schedule to the first one
+  };
+
+  const confirmDeleteSchedule = () => { // A popup window to confirm deletion of a schedule
+    if (scheduleId == null) return;
+
+    toast((t) => (
+      <div>
+        <p>Delete this schedule?</p>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+          <button
+            onClick={() => {
+              deleteSchedule();
+              toast.dismiss(t.id);
+            }}
+            style={{ background: 'darkred', color: 'white', padding: '4px 8px' }}
+          >
+            Yes
+          </button>
+          <button onClick={() => toast.dismiss(t.id)}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 8000 });
+  };
 
   //for downloading the schedule pdf
   const handleDownload = async (): Promise<void> => {
-      const res = await fetch('/download-pdf');
+      if (!scheduleId) return;
+      const res = await fetch(`/download-pdf?userId=${userId}&scheduleId=${scheduleId}`);
       if (!res.ok) {
           throw new Error('Download failed');
       }
@@ -121,10 +232,71 @@ export default function SchedulePage() {
       window.URL.revokeObjectURL(url);
   };
 
+  const removeAllCourses = async () => {
+        //all the ones from activeTerm
+        const toRemove: Course[] = courses.filter(c => c.semester.includes(activeTerm));
+        console.log(`${activeTerm} term num courses removed: ${toRemove.length}`);
+        await Promise.all(toRemove.map(c => removeCourse(c.id)));
+    };
+
+
+
 
   return (
     <div className="layout">
+      <div><Toaster/></div>
       <div className="main">
+        <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: '8px', alignItems: 'center' }}>
+
+          <span style={{ color: 'white' }}>Schedule:</span>
+
+          <select
+            value={scheduleId ?? schedules[0]?.id ?? ""}
+            onChange={(e) => setScheduleId(Number(e.target.value))}
+            style={{ padding: '6px 10px', width: '180px' }}
+          >
+            {schedules.map((sched) => (
+              <option key={sched.id} value={sched.id}>
+                {sched.name}
+              </option>
+            ))}
+          </select>
+
+          {/* NEW INPUT */}
+          <input
+            type="text"
+            placeholder="New schedule"
+            value={newScheduleName}
+            onChange={(e) => setNewScheduleName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') createSchedule();
+            }}
+            style={{ padding: '6px', width: '140px' }}
+          />
+
+          {/* NEW BUTTON */}
+          <button
+            onClick={createSchedule}
+            disabled={!newScheduleName.trim()}
+            style={{ padding: '6px 10px', cursor: 'pointer' }}
+          >
+            Add
+          </button>
+
+          {/* DELETE BUTTON */}
+          <button
+            onClick={confirmDeleteSchedule}
+            disabled={!scheduleId}
+            style={{
+              padding: '6px 10px',
+              cursor: 'pointer',
+              backgroundColor: 'darkred',
+              color: 'white'
+            }}
+          >
+            Delete
+          </button>
+        </div>
         <h1>User Schedule — {activeTerm}</h1>
         <div style={{
                 display: 'flex',
@@ -149,7 +321,23 @@ export default function SchedulePage() {
                   >
                     {term}
                   </button>
+
                 ))}
+            <button
+                                onClick={removeAllCourses}
+                                style={{
+                                  marginLeft: 'auto',   // pushes it to the far right
+                                  fontSize: '0.8rem',
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #ccc',
+                                  backgroundColor: '#f7f7f7',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Clear Term
+                              </button>
+
               </div>
               {(activeTerm === 'Fall' || activeTerm === 'Spring') && (
                 <div className="Schedule">

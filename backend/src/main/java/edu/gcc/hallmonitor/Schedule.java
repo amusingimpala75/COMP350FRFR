@@ -19,6 +19,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 public class Schedule {
 
@@ -28,6 +29,7 @@ public class Schedule {
     private List<Course> winterCourses;
     private int id;
     private int userId;
+    private String name;
     private boolean authenticated = false;
     private static final Connection CONNECTION;
 
@@ -50,18 +52,23 @@ public class Schedule {
         }
     }
 
-    public Schedule() {
+    public Schedule(String name) {
         this(new ArrayList<Course>());
+        this.name = name;
     }
 
     public int getId() {
         return id;
     }
 
+    public String getName() { return name; }
+
     //helper method to prevent duplicate code
     public List<Course> getCoursesForTerm(Course course) {
-        String semester = course.semester();
+        return getCoursesForTerm(course.semester());
+    }
 
+    public List<Course> getCoursesForTerm(String semester) {
         if (semester.contains("Fall")) return fallCourses;
         if (semester.contains("Spring")) return springCourses;
         if (semester.contains("Summer")) return summerCourses;
@@ -87,6 +94,7 @@ public class Schedule {
     }
 
     public static Schedule loadSchedule(int userId, int scheduleId) throws SQLException, JsonProcessingException {
+        Schedule schedule;
         PreparedStatement userCheckStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"schedules\" " +
                     "WHERE id = ? AND user_id = ?"
@@ -96,8 +104,11 @@ public class Schedule {
         ResultSet userCheckResultSet = userCheckStatement.executeQuery();
         if (!userCheckResultSet.next()) {
             throw new SecurityException("User does not own schedule");
+        } else {
+            schedule = new Schedule(
+                userCheckResultSet.getString("name")
+            );
         }
-
 
         PreparedStatement prepStatement = CONNECTION.prepareStatement(
                 "SELECT * FROM public.\"courses\" " +
@@ -108,7 +119,7 @@ public class Schedule {
         );
         prepStatement.setInt(1, scheduleId);
         ResultSet coursesResultSet = prepStatement.executeQuery();
-        Schedule schedule = new Schedule();
+
         schedule.id = scheduleId;
         schedule.userId = userId;
         schedule.authenticated = true;
@@ -143,6 +154,47 @@ public class Schedule {
         }
 
         return schedule;
+    }
+
+    public static int newSchedule(int userId, String name) throws SQLException {
+        // Ensure that the name isn't already taken for the user
+        PreparedStatement nameCheckStatement = CONNECTION.prepareStatement(
+                "SELECT name FROM public.\"schedules\" WHERE user_id = ? AND name = ?"
+        );
+        nameCheckStatement.setInt(1, userId);
+        nameCheckStatement.setString(2, name.trim().toLowerCase());
+        ResultSet rs = nameCheckStatement.executeQuery();
+        if (rs.next()) {
+            throw new SecurityException("User cannot have two schedules with the same name");
+        }
+
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "INSERT INTO public.\"schedules\" (user_id, name) VALUES (?, ?)",
+                PreparedStatement.RETURN_GENERATED_KEYS
+        );
+        prepStatement.setInt(1, userId);
+        prepStatement.setString(2, name);
+        prepStatement.execute();
+
+        ResultSet generatedKeys = prepStatement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            return generatedKeys.getInt(1);
+        } else {
+            throw new SecurityException("Unable to generate new schedule");
+        }
+    }
+
+    public static void deleteSchedule(int userId, int scheduleId) throws SQLException {
+        PreparedStatement prepStatement = CONNECTION.prepareStatement(
+                "DELETE FROM public.\"schedules\" WHERE user_id = ? AND id = ?"
+        );
+        prepStatement.setInt(1, userId);
+        prepStatement.setInt(2, scheduleId);
+        int rowsEffected = prepStatement.executeUpdate();
+
+        if (rowsEffected == 0) {
+            throw new SecurityException("User id and schedule id do not match");
+        }
     }
 
     private List<Course> allCourses(){
@@ -312,6 +364,7 @@ public class Schedule {
 
             //define how the page should be styled
             PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            PDType1Font bold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
             float fontSize = 12;
             float margin = 50;
             float yStart = 700;
@@ -325,74 +378,85 @@ public class Schedule {
             content.setFont(font, fontSize);
             content.newLineAtOffset(margin, yStart);
 
-            //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
-            for (Course c : getCourses()) {  //TODO change the PDF to reflect the different semesters
+            for(String term : List.of("Fall","Winter","Spring","Summer")) {
+                List<Course> termCourses = getCoursesForTerm(term);
+                if(termCourses.isEmpty()){ continue; }
+                content.setFont(bold, fontSize);
+                content.showText(term+" Semester Courses:");
+                content.setFont(font, fontSize);
+                content.newLineAtOffset(0, -leading);
+                y -= leading;
+                //for each course, add a first (non-indented) line with the dept, code, section, and title. On the next lines, add the professor, location, and times.
+                for (Course c : getCoursesForTerm(term)) {
 
-                //lines without indent
-                String first = c.department() + c.code() + c.section() + " " + c.name();
-                for (String line : wrapText(first, font, fontSize, maxWidth)) {
+                    //lines without indent
+                    String first = c.department() + c.code() + c.section() + " " + c.name();
+                    for (String line : wrapText(first, font, fontSize, maxWidth)) {
 
-                    //add a new page if necessary
-                    if (y < margin) {
-                        content.endText();
-                        content.close();
+                        //add a new page if necessary
+                        if (y < margin) {
+                            content.endText();
+                            content.close();
 
-                        page = new PDPage();
-                        document.addPage(page);
+                            page = new PDPage();
+                            document.addPage(page);
 
-                        content = new PDPageContentStream(document, page);
-                        content.beginText();
-                        content.setFont(font, fontSize);
-                        content.newLineAtOffset(margin, yStart);
+                            content = new PDPageContentStream(document, page);
+                            content.beginText();
+                            content.setFont(font, fontSize);
+                            content.newLineAtOffset(margin, yStart);
 
-                        y = yStart;
-                    }
+                            y = yStart;
+                        }
 
-                    //add the line content to the page
-                    content.showText(line);
-                    content.newLineAtOffset(0, -leading);
-                    y -= leading;
-                }
-
-                //lines with indent
-                List<String> lowerLines = new ArrayList<>();
-                String second = String.join(" ", c.professor()) + " " + c.location();
-                StringBuilder third = new StringBuilder();
-                if (c.times() != null) {
-                    for (CourseTime ct : c.times()) {
-                        third.append(ct.day()).append(" ").append(ct.startTime().format(formatter)).append(" - ").append(ct.endTime().format(formatter)).append("   ");
-                    }
-                }
-                lowerLines.addAll(wrapText(second, font, fontSize, maxWidth));
-                lowerLines.addAll(wrapText(third.toString(), font, fontSize, maxWidth));
-
-                //separate loop needed for indented lines
-                for (String line : lowerLines) {
-                    //add a new page if necessary
-                    if (y < margin) {
-                        content.endText();
-                        content.close();
-
-                        page = new PDPage();
-                        document.addPage(page);
-
-                        content = new PDPageContentStream(document, page);
-                        content.beginText();
-                        content.setFont(font, fontSize);
-                        content.newLineAtOffset(margin, yStart);
-
-                        y = yStart;
-                    }
-
-                    content.newLineAtOffset(20, 0);
-                    content.showText(line);
-                    content.newLineAtOffset(-20, 0);
-                    content.newLineAtOffset(0, -leading);
-                    y -= leading;
-                    //add a newline if last line
-                    if (line.equals(lowerLines.get(lowerLines.size() - 1))) {
+                        //add the line content to the page
+                        content.newLineAtOffset(20, 0);
+                        content.showText(line);
+                        content.newLineAtOffset(-20, 0);
                         content.newLineAtOffset(0, -leading);
                         y -= leading;
+                    }
+
+                    //lines with indent
+                    List<String> lowerLines = new ArrayList<>();
+                    String second = String.join(" ", c.professor()) + " " + c.location();
+                    StringBuilder third = new StringBuilder();
+                    if (c.times() != null) {
+                        for (CourseTime ct : c.times()) {
+                            third.append(ct.day()).append(" ").append(ct.startTime().format(formatter)).append(" - ").append(ct.endTime().format(formatter)).append("   ");
+                        }
+                    }
+                    lowerLines.addAll(wrapText(second, font, fontSize, maxWidth));
+                    lowerLines.addAll(wrapText(third.toString(), font, fontSize, maxWidth));
+
+                    //separate loop needed for indented lines
+                    for (String line : lowerLines) {
+                        //add a new page if necessary
+                        if (y < margin) {
+                            content.endText();
+                            content.close();
+
+                            page = new PDPage();
+                            document.addPage(page);
+
+                            content = new PDPageContentStream(document, page);
+                            content.beginText();
+                            content.setFont(font, fontSize);
+                            content.newLineAtOffset(margin, yStart);
+
+                            y = yStart;
+                        }
+
+                        content.newLineAtOffset(40, 0);
+                        content.showText(line);
+                        content.newLineAtOffset(-40, 0);
+                        content.newLineAtOffset(0, -leading);
+                        y -= leading;
+                        //add a newline if last line
+                        if (line.equals(lowerLines.get(lowerLines.size() - 1))) {
+                            content.newLineAtOffset(0, -leading);
+                            y -= leading;
+                        }
                     }
                 }
             }

@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import io.javalin.Javalin;
@@ -92,7 +94,45 @@ public class ScheduleController {
 
         });
 
-        // Get the schedule that is saved
+        // get schedules for user
+        app.get("/schedules", ctx -> {
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            User user = new User(userId);
+            List<Schedule> schedules = user.getUserSchedules();
+            List<ScheduleDTO> scheduleDTOs = schedules.stream().map(
+                    schedule -> new ScheduleDTO(schedule.getId(), schedule.getName())
+            ).toList();
+
+            ctx.json(scheduleDTOs);
+        });
+
+        // add a new schedule
+        app.post("/schedule", ctx -> {
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            String name = Objects.requireNonNull(ctx.queryParam("scheduleName"));
+
+            try {
+                int scheduleId = Schedule.newSchedule(userId, name);
+                ctx.json(new ScheduleDTO(scheduleId, name));
+            } catch (SecurityException se) {
+                ctx.status(409); // Duplicate resource
+                ctx.json(Map.of("error", "schedule with the same name already exists"));
+            }
+
+        });
+
+        app.delete("/schedule", ctx -> {
+            int userId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("userId")));
+            int scheduleId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("scheduleId")));
+
+            try {
+                Schedule.deleteSchedule(userId, scheduleId);
+            } catch (SecurityException se) {
+                ctx.status(404);
+            }
+        });
+
+        // Get the schedule for the uesrid and scheduleid given
         app.get("/schedule/items", ctx -> {
             String term = ctx.queryParam("term"); // Fall, Winter, Spring, Summer
             Integer userId = requireUserId(ctx);

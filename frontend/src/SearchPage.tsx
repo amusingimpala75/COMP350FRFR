@@ -27,7 +27,11 @@ interface SelectOption {
   label: string;
 }
 
-export default function SearchPage() {
+type SearchPageProps = {
+  scheduleId: number | null;
+};
+
+export default function SearchPage({ scheduleId }: SearchPageProps) {
   const courses_per_page = 10;
   const [query, setQuery] = useState('');
   const [semester, setSemester] = useState('ALL');
@@ -47,6 +51,11 @@ export default function SearchPage() {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const didMount = useRef(false);
   const isClearing = useRef(false);
+  const [text, setText] = useState(""); //for the chatbot query
+  const [result, setResult] = useState("Ask a question about your major's required classes!"); // the api call result
+  const [isOpen, setIsOpen] = useState(false); // for the modal
+  const [chatbotDept, setCbDept] = useState("Comp");
+  const [onlyOpenClasses, setOnlyOpenClasses] = useState(false);
 
   // --- SEARCH ---
   const search = async () => {
@@ -77,16 +86,20 @@ export default function SearchPage() {
     }
 
     search();
-  }, [semester, department, professor, days, credits, timeStart, timeEnd]);
+  }, [semester, department, professor, days, credits, timeStart, timeEnd, onlyOpenClasses]);
 
 
   //Toggles a course in the user's schedule and syncs with the backend.
   //If adding a course introduces a time conflict, the backend response is used to trigger a user notification.
   const toggleCourse = async (course: Course) => {
+    if (scheduleId == null) {
+      toast("No schedule selected");
+      return;
+    }
     const newSchedule = new Set(schedule);
 
     //send the course identifier to the backend
-    const result = await fetch(`/schedule/items?courseId=${course.id}`, {
+    const result = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}&courseId=${course.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
     });
@@ -117,7 +130,8 @@ export default function SearchPage() {
   const isDefaultValue = (value: any) => {
     return value === 'ALL'
       || (Array.isArray(value) && value.length === 0)
-      || (value.start === '00:01' && value.end === '23:59');
+      || (value.start === '00:01' && value.end === '23:59')
+      || value === false;
   };
 
   const updateFilter = async (type: string, oldValue: any, newValue: any) => {
@@ -163,6 +177,11 @@ export default function SearchPage() {
   const updateCredits = async (value: string) => {
     await updateFilter('credits', credits, value);
     setCredits(value);
+  };
+
+  const updateOnlyOpenClasses = async (value: boolean) => {
+    await updateFilter('open', onlyOpenClasses, value);
+    setOnlyOpenClasses(value);
   };
 
   const updateTimeStart = async (start: string) => {
@@ -252,6 +271,8 @@ export default function SearchPage() {
               setTimeEnd(filter.value.end + ':00');
             }
             break;
+          case "open":
+            setOnlyOpenClasses(true);
         }
       }
     };
@@ -261,9 +282,11 @@ export default function SearchPage() {
 
   // --- LOAD CURRENT SCHEDULE ---
   useEffect(() => {
+    if (scheduleId == null) return;
+
     const fetchSchedule = async () => {
       try {
-        const res = await fetch('/schedule/items');
+        const res = await fetch(`/schedule/items?userId=${userId}&scheduleId=${scheduleId}`); // scheduleId is null here
         const items: Course[] = await res.json();
         const ids = new Set(items.map(c => c.id));
         setSchedule(ids);
@@ -273,7 +296,7 @@ export default function SearchPage() {
     };
 
     fetchSchedule();
-  }, []);
+  }, [scheduleId]);
 
   // Keep current page in bounds when filters/search shrink result count.
   useEffect(() => {
@@ -299,6 +322,7 @@ export default function SearchPage() {
     setTimeStart('00:01');
     setTimeEnd('23:59');
     setQuery('');
+    setOnlyOpenClasses(false);
 
     setCourses([]);
     setCurrentPage(1);
@@ -315,6 +339,43 @@ export default function SearchPage() {
     { length: Math.max(0, windowEnd - windowStart + 1) },
     (_, i) => windowStart + i
   );
+
+
+//Chatbot query box
+async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+
+  if(text != ""){
+      const response = await fetch("http://127.0.0.1:8000/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            text,
+            chatbotDept
+        }),
+      });
+
+      const data = await response.json();
+      setResult(data.result);
+  }
+}
+
+//modal styling
+const modalStyle: React.CSSProperties = {
+  position: "fixed",
+  top: "0",
+  right: "0",
+  height: "100vh",
+  width: "350px",
+  background: "white",
+  padding: "20px",
+  boxShadow: "-2px 0 10px rgba(0,0,0,0.2)",
+  zIndex: 1000,
+  overflowY: "auto",
+};
+
 
   const semesterOptions: SelectOption[] = [
     { value: 'ALL', label: 'All Semesters' },
@@ -430,6 +491,14 @@ export default function SearchPage() {
         />
 
         <h5></h5>
+        <label>
+          <input
+            type="checkbox"
+            onChange={(selected) => updateOnlyOpenClasses(selected?.target.checked)}
+            checked={onlyOpenClasses}
+          /> Only show open classes
+        </label>
+        <h5></h5>
         <button className="clear-btn" onClick={clearAllFilters}>
           Clear All Filters
         </button>
@@ -449,6 +518,7 @@ export default function SearchPage() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && search()}
+            maxLength={1200}
           />
           <button onClick={search}>Search</button>
         </div>
@@ -585,6 +655,65 @@ export default function SearchPage() {
           )}
         </div>
       </div>
+      {/*Floating Chatbot Button*/}
+      <button
+              onClick={() => setIsOpen(true)}
+              style={{
+                position: "fixed",
+                bottom: "20px",
+                right: "20px",
+                padding: "12px 16px",
+                borderRadius: "50%",
+                fontSize: "18px",
+                cursor: "pointer",
+              }}
+            >
+              chat!
+            </button>
+            {isOpen && (
+                <div style={modalStyle}>
+                <select value={chatbotDept} onChange={(e) => setCbDept(e.target.value)}>
+                 <option value="Comp">Computer Science B.S.</option>
+                 <option value="Engl">English B.A.</option>
+                </select>
+
+                  {/* Close button */}
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    style={{ float: "right" }}
+                  >
+                    X
+                  </button>
+
+                  {/* Content layout */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+
+
+
+                    {/* Left: textbox */}
+                    <form onSubmit={handleSubmit}>
+                      <input
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Type..."
+                        maxLength={1200}
+                      />
+                      <button type="submit">Send</button>
+                    </form>
+
+
+                    {/* scrollable content */}
+                     <div style={{ flex: 1, overflowY: "auto", marginTop: "20px" }}>
+                     <p style={{ overflowWrap: "break-word" }}>{result}</p>
+                     </div>
+
+
+
+
+                  </div>
+                </div>
+
+            )}
     </div>
   );
 }

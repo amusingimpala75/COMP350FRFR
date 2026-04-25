@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, NavLink} from 'react-router-dom';
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react';
 import SearchPage from './SearchPage';
 import SchedulePage from './SchedulePage';
@@ -22,6 +23,19 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 function App() {
+  const [scheduleId, setScheduleId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("scheduleId");
+    if (saved) setScheduleId(Number(saved));
+  }, []);
+
+  useEffect(() => {
+    if (scheduleId !== null) {
+      localStorage.setItem("scheduleId", String(scheduleId));
+    }
+  }, [scheduleId]);
+
   const { user, logout, loading } = useAuth();
 
   return (
@@ -49,8 +63,8 @@ function App() {
         <Routes>
           <Route path="/login" element={user ? <Navigate to="/search" replace /> : <LoginPage />} />
           <Route path="/signup" element={user ? <Navigate to="/search" replace /> : <SignupPage />} />
-          <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
-          <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
+          <Route path="/search" element={<ProtectedRoute><SearchPage scheduleId={scheduleId}/></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute><SchedulePage scheduleId={scheduleId} setScheduleId={setScheduleId}/></ProtectedRoute>} />
           <Route
             path="*"
             element={

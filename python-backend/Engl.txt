@@ -1,0 +1,75 @@
+English B.A. Suggested Four Year Plan
+
+Freshman Year:
+Fall:
+{"department": "ENGL", "number": "201", "name": "English Literature I", "credits": 3},
+ENGL Elective (3 credits, from list below),
+{"department": "HUMA", "number": "102", "name": "Civ and the Biblical Revelation", "credits": 3},
+Foundations of Social Science course (3 credits, either ECON 120 Foundations of Economics, PSYC 101 Foundations of Psychology, HIST 120 Foundations of History, PSYC 200 Cross-Cultural Psychology, HIST 141 World Geography, SOCI 101 Foundations of Sociology, HIST 204 Hist/Phil Foundations of Education, SOCI 103 Found. of Cultural Anthr., POLS 101 Foundations of Political Science, or SOCW 101 Found. of Social Work),
+Foreign Language or General Elective (3 credits)
+
+Spring:
+{"department": "ENGL", "number": "202", "name": "English Literature II", "credits": 3},
+{"department": "WRIT", "number": "101", "name": "Foundations of Academic Discourse", "credits": 3},
+Quantitative/Logical Reasoning course (3 credits),
+{"department": "PHYE", "number": "100", "name": "Healthful Living", "credits": 1},
+Foreign Language or General Elective (3 credits),
+General Elective (3 credits)
+
+Sophomore Year:
+Fall:
+{"department": "ENGL", "number": "203", "name": "American Literature I", "credits": 3},
+ENGL 205, ENGL 250, or ENGL Elective (3 credits),
+{"department": "HUMA", "number": "200", "name": "Western Civilization", "credits": 3},
+Natural Science with Lab (4 credits),
+Foreign Language or General Elective (3 credits)
+
+Spring:
+{"department": "ENGL", "number": "204", "name": "American Literature II", "credits": 3},
+ENGL Elective or {"department": "ENGL", "number": "206", "name": "Course option", "credits": 3},
+SSFT Course (2 credits),
+Foreign Language or General Elective (3 credits),
+General Elective (5 credits)
+
+Junior Year:
+Fall:
+{"department": "ENGL", "number": "351", "name": "Shakespeare", "credits": 3} or ENGL Elective,
+{"department": "ENGL", "number": "302", "name": "Course option", "credits": 3} or ENGL Elective,
+ENGL Elective (3 credits),
+{"department": "HUMA", "number": "301", "name": "Civilization and the Arts", "credits": 3},
+Natural Science with Lab (4 credits)
+
+Spring:
+ENGL Elective or {"department": "ENGL", "number": "352", "name": "Course option", "credits": 3},
+ENGL Elective or {"department": "ENGL", "number": "302", "name": "Course option", "credits": 3},
+{"department": "HUMA", "number": "303", "name": "Christianity and Civilization", "credits": 3},
+General Electives (8 credits)
+
+Senior Year:
+Fall:
+Quantitative/Logical Reasoning course (3 credits),
+General Electives (13 credits)
+
+Spring:
+{"department": "ENGL", "number": "485", "name": "Senior Capstone", "credits": 3},
+General Electives (13 credits)
+
+
+
+ENGL Electives List:
+
+ENGL 221 Science Fiction
+ENGL 222 Fantasy Literature
+ENGL 224 Arthurian Literature
+ENGL 226 Gothic Literature
+ENGL 242 19th Century English Novel
+ENGL 243 20th Century English Novel
+ENGL 245 19th Century American Novel
+ENGL 246 20th Century American Novel
+ENGL 252 Modern Drama
+ENGL 254 Page to Stage (1 credit)
+ENGL 261 Poetry
+ENGL 262 Modern Poetry
+ENGL 324 European Literature
+ENGL 327 Christian Writers
+ENGL 356 Literary Theory
