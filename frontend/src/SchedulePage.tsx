@@ -42,17 +42,16 @@ export default function SchedulePage({
     setScheduleId,
     userId
   }: SchedulePageProps) {
-  //const [courses, setCourses] = useState<Course[]>([]);
   const [activeTerm, setActiveTerm] = useState<Term>('Fall');
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [newScheduleName, setNewScheduleName] = useState('');
-  //const calendarRef = useRef<FullCalendar>(null);
     const [FallCourses, setFallCourses] = useState<Course[]>([]);
     const [WinterCourses, setWinterCourses] = useState<Course[]>([]);
     const [SpringCourses, setSpringCourses] = useState<Course[]>([]);
     const [SummerCourses, setSummerCourses] = useState<Course[]>([]);
     const calendarRef = useRef<FullCalendar>(null)
 
+    //returns courses associated with a term
     const termCourses = (term: Term) => {
         switch (term) {
             case 'Fall':
@@ -75,7 +74,7 @@ export default function SchedulePage({
     setSchedules(data);
   };
 
-
+//reloads courses for a particular term
 const refreshSchedule = async(term:Term) => {
     if (scheduleId == null) return;
     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
@@ -103,11 +102,9 @@ const refreshSchedule = async(term:Term) => {
 
 }
 
+//load courses from a particular term onto the schedule page
   const loadCourses = async (term: Term) => {
     if (scheduleId == null) return;
-//     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
-//     const items: Course[] = await res.json();
-//     setCourses(items);
 
     //adding events to fullcalendar
     const calendarApi = calendarRef.current?.getApi()
@@ -140,12 +137,7 @@ const refreshSchedule = async(term:Term) => {
     refreshSchedule(activeTerm);
   };
 
-//   useEffect(() => {
-//     if (scheduleId !== null) {
-//       //loadCourses(activeTerm);
-//       refreshSchedule(activeTerm);
-//     }
-//   }, [activeTerm, scheduleId]);
+    //when the schedule changes, reload all terms
     useEffect(() => {
       if (scheduleId !== null && userId !== null) {
         refreshSchedule('Fall');
@@ -155,10 +147,12 @@ const refreshSchedule = async(term:Term) => {
       }
     }, [scheduleId]);
 
+  //initial schedule load
   useEffect(() => {
     loadSchedules();
   }, []);
 
+  //when the term changes, or the schedule, or any of the course lists, reload the visual schedule
   useEffect(() => {
     if (scheduleId !== null && userId !== null) {
       loadCourses(activeTerm);
@@ -319,8 +313,7 @@ const refreshSchedule = async(term:Term) => {
                 })
               );
               refreshSchedule(activeTerm);
-              //loadCourses(activeTerm)
-    };
+  };
 
 
 
