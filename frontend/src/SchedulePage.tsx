@@ -42,11 +42,32 @@ export default function SchedulePage({
     setScheduleId,
     userId
   }: SchedulePageProps) {
-  const [courses, setCourses] = useState<Course[]>([]);
+  //const [courses, setCourses] = useState<Course[]>([]);
   const [activeTerm, setActiveTerm] = useState<Term>('Fall');
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [newScheduleName, setNewScheduleName] = useState('');
   //const calendarRef = useRef<FullCalendar>(null);
+    const [FallCourses, setFallCourses] = useState<Course[]>([]);
+    const [WinterCourses, setWinterCourses] = useState<Course[]>([]);
+    const [SpringCourses, setSpringCourses] = useState<Course[]>([]);
+    const [SummerCourses, setSummerCourses] = useState<Course[]>([]);
+    const calendarRef = useRef<FullCalendar>(null)
+
+    const termCourses = (term: Term) => {
+        switch (term) {
+            case 'Fall':
+              return FallCourses;
+            case 'Winter':
+              return WinterCourses;
+            case 'Spring':
+              return SpringCourses;
+            case 'Summer':
+              return SummerCourses;
+            default:
+                return [];
+        }
+    }
+
 
   const loadSchedules = async () => {
     const res = await fetch(`/schedules?userId=${userId}`);
@@ -54,11 +75,39 @@ export default function SchedulePage({
     setSchedules(data);
   };
 
-  const loadCourses = async (term: Term) => {
+
+const refreshSchedule = async(term:Term) => {
     if (scheduleId == null) return;
     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
-    setCourses(items);
+
+    console.log(`refresh ${term}`);
+
+    switch (term) {
+        case 'Fall':
+          setFallCourses(items);
+          return;
+        case 'Winter':
+          setWinterCourses(items);
+          return;
+        case 'Spring':
+          setSpringCourses(items);
+          return;
+        case 'Summer':
+          setSummerCourses(items);
+          return;
+        default:
+          console.log(`bad status: ${term}`);
+          return null;
+      }
+
+}
+
+  const loadCourses = async (term: Term) => {
+    if (scheduleId == null) return;
+//     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
+//     const items: Course[] = await res.json();
+//     setCourses(items);
 
     //adding events to fullcalendar
     const calendarApi = calendarRef.current?.getApi()
@@ -66,7 +115,7 @@ export default function SchedulePage({
     calendarApi.removeAllEvents() //refresh the calendar
 
     //convert days to their numerical representation and add each class day of a course to the calendar
-    for(const course of items){
+    for(const course of termCourses(term)){
         for(const time of course.times){
             const dayMap: Record<string, number> = {
               M: 1,
@@ -87,18 +136,41 @@ export default function SchedulePage({
     //remove from calendar
     removeEvents(courseId);
     await fetch(`/schedule/items?courseId=${courseId}&userId=${userId}&scheduleId=${scheduleId}`, { method: 'POST' });
-    loadCourses(activeTerm);
+    //loadCourses(activeTerm);
+    refreshSchedule(activeTerm);
   };
 
-  useEffect(() => {
-    if (scheduleId !== null) {
-      loadCourses(activeTerm);
-    }
-  }, [activeTerm, scheduleId]);
+//   useEffect(() => {
+//     if (scheduleId !== null) {
+//       //loadCourses(activeTerm);
+//       refreshSchedule(activeTerm);
+//     }
+//   }, [activeTerm, scheduleId]);
+    useEffect(() => {
+      if (scheduleId !== null && userId !== null) {
+        refreshSchedule('Fall');
+        refreshSchedule('Winter');
+        refreshSchedule('Spring');
+        refreshSchedule('Summer');
+      }
+    }, [scheduleId]);
 
   useEffect(() => {
     loadSchedules();
   }, []);
+
+  useEffect(() => {
+    if (scheduleId !== null && userId !== null) {
+      loadCourses(activeTerm);
+    }
+  }, [
+    activeTerm,
+    scheduleId,
+    FallCourses,
+    WinterCourses,
+    SpringCourses,
+    SummerCourses
+  ]);
 
   useEffect(() => {
     if (schedules.length === 0) return;
@@ -110,7 +182,6 @@ export default function SchedulePage({
   }, [schedules, scheduleId]);
 
 
-  const calendarRef = useRef<FullCalendar>(null)
 
 
   const addEvent = (id:number, name:string, daysArray:number[], start:string, end:string) => {
@@ -238,9 +309,17 @@ export default function SchedulePage({
 
   const removeAllCourses = async () => {
         //all the ones from activeTerm
-        const toRemove: Course[] = courses.filter(c => c.semester.includes(activeTerm));
-        console.log(`${activeTerm} term num courses removed: ${toRemove.length}`);
-        await Promise.all(toRemove.map(c => removeCourse(c.id)));
+        const toRemove: Course[] = termCourses(activeTerm);
+              await Promise.all(
+                toRemove.map(course => {
+                  removeEvents(course.id);
+                  return fetch(`/schedule/items?courseId=${course.id}&userId=${userId}&scheduleId=${scheduleId}`, {
+                    method: 'POST'
+                  });
+                })
+              );
+              refreshSchedule(activeTerm);
+              //loadCourses(activeTerm)
     };
 
 
@@ -365,7 +444,7 @@ export default function SchedulePage({
                 </div>
                 )}
         <ul>
-          {courses.map(course => {
+          {termCourses(activeTerm).map(course => {
             return (
               <li key={course.id}>
                 {course.semester} {course.subject}{course.number} {course.section} — {course.name}
