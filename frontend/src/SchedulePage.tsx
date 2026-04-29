@@ -80,8 +80,6 @@ const refreshSchedule = async(term:Term) => {
     const res = await fetch(`/schedule/items?term=${encodeURIComponent(term)}&userId=${userId}&scheduleId=${scheduleId}`);
     const items: Course[] = await res.json();
 
-    console.log(`refresh ${term}`);
-
     switch (term) {
         case 'Fall':
           setFallCourses(items);
@@ -96,7 +94,7 @@ const refreshSchedule = async(term:Term) => {
           setSummerCourses(items);
           return;
         default:
-          console.log(`bad status: ${term}`);
+          console.error(`bad status: ${term}`);
           return null;
       }
 
