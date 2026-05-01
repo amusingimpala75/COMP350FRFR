@@ -8,8 +8,6 @@ import io.javalin.http.Context;
 import java.util.List;
 
 public class SearchController {
-    private static Search search = new Search();
-
     private static Search getSearch(Context ctx) {
         Search search = ctx.sessionAttribute("search");
         if (search == null) {
@@ -44,7 +42,7 @@ public class SearchController {
 
         // Get the previous search query
         app.get("/search/query", ctx -> {
-            ctx.result(search.query());
+            ctx.result(getSearch(ctx).query());
         });
 
         // [TODO] there should be a better way to do this
