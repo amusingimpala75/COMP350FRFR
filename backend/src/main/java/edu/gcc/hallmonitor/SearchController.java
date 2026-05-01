@@ -3,10 +3,25 @@ package edu.gcc.hallmonitor;
 import java.util.stream.Collectors;
 
 import io.javalin.Javalin;
+import io.javalin.http.Context;
+
 import java.util.List;
 
 public class SearchController {
     private static Search search = new Search();
+
+    private static Search getSearch(Context ctx) {
+        Search search = ctx.sessionAttribute("search");
+        if (search == null) {
+            search = new Search();
+            setSearch(ctx, search);
+        }
+        return search;
+    }
+
+    private static void setSearch(Context ctx, Search search) {
+        ctx.sessionAttribute("search", search);
+    }
 
     public static void registerRoutes(Javalin app) {
         // Get the search page
